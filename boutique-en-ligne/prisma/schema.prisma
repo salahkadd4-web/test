@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum OrderStatus {
+  EN_ATTENTE
+  CONFIRMEE
+  EN_PREPARATION
+  EXPEDIEE
+  LIVREE
+  ANNULEE
+}
+
+model User {
+  id         String   @id @default(cuid())
+  nom        String
+  prenom     String
+  email      String?  @unique
+  telephone  String?  @unique
+  motDePasse String
+  role       Role     @default(CLIENT)
+  avatar     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  cart      Cart?
+  favorites Favorite[]
+  orders    Order[]
+  messages  Message[]
+  resetTokens ResetToken[]
+  returns Return[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  nom         String    @unique
+  description String?
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  nom         String
+  description String?
+  prix        Float
+  stock       Int      @default(0)
+  images      String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  cartItems  CartItem[]
+  favorites  Favorite[]
+  orderItems OrderItem[]
+  returns Return[]
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  items CartItem[]
+}
+
+model CartItem {
+  id       String @id @default(cuid())
+  quantite Int    @default(1)
+
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  statut     OrderStatus @default(EN_ATTENTE)
+  total      Float
+  adresse    String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+  returns Return[]
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  quantite Int
+  prix     Float
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  contenu   String
+  lu        Boolean  @default(false)
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model ResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model OtpToken {
+  id          String   @id @default(cuid())
+  identifiant String
+  token       String
+  data        String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+enum ReturnStatus {
+  EN_ATTENTE
+  APPROUVE
+  REFUSE
+  REMBOURSE
+}
+
+enum ReturnReason {
+  DEFECTUEUX
+  MAUVAIS_ARTICLE
+  CHANGEMENT_AVIS
+  NON_CONFORME
+}
+
+model Return {
+  id              String       @id @default(cuid())
+  orderId         String
+  order           Order        @relation(fields: [orderId], references: [id])
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id])
+  returnReason    ReturnReason
+  returnStatus    ReturnStatus @default(EN_ATTENTE)
+  daysToReturn    Int
+  description     String?
+  mlDecision      String?
+  mlConfidence    Float?
+  mlResponsibility String?
+  mlDecisionLabel String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}

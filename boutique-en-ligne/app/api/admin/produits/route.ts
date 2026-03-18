@@ -1,0 +1,54 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { getToken } from 'next-auth/jwt'
+
+async function checkAdmin(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+  return token?.role === 'ADMIN' ? token : null
+}
+
+// GET — Liste des produits
+export async function GET(req: NextRequest) {
+  try {
+    const token = await checkAdmin(req)
+    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
+    const produits = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { category: true },
+    })
+
+    return NextResponse.json(produits)
+  } catch {
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
+// POST — Créer un produit
+export async function POST(req: NextRequest) {
+  try {
+    const token = await checkAdmin(req)
+    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
+    const { nom, description, prix, stock, images, categoryId } = await req.json()
+
+    if (!nom || !prix || !categoryId) {
+      return NextResponse.json({ error: 'Nom, prix et catégorie sont requis' }, { status: 400 })
+    }
+
+    const produit = await prisma.product.create({
+      data: {
+        nom,
+        description: description || null,
+        prix: parseFloat(prix),
+        stock: parseInt(stock) || 0,
+        images: images || [],
+        categoryId,
+      },
+    })
+
+    return NextResponse.json(produit, { status: 201 })
+  } catch {
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}

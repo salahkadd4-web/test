@@ -1,0 +1,90 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+
+export default function FavorisPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [favoris, setFavoris] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') { router.push('/connexion'); return }
+    if (status === 'authenticated') {
+      fetch('/api/favoris')
+        .then((res) => res.json())
+        .then((data) => { setFavoris(data); setLoading(false) })
+    }
+  }, [status])
+
+  const handleRetirer = async (produitId: string) => {
+    await fetch('/api/favoris', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produitId }),
+    })
+    setFavoris(favoris.filter((f) => f.productId !== produitId))
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-12 text-center text-gray-400 dark:text-gray-500">
+        Chargement...
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Mes Favoris</h1>
+      <p className="text-gray-500 dark:text-gray-400 mb-8">
+        {favoris.length} produit{favoris.length > 1 ? 's' : ''} en favori
+      </p>
+
+      {favoris.length === 0 ? (
+        <div className="text-center py-20 text-gray-400 dark:text-gray-500">
+          <p className="text-5xl mb-4">🤍</p>
+          <p className="text-lg">Vous n'avez pas encore de favoris.</p>
+          <Link href="/produits" className="text-blue-600 dark:text-blue-400 hover:underline mt-4 inline-block">
+            Parcourir les produits
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {favoris.map((favori) => (
+            <div key={favori.id}
+              className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:shadow-md dark:hover:shadow-gray-900 transition-all duration-300">
+              <Link href={`/produits/${favori.product.id}`}>
+                <div className="h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+                  {favori.product.images[0] ? (
+                    <img src={favori.product.images[0]} alt={favori.product.nom} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <span className="text-4xl">📦</span>
+                  )}
+                </div>
+                <div className="p-4">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{favori.product.category.nom}</p>
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2 line-clamp-2">
+                    {favori.product.nom}
+                  </h3>
+                  <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {favori.product.prix.toFixed(2)} DA
+                  </p>
+                </div>
+              </Link>
+              <div className="px-4 pb-4">
+                <button onClick={() => handleRetirer(favori.product.id)}
+                  className="w-full border border-red-300 dark:border-red-800 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 text-sm py-2 rounded-lg transition">
+                  ❌ Retirer des favoris
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

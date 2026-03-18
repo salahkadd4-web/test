@@ -1,0 +1,61 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+
+export default function FavoriButton({ produitId }: { produitId: string }) {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const [isFavori, setIsFavori] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!session) return
+
+    const checkFavori = async () => {
+      const res = await fetch('/api/favoris')
+      const data = await res.json()
+      const found = data.find((f: any) => f.productId === produitId)
+      setIsFavori(!!found)
+    }
+
+    checkFavori()
+  }, [session, produitId])
+
+  const handleToggle = async () => {
+    if (!session) {
+      router.push('/connexion')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch('/api/favoris', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ produitId }),
+      })
+      const data = await res.json()
+      setIsFavori(data.isFavori)
+    } catch {
+      console.error('Erreur favoris')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <button
+      onClick={handleToggle}
+      disabled={loading}
+      className={`w-full border-2 font-semibold py-3 rounded-xl transition disabled:opacity-50 ${
+        isFavori
+          ? 'border-red-500 text-red-500 hover:bg-red-50'
+          : 'border-blue-600 text-blue-600 hover:bg-blue-50'
+      }`}
+    >
+      {isFavori ? '❤️ Retiré des favoris' : '🤍 Ajouter aux favoris'}
+    </button>
+  )
+}
