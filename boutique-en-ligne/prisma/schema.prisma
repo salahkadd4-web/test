@@ -12,6 +12,11 @@ enum Role {
   ADMIN
 }
 
+enum Genre {
+  HOMME
+  FEMME
+}
+
 enum OrderStatus {
   EN_ATTENTE
   CONFIRMEE
@@ -30,15 +35,18 @@ model User {
   motDePasse String
   role       Role     @default(CLIENT)
   avatar     String?
+  age        Int?
+  genre      Genre?
+  wilaya     String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  cart      Cart?
-  favorites Favorite[]
-  orders    Order[]
-  messages  Message[]
+  cart        Cart?
+  favorites   Favorite[]
+  orders      Order[]
+  messages    Message[]
   resetTokens ResetToken[]
-  returns Return[]
+  returns     Return[]
 }
 
 model Category {
@@ -68,7 +76,7 @@ model Product {
   cartItems  CartItem[]
   favorites  Favorite[]
   orderItems OrderItem[]
-  returns Return[]
+  returns    Return[]
 }
 
 model Cart {
@@ -105,17 +113,17 @@ model Favorite {
 }
 
 model Order {
-  id         String      @id @default(cuid())
-  statut     OrderStatus @default(EN_ATTENTE)
-  total      Float
-  adresse    String
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id        String      @id @default(cuid())
+  statut    OrderStatus @default(EN_ATTENTE)
+  total     Float
+  adresse   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  items OrderItem[]
+  items   OrderItem[]
   returns Return[]
 }
 
@@ -175,21 +183,21 @@ enum ReturnReason {
 }
 
 model Return {
-  id              String       @id @default(cuid())
-  orderId         String
-  order           Order        @relation(fields: [orderId], references: [id])
-  userId          String
-  user            User         @relation(fields: [userId], references: [id])
-  productId       String
-  product         Product      @relation(fields: [productId], references: [id])
-  returnReason    ReturnReason
-  returnStatus    ReturnStatus @default(EN_ATTENTE)
-  daysToReturn    Int
-  description     String?
-  mlDecision      String?
-  mlConfidence    Float?
+  id               String       @id @default(cuid())
+  orderId          String
+  order            Order        @relation(fields: [orderId], references: [id])
+  userId           String
+  user             User         @relation(fields: [userId], references: [id])
+  productId        String
+  product          Product      @relation(fields: [productId], references: [id])
+  returnReason     ReturnReason
+  returnStatus     ReturnStatus @default(EN_ATTENTE)
+  daysToReturn     Int
+  description      String?
+  mlDecision       String?
+  mlConfidence     Float?
   mlResponsibility String?
-  mlDecisionLabel String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  mlDecisionLabel  String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 }

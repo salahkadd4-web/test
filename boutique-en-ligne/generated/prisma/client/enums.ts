@@ -17,6 +17,14 @@ export const Role = {
 export type Role = (typeof Role)[keyof typeof Role]
 
 
+export const Genre = {
+  HOMME: 'HOMME',
+  FEMME: 'FEMME'
+} as const
+
+export type Genre = (typeof Genre)[keyof typeof Genre]
+
+
 export const OrderStatus = {
   EN_ATTENTE: 'EN_ATTENTE',
   CONFIRMEE: 'CONFIRMEE',

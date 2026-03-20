@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  age: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  age: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -33,6 +43,9 @@ export type UserMinAggregateOutputType = {
   motDePasse: string | null
   role: $Enums.Role | null
   avatar: string | null
+  age: number | null
+  genre: $Enums.Genre | null
+  wilaya: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +59,9 @@ export type UserMaxAggregateOutputType = {
   motDePasse: string | null
   role: $Enums.Role | null
   avatar: string | null
+  age: number | null
+  genre: $Enums.Genre | null
+  wilaya: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,11 +75,22 @@ export type UserCountAggregateOutputType = {
   motDePasse: number
   role: number
   avatar: number
+  age: number
+  genre: number
+  wilaya: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type UserAvgAggregateInputType = {
+  age?: true
+}
+
+export type UserSumAggregateInputType = {
+  age?: true
+}
 
 export type UserMinAggregateInputType = {
   id?: true
@@ -74,6 +101,9 @@ export type UserMinAggregateInputType = {
   motDePasse?: true
   role?: true
   avatar?: true
+  age?: true
+  genre?: true
+  wilaya?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +117,9 @@ export type UserMaxAggregateInputType = {
   motDePasse?: true
   role?: true
   avatar?: true
+  age?: true
+  genre?: true
+  wilaya?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +133,9 @@ export type UserCountAggregateInputType = {
   motDePasse?: true
   role?: true
   avatar?: true
+  age?: true
+  genre?: true
+  wilaya?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -143,6 +179,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -173,6 +221,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -186,9 +236,14 @@ export type UserGroupByOutputType = {
   motDePasse: string
   role: $Enums.Role
   avatar: string | null
+  age: number | null
+  genre: $Enums.Genre | null
+  wilaya: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -220,6 +275,9 @@ export type UserWhereInput = {
   motDePasse?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
+  age?: Prisma.IntNullableFilter<"User"> | number | null
+  genre?: Prisma.EnumGenreNullableFilter<"User"> | $Enums.Genre | null
+  wilaya?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   cart?: Prisma.XOR<Prisma.CartNullableScalarRelationFilter, Prisma.CartWhereInput> | null
@@ -239,6 +297,9 @@ export type UserOrderByWithRelationInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  age?: Prisma.SortOrderInput | Prisma.SortOrder
+  genre?: Prisma.SortOrderInput | Prisma.SortOrder
+  wilaya?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   cart?: Prisma.CartOrderByWithRelationInput
@@ -261,6 +322,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   motDePasse?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
+  age?: Prisma.IntNullableFilter<"User"> | number | null
+  genre?: Prisma.EnumGenreNullableFilter<"User"> | $Enums.Genre | null
+  wilaya?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   cart?: Prisma.XOR<Prisma.CartNullableScalarRelationFilter, Prisma.CartWhereInput> | null
@@ -280,11 +344,16 @@ export type UserOrderByWithAggregationInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  age?: Prisma.SortOrderInput | Prisma.SortOrder
+  genre?: Prisma.SortOrderInput | Prisma.SortOrder
+  wilaya?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -299,6 +368,9 @@ export type UserScalarWhereWithAggregatesInput = {
   motDePasse?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   avatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  age?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
+  genre?: Prisma.EnumGenreNullableWithAggregatesFilter<"User"> | $Enums.Genre | null
+  wilaya?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -312,6 +384,9 @@ export type UserCreateInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
@@ -331,6 +406,9 @@ export type UserUncheckedCreateInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
@@ -350,6 +428,9 @@ export type UserUpdateInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
@@ -369,6 +450,9 @@ export type UserUncheckedUpdateInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
@@ -388,6 +472,9 @@ export type UserCreateManyInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -401,6 +488,9 @@ export type UserUpdateManyMutationInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -414,6 +504,9 @@ export type UserUncheckedUpdateManyInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -427,8 +520,15 @@ export type UserCountOrderByAggregateInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  age?: Prisma.SortOrder
+  genre?: Prisma.SortOrder
+  wilaya?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  age?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -440,6 +540,9 @@ export type UserMaxOrderByAggregateInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  age?: Prisma.SortOrder
+  genre?: Prisma.SortOrder
+  wilaya?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -453,8 +556,15 @@ export type UserMinOrderByAggregateInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  age?: Prisma.SortOrder
+  genre?: Prisma.SortOrder
+  wilaya?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  age?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -472,6 +582,18 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type EnumRoleFieldUpdateOperationsInput = {
   set?: $Enums.Role
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableEnumGenreFieldUpdateOperationsInput = {
+  set?: $Enums.Genre | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -571,6 +693,9 @@ export type UserCreateWithoutCartInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
@@ -589,6 +714,9 @@ export type UserUncheckedCreateWithoutCartInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
@@ -623,6 +751,9 @@ export type UserUpdateWithoutCartInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
@@ -641,6 +772,9 @@ export type UserUncheckedUpdateWithoutCartInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
@@ -659,6 +793,9 @@ export type UserCreateWithoutFavoritesInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
@@ -677,6 +814,9 @@ export type UserUncheckedCreateWithoutFavoritesInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
@@ -711,6 +851,9 @@ export type UserUpdateWithoutFavoritesInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
@@ -729,6 +872,9 @@ export type UserUncheckedUpdateWithoutFavoritesInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
@@ -747,6 +893,9 @@ export type UserCreateWithoutOrdersInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
@@ -765,6 +914,9 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
@@ -799,6 +951,9 @@ export type UserUpdateWithoutOrdersInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
@@ -817,6 +972,9 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
@@ -835,6 +993,9 @@ export type UserCreateWithoutMessagesInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
@@ -853,6 +1014,9 @@ export type UserUncheckedCreateWithoutMessagesInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
@@ -887,6 +1051,9 @@ export type UserUpdateWithoutMessagesInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
@@ -905,6 +1072,9 @@ export type UserUncheckedUpdateWithoutMessagesInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
@@ -923,6 +1093,9 @@ export type UserCreateWithoutResetTokensInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
@@ -941,6 +1114,9 @@ export type UserUncheckedCreateWithoutResetTokensInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
@@ -975,6 +1151,9 @@ export type UserUpdateWithoutResetTokensInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
@@ -993,6 +1172,9 @@ export type UserUncheckedUpdateWithoutResetTokensInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
@@ -1011,6 +1193,9 @@ export type UserCreateWithoutReturnsInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
@@ -1029,6 +1214,9 @@ export type UserUncheckedCreateWithoutReturnsInput = {
   motDePasse: string
   role?: $Enums.Role
   avatar?: string | null
+  age?: number | null
+  genre?: $Enums.Genre | null
+  wilaya?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
@@ -1063,6 +1251,9 @@ export type UserUpdateWithoutReturnsInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
@@ -1081,6 +1272,9 @@ export type UserUncheckedUpdateWithoutReturnsInput = {
   motDePasse?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
+  wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
@@ -1166,6 +1360,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  age?: boolean
+  genre?: boolean
+  wilaya?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   cart?: boolean | Prisma.User$cartArgs<ExtArgs>
@@ -1186,6 +1383,9 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  age?: boolean
+  genre?: boolean
+  wilaya?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1199,6 +1399,9 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  age?: boolean
+  genre?: boolean
+  wilaya?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1212,11 +1415,14 @@ export type UserSelectScalar = {
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  age?: boolean
+  genre?: boolean
+  wilaya?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prenom" | "email" | "telephone" | "motDePasse" | "role" | "avatar" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prenom" | "email" | "telephone" | "motDePasse" | "role" | "avatar" | "age" | "genre" | "wilaya" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cart?: boolean | Prisma.User$cartArgs<ExtArgs>
   favorites?: boolean | Prisma.User$favoritesArgs<ExtArgs>
@@ -1248,6 +1454,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     motDePasse: string
     role: $Enums.Role
     avatar: string | null
+    age: number | null
+    genre: $Enums.Genre | null
+    wilaya: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1687,6 +1896,9 @@ export interface UserFieldRefs {
   readonly motDePasse: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly avatar: Prisma.FieldRef<"User", 'String'>
+  readonly age: Prisma.FieldRef<"User", 'Int'>
+  readonly genre: Prisma.FieldRef<"User", 'Genre'>
+  readonly wilaya: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

@@ -10,15 +10,23 @@ const reasonMap: Record<string, string> = {
   NON_CONFORME:    'Ne correspond pas',
 }
 
+const genreMap: Record<string, string> = {
+  HOMME: 'Male',
+  FEMME: 'Female',
+  AUTRE: 'Male',
+}
+
 export async function GET(req: NextRequest) {
   try {
     const token = await getToken({ req, secret: process.env.AUTH_SECRET })
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
     const retours = await prisma.return.findMany({
       where: { userId: token.id as string },
       orderBy: { createdAt: 'desc' },
       include: { order: true, product: { include: { category: true } } },
     })
+
     return NextResponse.json(retours)
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
@@ -30,14 +38,17 @@ export async function POST(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.AUTH_SECRET })
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const {
-      orderId, productId, returnReason, description,
-      wilaya, customerAge, customerGender, paymentMethod, shippingMethod,
-    } = await req.json()
+    const { orderId, productId, returnReason, description } = await req.json()
 
     if (!orderId || !productId || !returnReason) {
       return NextResponse.json({ error: 'Champs requis manquants' }, { status: 400 })
     }
+
+    // Récupérer le profil du client pour les données ML
+    const userProfile = await prisma.user.findUnique({
+      where: { id: token.id as string },
+      select: { age: true, genre: true, wilaya: true },
+    })
 
     const order = await prisma.order.findFirst({
       where: { id: orderId, userId: token.id as string, statut: 'LIVREE' },
@@ -72,18 +83,19 @@ export async function POST(req: NextRequest) {
     const totalReturns = await prisma.return.count({ where: { userId: token.id as string } })
     const fraudScore   = Math.min(Math.round((totalReturns / Math.max(totalOrders, 1)) * 100), 100)
 
+    // Utiliser les données du profil pour le ML
     let mlResult = null
     try {
       mlResult = await analyzeReturn({
-        Customer_Age:           customerAge || 30,
-        Customer_Gender:        customerGender || 'Male',
-        Customer_Wilaya:        wilaya || 'Alger',
+        Customer_Age:           userProfile?.age    || 30,
+        Customer_Gender:        genreMap[userProfile?.genre || ''] || 'Male',
+        Customer_Wilaya:        userProfile?.wilaya || 'Alger',
         Customer_Past_Returns:  totalReturns,
         Product_Category:       orderItem.product.category.nom,
         Product_Price_DA:       orderItem.prix,
         Order_Quantity:         orderItem.quantite,
-        Payment_Method:         paymentMethod || 'Virement bancaire',
-        Shipping_Method:        shippingMethod || 'Express',
+        Payment_Method:         'Virement bancaire',
+        Shipping_Method:        'Express',
         Shipping_Cost_DA:       700,
         Days_to_Return:         daysToReturn,
         Within_Return_Policy:   daysToReturn <= 30,
@@ -98,11 +110,8 @@ export async function POST(req: NextRequest) {
     let returnStatus: 'EN_ATTENTE' | 'APPROUVE' | 'REFUSE' = 'EN_ATTENTE'
     if (mlResult) {
       const resolution = mlResult.decision.resolution
-      if (resolution === 'Reject') {
-        returnStatus = 'REFUSE'
-      } else if (resolution === 'Refund' || resolution === 'Exchange' || resolution === 'Repair') {
-        returnStatus = 'APPROUVE'
-      }
+      if (resolution === 'Reject') returnStatus = 'REFUSE'
+      else if (['Refund', 'Exchange', 'Repair'].includes(resolution)) returnStatus = 'APPROUVE'
     }
 
     const retour = await prisma.return.create({
