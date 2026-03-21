@@ -25,6 +25,12 @@ export async function POST(req: NextRequest) {
       }
 
       // Vérifier mot de passe
+      if (!user.motDePasse) {
+        return NextResponse.json(
+          { error: "Compte Google — définissez d'abord un mot de passe dans votre profil" },
+          { status: 400 }
+        )
+      }
       const valid = await bcrypt.compare(motDePasse, user.motDePasse)
       if (!valid) return NextResponse.json({ error: 'Mot de passe incorrect' }, { status: 400 })
 

@@ -32,7 +32,7 @@ model User {
   prenom     String
   email      String?  @unique
   telephone  String?  @unique
-  motDePasse String
+  motDePasse String?
   role       Role     @default(CLIENT)
   avatar     String?
   age        Int?

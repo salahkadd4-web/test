@@ -21,11 +21,46 @@ export default function NouvelleCommandePage() {
   const [adresse, setAdresse] = useState('')
   const [showModal, setShowModal] = useState(false)
 
+  // Téléphone
+  const [telephone, setTelephone] = useState('')
+  const [hasTelephone, setHasTelephone] = useState(true)
+  const [savingTel, setSavingTel] = useState(false)
+  const [telError, setTelError] = useState('')
+
   useEffect(() => {
-    fetch('/api/panier').then((r) => r.json()).then((d) => { setPanier(d); setLoading(false) })
+    Promise.all([
+      fetch('/api/panier').then(r => r.json()),
+      fetch('/api/profil').then(r => r.json()),
+    ]).then(([panierData, profilData]) => {
+      setPanier(panierData)
+      // Vérifier si le client a un téléphone
+      setHasTelephone(!!profilData.telephone)
+      setLoading(false)
+    })
   }, [])
 
   const total = panier?.items.reduce((acc, item) => acc + item.product.prix * item.quantite, 0) ?? 0
+
+  // Sauvegarder le téléphone
+  const handleSaveTelephone = async () => {
+    setTelError('')
+    const telRegex = /^(05|06|07)[0-9]{8}$/
+    if (!telRegex.test(telephone.replace(/\s/g, ''))) {
+      setTelError('Format invalide. Ex: 05XX XX XX XX')
+      return
+    }
+    setSavingTel(true)
+    try {
+      const res = await fetch('/api/profil', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telephone: telephone.replace(/\s/g, '') }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setTelError(data.error); return }
+      setHasTelephone(true)
+    } catch { setTelError('Erreur serveur') } finally { setSavingTel(false) }
+  }
 
   const handleConfirmer = async () => {
     setError(''); setSubmitting(true); setShowModal(false)
@@ -41,7 +76,11 @@ export default function NouvelleCommandePage() {
     } catch { setError('Erreur serveur, veuillez réessayer') } finally { setSubmitting(false) }
   }
 
-  if (loading) return <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">Chargement...</div>
+  if (loading) return (
+    <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+      Chargement...
+    </div>
+  )
 
   if (!panier || panier.items.length === 0) {
     return (
@@ -61,32 +100,94 @@ export default function NouvelleCommandePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Adresse de livraison</h2>
+        <div className="space-y-4">
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg mb-4">
-              {error}
+          {/* ── Téléphone manquant ─────────────────────── */}
+          {!hasTelephone && (
+            <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <span className="text-2xl">📱</span>
+                <div>
+                  <h3 className="font-semibold text-amber-800 dark:text-amber-300 text-sm">
+                    Numéro de téléphone requis
+                  </h3>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                    Nous avons besoin de votre numéro pour le suivi de la livraison.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-amber-800 dark:text-amber-300 mb-1">
+                    Numéro de téléphone *
+                  </label>
+                  <input
+                    type="tel" value={telephone}
+                    onChange={(e) => { setTelephone(e.target.value); setTelError('') }}
+                    placeholder="05XX XX XX XX"
+                    className="w-full border border-amber-300 dark:border-amber-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  />
+                  {telError && <p className="text-xs text-red-500 dark:text-red-400 mt-1">{telError}</p>}
+                  <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                    Format : 05XX, 06XX ou 07XX XX XX XX
+                  </p>
+                </div>
+                <button
+                  onClick={handleSaveTelephone}
+                  disabled={savingTel || !telephone}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
+                >
+                  {savingTel ? 'Enregistrement...' : '✓ Enregistrer le numéro'}
+                </button>
+              </div>
             </div>
           )}
 
-          <form onSubmit={(e) => { e.preventDefault(); setShowModal(true) }} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adresse complète</label>
-              <textarea value={adresse} onChange={(e) => setAdresse(e.target.value)} required rows={4}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500"
-                placeholder="Numéro, rue, ville, wilaya..." />
-            </div>
-            <button type="submit" disabled={submitting}
-              className="w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-3 rounded-xl transition disabled:opacity-50">
-              {submitting ? 'Traitement...' : `Confirmer — ${total.toFixed(2)} DA`}
-            </button>
-            <Link href="/panier" className="block text-center text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-sm transition">
-              ← Retour au panier
-            </Link>
-          </form>
+          {/* ── Adresse de livraison ───────────────────── */}
+          <div className={`bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 ${!hasTelephone ? 'opacity-50 pointer-events-none' : ''}`}>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+              📍 Adresse de livraison
+            </h2>
+
+            {!hasTelephone && (
+              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-4 text-xs text-gray-500 dark:text-gray-400 text-center">
+                ⚠️ Veuillez d'abord renseigner votre numéro de téléphone
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={(e) => { e.preventDefault(); setShowModal(true) }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Adresse complète *
+                </label>
+                <textarea
+                  value={adresse} onChange={(e) => setAdresse(e.target.value)}
+                  required rows={4}
+                  className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500"
+                  placeholder="Numéro, rue, cité, commune, wilaya..."
+                />
+              </div>
+              <button
+                type="submit" disabled={submitting || !hasTelephone}
+                className="w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-3 rounded-xl transition disabled:opacity-50"
+              >
+                {submitting ? 'Traitement...' : `Confirmer — ${total.toFixed(2)} DA`}
+              </button>
+              <Link href="/panier" className="block text-center text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-sm transition">
+                ← Retour au panier
+              </Link>
+            </form>
+          </div>
         </div>
 
+        {/* ── Résumé panier ──────────────────────────── */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 h-fit">
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             Résumé ({panier.items.length} article{panier.items.length > 1 ? 's' : ''})
@@ -103,7 +204,7 @@ export default function NouvelleCommandePage() {
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-1">{item.product.nom}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">x{item.quantite}</p>
                 </div>
-                <p className="font-semibold text-gray-800 dark:text-gray-100">
+                <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">
                   {(item.product.prix * item.quantite).toFixed(2)} DA
                 </p>
               </div>
@@ -118,6 +219,7 @@ export default function NouvelleCommandePage() {
         </div>
       </div>
 
+      {/* ── Modal confirmation ──────────────────────── */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-gray-100 dark:border-gray-800">

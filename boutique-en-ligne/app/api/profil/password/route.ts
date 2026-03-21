@@ -28,7 +28,13 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({ where: { id: token.id as string } })
     if (!user) return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 })
-
+    
+    if (!user.motDePasse) {
+      return NextResponse.json(
+        { error: "Compte Google — définissez d'abord un mot de passe dans votre profil" },
+        { status: 400 }
+      )
+    }
     const valid = await bcrypt.compare(motDePasseActuel, user.motDePasse)
     if (!valid) return NextResponse.json({ error: 'Mot de passe actuel incorrect' }, { status: 400 })
 
