@@ -381,10 +381,6 @@ export type MessageUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.MessageScalarWhereInput | Prisma.MessageScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type MessageCreateWithoutUserInput = {
   id?: string
   contenu: string

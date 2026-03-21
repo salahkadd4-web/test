@@ -120,6 +120,12 @@ model Order {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
+  scan1Done            Boolean  @default(false)
+  scan1Result          String?
+  scan1ShippingAllowed Boolean  @default(false)
+  scan2Done            Boolean  @default(false)
+  scan2Result          String?
+
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
