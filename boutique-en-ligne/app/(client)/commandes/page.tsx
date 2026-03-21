@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
@@ -29,7 +29,7 @@ const statutConfig: Record<string, { label: string; color: string; emoji: string
   ANNULEE:        { label: 'Annulée',        color: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400',             emoji: '❌' },
 }
 
-export default function CommandesPage() {
+function CommandesContent() {
   const searchParams = useSearchParams()
   const success = searchParams.get('success')
   const [commandes, setCommandes] = useState<Order[]>([])
@@ -85,16 +85,13 @@ export default function CommandesPage() {
             return (
               <div key={commande.id}
                 className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-
                 <div
                   className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                   onClick={() => setExpanded(isExpanded ? null : commande.id)}
                 >
                   <div className="flex items-center gap-4">
                     <div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">
-                        #{commande.id.slice(-8).toUpperCase()}
-                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">#{commande.id.slice(-8).toUpperCase()}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(commande.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
@@ -111,12 +108,10 @@ export default function CommandesPage() {
 
                 {isExpanded && (
                   <div className="border-t border-gray-100 dark:border-gray-800 px-5 py-4 space-y-4">
-
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                       <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">📍 Adresse de livraison</p>
                       <p className="text-sm text-gray-800 dark:text-gray-200">{commande.adresse}</p>
                     </div>
-
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3">🚀 Suivi de commande</p>
                       <div className="flex items-center gap-1">
@@ -141,7 +136,6 @@ export default function CommandesPage() {
                         })}
                       </div>
                     </div>
-
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3">📦 Articles commandés</p>
                       <div className="space-y-2">
@@ -165,7 +159,6 @@ export default function CommandesPage() {
                         ))}
                       </div>
                     </div>
-
                     <div className="border-t border-gray-100 dark:border-gray-800 pt-3 flex justify-between font-bold text-lg">
                       <span className="text-gray-800 dark:text-gray-100">Total</span>
                       <span className="text-blue-600 dark:text-blue-400">{commande.total.toFixed(2)} DA</span>
@@ -178,5 +171,13 @@ export default function CommandesPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function CommandesPage() {
+  return (
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">Chargement...</div>}>
+      <CommandesContent />
+    </Suspense>
   )
 }

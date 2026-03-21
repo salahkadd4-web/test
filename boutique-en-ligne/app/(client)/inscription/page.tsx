@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -40,7 +40,7 @@ function validatePassword(password: string): string | null {
   return rules.every(r => r.test(password)) ? null : 'Le mot de passe ne respecte pas toutes les conditions'
 }
 
-export default function InscriptionPage() {
+function InscriptionContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
@@ -230,6 +230,7 @@ export default function InscriptionPage() {
                       <option value="">Non précisé</option>
                       <option value="HOMME">Homme</option>
                       <option value="FEMME">Femme</option>
+                      <option value="AUTRE">Autre</option>
                     </select>
                   </div>
                 </div>
@@ -367,5 +368,13 @@ export default function InscriptionPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function InscriptionPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center"><p className="text-gray-500 dark:text-gray-400">Chargement...</p></div>}>
+      <InscriptionContent />
+    </Suspense>
   )
 }

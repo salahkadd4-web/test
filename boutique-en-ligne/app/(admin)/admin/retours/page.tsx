@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 type Return = {
@@ -110,7 +110,7 @@ function ProbabilityBar({ label, value, maxValue }: { label: string; value: numb
   )
 }
 
-export default function AdminRetoursPage() {
+function AdminRetoursContent() {
   const searchParams = useSearchParams()
   const [retours, setRetours] = useState<Return[]>([])
   const [loading, setLoading] = useState(true)
@@ -250,6 +250,7 @@ export default function AdminRetoursPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-600 font-semibold">
             <tr>
@@ -326,6 +327,7 @@ export default function AdminRetoursPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Modal */}
@@ -611,5 +613,13 @@ export default function AdminRetoursPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function AdminRetoursPage() {
+  return (
+    <Suspense fallback={<div className="text-center text-gray-500 py-12">Chargement...</div>}>
+      <AdminRetoursContent />
+    </Suspense>
   )
 }

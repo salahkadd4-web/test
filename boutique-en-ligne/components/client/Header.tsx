@@ -58,7 +58,10 @@ export default function Header() {
     <>
       <header className="bg-white dark:bg-gray-900 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
-
+           {/* Burger mobile */}
+            <button className="md:hidden text-black dark:text-white" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? '✕' : '☰'}
+            </button>
           {/* Logo */}
           <Link href="/" className="text-lg font-light tracking-[0.4em] uppercase text-black dark:text-white shrink-0">
             Boutique
@@ -167,10 +170,7 @@ export default function Header() {
               </>
             )}
 
-            {/* Burger mobile */}
-            <button className="md:hidden text-black dark:text-white" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? '✕' : '☰'}
-            </button>
+           
           </div>
         </div>
 

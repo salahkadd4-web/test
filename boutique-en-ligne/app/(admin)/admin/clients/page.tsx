@@ -66,6 +66,7 @@ export default function AdminClientsPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-600 font-semibold">
             <tr>
@@ -144,6 +145,7 @@ export default function AdminClientsPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Modal Détails Client */}

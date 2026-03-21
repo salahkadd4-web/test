@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function ConnexionPage() {
+function ConnexionContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const inscription = searchParams.get('inscription')
@@ -155,5 +155,13 @@ export default function ConnexionPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ConnexionPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center"><p className="text-gray-500 dark:text-gray-400">Chargement...</p></div>}>
+      <ConnexionContent />
+    </Suspense>
   )
 }
