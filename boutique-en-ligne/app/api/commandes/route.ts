@@ -82,9 +82,13 @@ export async function POST(req: NextRequest) {
 
     // Mettre à jour le stock
     for (const item of panier.items) {
+      const newStock = item.product.stock - item.quantite
       await prisma.product.update({
         where: { id: item.productId },
-        data: { stock: { decrement: item.quantite } },
+        data: {
+          stock: newStock,
+          actif: newStock > 0,
+        },
       })
     }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import MLResultCard from '@/components/client/MLResultCard'
 
@@ -72,18 +72,11 @@ function ProbabilityBar({ label, value, maxValue }: { label: string; value: numb
   )
 }
 
-const WILAYAS = [
-  'Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar','Blida','Bouira',
-  'Tamanrasset','Tébessa','Tlemcen','Tiaret','Tizi Ouzou','Alger','Djelfa','Jijel','Sétif','Saïda',
-  'Skikda','Sidi Bel Abbès','Annaba','Guelma','Constantine','Médéa','Mostaganem',"M'Sila",'Mascara','Ouargla',
-  'Oran','El Bayadh','Illizi','Bordj Bou Arréridj','Boumerdès','El Tarf','Tindouf','Tissemsilt','El Oued',
-  'Khenchela','Souk Ahras','Tipaza','Mila','Aïn Defla','Naâma','Aïn Témouchent','Ghardaïa','Relizane',
-]
-const PAYMENT_METHODS = ['Virement bancaire','BaridiMob','CIB','Espèces livraison','Dahabia']
-const SHIPPING_METHODS = ['Express','EMS','Retrait en boutique','Yassir','Maystro','Zr Express']
+type Etape = 'formulaire' | 'scan'
 
 export default function RetoursPage() {
   const [view, setView] = useState<'liste' | 'nouveau'>('liste')
+  const [etape, setEtape] = useState<Etape>('formulaire')
   const [retours, setRetours] = useState<Return[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -96,33 +89,89 @@ export default function RetoursPage() {
   const [mlDetail, setMlDetail] = useState<any>(null)
   const [loadingMlDetail, setLoadingMlDetail] = useState(false)
 
+  // Scan 3
+  const [scanImages, setScanImages] = useState<string[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [form, setForm] = useState({
     orderId: '', productId: '', returnReason: '', description: '',
-    wilaya: 'Alger', customerAge: '', customerGender: 'Male',
-    paymentMethod: 'Virement bancaire', shippingMethod: 'Express',
   })
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
 
   useEffect(() => { fetchData() }, [])
 
   const fetchData = async () => {
-    const [retoursRes, ordersRes] = await Promise.all([fetch('/api/retours'), fetch('/api/commandes')])
+    const [retoursRes, ordersRes] = await Promise.all([
+      fetch('/api/retours'),
+      fetch('/api/commandes'),
+    ])
     const retoursData = await retoursRes.json()
-    const ordersData = await ordersRes.json()
+    const ordersData  = await ordersRes.json()
     setRetours(Array.isArray(retoursData) ? retoursData : [])
     setOrders(Array.isArray(ordersData) ? ordersData.filter((o: Order) => o.statut === 'LIVREE') : [])
     setLoading(false)
   }
 
   const handleOrderChange = (orderId: string) => {
-    setSelectedOrder(orders.find((o) => o.id === orderId) || null)
+    setSelectedOrder(orders.find(o => o.id === orderId) || null)
     setSelectedOrderItem(null)
     setForm({ ...form, orderId, productId: '' })
   }
 
   const handleProductChange = (productId: string) => {
-    setSelectedOrderItem(selectedOrder?.items.find((i) => i.product.id === productId) || null)
+    setSelectedOrderItem(selectedOrder?.items.find(i => i.product.id === productId) || null)
     setForm({ ...form, productId })
+  }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = ev => setScanImages(prev => [...prev, ev.target?.result as string])
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // Étape 1 — valider le formulaire et passer au scan
+  const handleNextToScan = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    if (!form.orderId || !form.productId || !form.returnReason) {
+      setError('Veuillez remplir tous les champs obligatoires')
+      return
+    }
+    setEtape('scan')
+  }
+
+  // Étape 2 — soumettre avec les images de scan
+  const handleSubmit = async () => {
+    setError('')
+    setSubmitting(true)
+    setMlResult(null)
+    try {
+      const res = await fetch('/api/retours', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          scan3Images: scanImages.length > 0 ? scanImages : undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error); return }
+      setMlResult(data.mlResult)
+      setSubmittedForm({
+        returnReason: form.returnReason,
+        quantity: selectedOrderItem?.quantite || 1,
+        productName: selectedOrderItem?.product.nom || '',
+      })
+      setForm({ orderId: '', productId: '', returnReason: '', description: '' })
+      setSelectedOrder(null)
+      setSelectedOrderItem(null)
+      setScanImages([])
+      setEtape('formulaire')
+      fetchData()
+    } catch { setError('Erreur serveur') } finally { setSubmitting(false) }
   }
 
   const handleOpenDetail = async (retour: Return) => {
@@ -137,38 +186,9 @@ export default function RetoursPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setSubmitting(true)
-    setMlResult(null)
-    try {
-      const res = await fetch('/api/retours', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, customerAge: form.customerAge ? parseInt(form.customerAge) : 30 }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error); return }
-      setMlResult(data.mlResult)
-      setSubmittedForm({
-        wilaya: form.wilaya, returnReason: form.returnReason,
-        quantity: selectedOrderItem?.quantite || 1,
-        productName: selectedOrderItem?.product.nom || '',
-        customerAge: form.customerAge ? parseInt(form.customerAge) : undefined,
-        customerGender: form.customerGender,
-        paymentMethod: form.paymentMethod, shippingMethod: form.shippingMethod,
-      })
-      setForm({ orderId: '', productId: '', returnReason: '', description: '', wilaya: 'Alger', customerAge: '', customerGender: 'Male', paymentMethod: 'Virement bancaire', shippingMethod: 'Express' })
-      setSelectedOrder(null)
-      setSelectedOrderItem(null)
-      fetchData()
-    } catch { setError('Erreur serveur') } finally { setSubmitting(false) }
-  }
-
-  const inputClass = "w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-  const sectionTitleClass = "text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 font-medium mb-3"
+  const inputClass  = "w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  const labelClass  = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+  const sectionTitle = "text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 font-medium mb-3"
 
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">Chargement...</div>
 
@@ -187,7 +207,7 @@ export default function RetoursPage() {
             )}
           </div>
           <button
-            onClick={() => { setView(view === 'liste' ? 'nouveau' : 'liste'); setError('') }}
+            onClick={() => { setView(view === 'liste' ? 'nouveau' : 'liste'); setEtape('formulaire'); setError('') }}
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
           >
             {view === 'liste' ? '+ Nouveau retour' : '← Mes retours'}
@@ -195,14 +215,14 @@ export default function RetoursPage() {
         </div>
       )}
 
-      {/* Résultat ML après soumission */}
+      {/* Résultat ML */}
       {mlResult && submittedForm && (
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Résultat de l'analyse</h1>
           <MLResultCard mlResult={mlResult} formData={submittedForm} />
           <div className="flex gap-3 mt-6">
             <button onClick={() => { setMlResult(null); setView('liste') }}
-              className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-black py-3 rounded-xl font-semibold hover:bg-gray-700 dark:hover:bg-gray-100 transition">
+              className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-black py-3 rounded-xl font-semibold hover:bg-gray-700 transition">
               Voir mes retours
             </button>
             <button onClick={() => { setMlResult(null); setView('nouveau') }}
@@ -213,7 +233,7 @@ export default function RetoursPage() {
         </div>
       )}
 
-      {/* Liste des retours */}
+      {/* Liste */}
       {!mlResult && view === 'liste' && (
         <div>
           {retours.length === 0 ? (
@@ -230,29 +250,22 @@ export default function RetoursPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {retours.map((retour) => {
+              {retours.map(retour => {
                 const status = statusConfig[retour.returnStatus] || statusConfig.EN_ATTENTE
                 return (
                   <div key={retour.id} className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
-
-                    {/* Info produit + statut */}
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0">
-                          {retour.product.images[0] ? (
-                            <img src={retour.product.images[0]} alt={retour.product.nom} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>
-                          )}
+                          {retour.product.images[0]
+                            ? <img src={retour.product.images[0]} alt={retour.product.nom} className="w-full h-full object-cover" />
+                            : <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>
+                          }
                         </div>
                         <div>
                           <p className="font-semibold text-gray-800 dark:text-gray-100">{retour.product.nom}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            Commande #{retour.order.id.slice(-6).toUpperCase()}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            {reasonLabels[retour.returnReason] || retour.returnReason}
-                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Commande #{retour.order.id.slice(-6).toUpperCase()}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{reasonLabels[retour.returnReason]}</p>
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                             {new Date(retour.createdAt).toLocaleDateString('fr-FR')} — J+{retour.daysToReturn}
                           </p>
@@ -262,16 +275,11 @@ export default function RetoursPage() {
                         {status.emoji} {status.label}
                       </span>
                     </div>
-
-                    {/* Décision ML */}
                     {retour.mlDecision && (
                       <div className="mt-4 bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">🤖 Décision automatique</p>
-                          <button
-                            onClick={() => handleOpenDetail(retour)}
-                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                          >
+                          <button onClick={() => handleOpenDetail(retour)} className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
                             Voir le détail →
                           </button>
                         </div>
@@ -303,10 +311,31 @@ export default function RetoursPage() {
       {/* Formulaire nouveau retour */}
       {!mlResult && view === 'nouveau' && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
+
+          {/* Indicateur d'étapes */}
+          <div className="flex items-center gap-3 mb-6">
+            {[
+              { key: 'formulaire', label: '1. Motif' },
+              { key: 'scan',       label: '2. Scanner le produit' },
+            ].map((s, i) => (
+              <div key={s.key} className="flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                  etape === s.key ? 'bg-blue-600 text-white' :
+                  (etape === 'scan' && s.key === 'formulaire') ? 'bg-green-500 text-white' :
+                  'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                }`}>
+                  {etape === 'scan' && s.key === 'formulaire' ? '✓' : i + 1}
+                </div>
+                <span className={`text-xs font-medium ${etape === s.key ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                  {s.label}
+                </span>
+                {i < 1 && <div className={`w-8 h-0.5 ${etape === 'scan' ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`} />}
+              </div>
+            ))}
+          </div>
+
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Nouvelle demande de retour</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-            ⏰ Délai maximum : <strong>30 jours</strong> après la livraison
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">⏰ Délai maximum : <strong>30 jours</strong> après la livraison</p>
 
           {error && <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>}
 
@@ -317,127 +346,164 @@ export default function RetoursPage() {
               <Link href="/commandes" className="text-blue-600 dark:text-blue-400 hover:underline text-sm mt-2 inline-block">Voir mes commandes</Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-
-              <div>
-                <p className={sectionTitleClass}>📦 Commande concernée</p>
-                <div className="space-y-3">
+            <>
+              {/* ── Étape 1 : Formulaire ── */}
+              {etape === 'formulaire' && (
+                <form onSubmit={handleNextToScan} className="space-y-5">
                   <div>
-                    <label className={labelClass}>Commande *</label>
-                    <select value={form.orderId} onChange={(e) => handleOrderChange(e.target.value)} required className={inputClass}>
-                      <option value="">Sélectionner une commande</option>
-                      {orders.map((order) => {
-                        const days = Math.floor((new Date().getTime() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-                        return (
-                          <option key={order.id} value={order.id} disabled={days > 30}>
-                            #{order.id.slice(-6).toUpperCase()} — {new Date(order.createdAt).toLocaleDateString('fr-FR')} — {order.total.toFixed(2)} DA
-                            {days > 30 ? ' (Délai dépassé)' : ' (J+' + days + ')'}
-                          </option>
-                        )
-                      })}
-                    </select>
-                  </div>
-                  {selectedOrder && (
-                    <div>
-                      <label className={labelClass}>Produit à retourner *</label>
-                      <select value={form.productId} onChange={(e) => handleProductChange(e.target.value)} required className={inputClass}>
-                        <option value="">Sélectionner un produit</option>
-                        {selectedOrder.items.map((item) => (
-                          <option key={item.id} value={item.product.id}>
-                            {item.product.nom} (x{item.quantite} — {item.prix.toFixed(2)} DA)
-                          </option>
-                        ))}
-                      </select>
+                    <p className={sectionTitle}>📦 Commande concernée</p>
+                    <div className="space-y-3">
+                      <div>
+                        <label className={labelClass}>Commande *</label>
+                        <select value={form.orderId} onChange={e => handleOrderChange(e.target.value)} required className={inputClass}>
+                          <option value="">Sélectionner une commande</option>
+                          {orders.map(order => {
+                            const days = Math.floor((new Date().getTime() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+                            return (
+                              <option key={order.id} value={order.id} disabled={days > 30}>
+                                #{order.id.slice(-6).toUpperCase()} — {new Date(order.createdAt).toLocaleDateString('fr-FR')} — {order.total.toFixed(2)} DA
+                                {days > 30 ? ' (Délai dépassé)' : ` (J+${days})`}
+                              </option>
+                            )
+                          })}
+                        </select>
+                      </div>
+                      {selectedOrder && (
+                        <div>
+                          <label className={labelClass}>Produit à retourner *</label>
+                          <select value={form.productId} onChange={e => handleProductChange(e.target.value)} required className={inputClass}>
+                            <option value="">Sélectionner un produit</option>
+                            {selectedOrder.items.map(item => (
+                              <option key={item.id} value={item.product.id}>
+                                {item.product.nom} (x{item.quantite} — {item.prix.toFixed(2)} DA)
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      {selectedOrderItem && (
+                        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded-xl p-3 flex items-center gap-3">
+                          <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shrink-0">
+                            {selectedOrderItem.product.images[0]
+                              ? <img src={selectedOrderItem.product.images[0]} alt="" className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center">📦</div>
+                            }
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-blue-800 dark:text-blue-300">{selectedOrderItem.product.nom}</p>
+                            <p className="text-xs text-blue-600 dark:text-blue-400">x{selectedOrderItem.quantite} — {selectedOrderItem.prix.toFixed(2)} DA/u</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {selectedOrderItem && (
-                    <div className="bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded-xl p-3 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shrink-0">
-                        {selectedOrderItem.product.images[0] ? (
-                          <img src={selectedOrderItem.product.images[0]} alt="" className="w-full h-full object-cover" />
-                        ) : <div className="w-full h-full flex items-center justify-center">📦</div>}
+                  </div>
+
+                  <div className="border-t border-gray-100 dark:border-gray-800" />
+
+                  <div>
+                    <p className={sectionTitle}>📋 Motif du retour</p>
+                    <div className="space-y-3">
+                      <div>
+                        <label className={labelClass}>Raison du retour *</label>
+                        <select value={form.returnReason} onChange={e => setForm({ ...form, returnReason: e.target.value })} required className={inputClass}>
+                          <option value="">Sélectionner une raison</option>
+                          {Object.entries(reasonLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                        </select>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-blue-800 dark:text-blue-300">{selectedOrderItem.product.nom}</p>
-                        <p className="text-xs text-blue-600 dark:text-blue-400">Quantité : {selectedOrderItem.quantite} — {selectedOrderItem.prix.toFixed(2)} DA/u</p>
-                        <p className="text-xs text-blue-600 dark:text-blue-400">Total : {(selectedOrderItem.prix * selectedOrderItem.quantite).toFixed(2)} DA</p>
+                        <label className={labelClass}>Description (optionnel)</label>
+                        <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2}
+                          className={inputClass} placeholder="Décrivez le problème en détail..." />
                       </div>
                     </div>
+                  </div>
+
+                  <button type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition mt-2">
+                    Suivant → Scanner le produit
+                  </button>
+                </form>
+              )}
+
+              {/* ── Étape 2 : Scan produit ── */}
+              {etape === 'scan' && (
+                <div className="space-y-5">
+                  <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-xl p-4">
+                    <p className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-1">
+                      📷 Photographiez le produit à retourner
+                    </p>
+                    <p className="text-xs text-orange-600 dark:text-orange-500">
+                      Ces photos permettent de vérifier l'état du produit et d'accélérer le traitement de votre retour. Le système compare automatiquement avec les photos d'expédition.
+                    </p>
+                  </div>
+
+                  {/* Résumé de la demande */}
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">Résumé de votre demande</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{selectedOrderItem?.product.nom}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{reasonLabels[form.returnReason]}</p>
+                  </div>
+
+                  {/* Zone upload */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-600 transition"
+                  >
+                    {scanImages.length > 0 ? (
+                      <div>
+                        <div className="grid grid-cols-3 gap-2 mb-3">
+                          {scanImages.map((img, i) => (
+                            <img key={i} src={img} alt="" className="w-full h-20 object-cover rounded-lg" />
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{scanImages.length} photo(s) — cliquez pour ajouter</p>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-4xl mb-3">📸</p>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Cliquez pour photographier le produit</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">1 à 4 photos recommandées</p>
+                      </>
+                    )}
+                  </div>
+
+                  <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
+
+                  {scanImages.length > 0 && (
+                    <button
+                      onClick={() => setScanImages([])}
+                      className="text-xs text-red-500 dark:text-red-400 hover:underline"
+                    >
+                      🗑️ Supprimer les photos
+                    </button>
+                  )}
+
+                  {error && <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg">{error}</div>}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setEtape('formulaire')}
+                      className="flex-1 border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    >
+                      ← Retour
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                      className="flex-2 flex-grow bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50"
+                    >
+                      {submitting ? '🤖 Analyse en cours...' : scanImages.length > 0 ? '✅ Soumettre avec scan' : 'Soumettre sans photo'}
+                    </button>
+                  </div>
+
+                  {scanImages.length === 0 && (
+                    <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+                      ⚠️ Sans photo, l'analyse visuelle ne sera pas disponible
+                    </p>
                   )}
                 </div>
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-gray-800" />
-
-              <div>
-                <p className={sectionTitleClass}>📋 Motif du retour</p>
-                <div className="space-y-3">
-                  <div>
-                    <label className={labelClass}>Raison du retour *</label>
-                    <select value={form.returnReason} onChange={(e) => setForm({ ...form, returnReason: e.target.value })} required className={inputClass}>
-                      <option value="">Sélectionner une raison</option>
-                      {Object.entries(reasonLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Description (optionnel)</label>
-                    <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
-                      className={inputClass} placeholder="Décrivez le problème en détail..." />
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-gray-800" />
-
-              <div>
-                <p className={sectionTitleClass}>👤 Vos informations</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={labelClass}>Wilaya *</label>
-                    <select value={form.wilaya} onChange={(e) => setForm({ ...form, wilaya: e.target.value })} required className={inputClass}>
-                      {WILAYAS.map((w) => <option key={w} value={w}>{w}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Genre</label>
-                    <select value={form.customerGender} onChange={(e) => setForm({ ...form, customerGender: e.target.value })} className={inputClass}>
-                      <option value="Male">Homme</option>
-                      <option value="Female">Femme</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Âge</label>
-                    <input type="number" value={form.customerAge} onChange={(e) => setForm({ ...form, customerAge: e.target.value })}
-                      min="18" max="100" className={inputClass} placeholder="Ex: 35" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-gray-800" />
-
-              <div>
-                <p className={sectionTitleClass}>🚚 Livraison & Paiement</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={labelClass}>Méthode de paiement</label>
-                    <select value={form.paymentMethod} onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })} className={inputClass}>
-                      {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Méthode de livraison</label>
-                    <select value={form.shippingMethod} onChange={(e) => setForm({ ...form, shippingMethod: e.target.value })} className={inputClass}>
-                      {SHIPPING_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <button type="submit" disabled={submitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 mt-2">
-                {submitting ? '🤖 Analyse en cours...' : 'Soumettre la demande'}
-              </button>
-            </form>
+              )}
+            </>
           )}
         </div>
       )}
@@ -446,20 +512,14 @@ export default function RetoursPage() {
       {selectedRetour && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-800">
-
-            {/* Header modal */}
             <div className="bg-gray-900 dark:bg-gray-800 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between sticky top-0">
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Tracabilité de décision</p>
                 <p className="font-semibold text-sm">{selectedRetour.product.nom}</p>
               </div>
-              <button onClick={() => { setSelectedRetour(null); setMlDetail(null) }}
-                className="text-gray-400 hover:text-white text-xl transition">✕</button>
+              <button onClick={() => { setSelectedRetour(null); setMlDetail(null) }} className="text-gray-400 hover:text-white text-xl transition">✕</button>
             </div>
-
             <div className="p-6 space-y-4">
-
-              {/* Statut + Raison */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Statut actuel</p>
@@ -473,46 +533,32 @@ export default function RetoursPage() {
                 </div>
               </div>
 
-              {/* Décision ML */}
               {selectedRetour.mlDecision && (
                 <div>
                   {loadingMlDetail ? (
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center text-gray-400 dark:text-gray-500 text-sm">
-                      🤖 Chargement de l'analyse...
-                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center text-gray-400 text-sm">🤖 Chargement...</div>
                   ) : mlDetail ? (
                     <div className="space-y-3">
-
-                      {/* Résumé données */}
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-                        <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium mb-3">Données analysées</p>
+                        <p className="text-xs uppercase tracking-wider text-gray-400 font-medium mb-3">Données analysées</p>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
                           {[
                             ['Produit', mlDetail.input_summary?.product_category_normalized],
                             ['Prix', mlDetail.input_summary?.price_da?.toFixed(0) + ' DA'],
                             ['Délai', mlDetail.input_summary?.days_to_return + 'j / ' + mlDetail.policy_applied?.return_window_days + 'j'],
                             ['Raison', mlDetail.input_summary?.return_reason],
-                            ['Wilaya', mlDetail.customer_info?.wilaya],
-                            ['Historique', mlDetail.customer_info?.past_returns + ' retour(s)'],
-                            ['Paiement', mlDetail.customer_info?.payment_method],
-                            ['Livraison', mlDetail.customer_info?.shipping_method],
                             ['Fraud Score', mlDetail.input_summary?.fraud_score],
                           ].map(([key, val]) => (
                             <div key={key as string} className="flex justify-between gap-2">
                               <span className="text-gray-500 dark:text-gray-400">{key}</span>
-                              <span className={`font-medium text-right ${key === 'Fraud Score' && Number(val) > 50 ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'}`}>
-                                {val}
-                              </span>
+                              <span className={`font-medium text-right ${key === 'Fraud Score' && Number(val) > 50 ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'}`}>{val}</span>
                             </div>
                           ))}
                         </div>
                       </div>
-
-                      {/* Résolution */}
                       {(() => {
                         const res = resolutionConfig[mlDetail.decision?.resolution] || resolutionConfig.Reject
-                        const probEntries = Object.entries(mlDetail.decision?.probabilities || {})
-                          .sort((a: any, b: any) => b[1] - a[1]) as [string, number][]
+                        const probEntries = Object.entries(mlDetail.decision?.probabilities || {}).sort((a: any, b: any) => b[1] - a[1]) as [string, number][]
                         const maxProb = probEntries[0]?.[1] || 100
                         return (
                           <div className={res.bg + ' rounded-xl p-4'}>
@@ -523,74 +569,31 @@ export default function RetoursPage() {
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Confiance : {mlDetail.decision?.confidence?.toFixed(1)}%</p>
                               </div>
                             </div>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Probabilités</p>
-                            {probEntries.map(([label, value]) => (
-                              <ProbabilityBar key={label} label={label} value={value} maxValue={maxProb} />
-                            ))}
-                            {mlDetail.decision?.partial_refund && (
-                              <div className="mt-3 bg-white/60 dark:bg-gray-900/60 rounded-lg p-3 border border-green-200 dark:border-green-800">
-                                <p className="text-xs font-semibold text-green-700 dark:text-green-400">
-                                  💰 Remboursement partiel : {mlDetail.decision.partial_refund.refund_amount_DA.toFixed(2)} DA ({mlDetail.decision.partial_refund.refund_percentage}%)
-                                </p>
-                              </div>
-                            )}
+                            {probEntries.map(([label, value]) => <ProbabilityBar key={label} label={label} value={value} maxValue={maxProb} />)}
                           </div>
                         )
                       })()}
-
-                      {/* Frais retour */}
                       {mlDetail.decision?.shipping && (() => {
-                        const shipEntries = Object.entries(mlDetail.decision.shipping.probabilities || {})
-                          .sort((a: any, b: any) => b[1] - a[1]) as [string, number][]
+                        const shipEntries = Object.entries(mlDetail.decision.shipping.probabilities || {}).sort((a: any, b: any) => b[1] - a[1]) as [string, number][]
                         const maxShip = shipEntries[0]?.[1] || 100
                         return (
                           <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-                            <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                              {shippingLabels[mlDetail.decision.shipping.responsible] || mlDetail.decision.shipping.responsible}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Confiance : {mlDetail.decision.shipping.confidence?.toFixed(1)}%</p>
-                            {shipEntries.map(([label, value]) => (
-                              <ProbabilityBar key={label} label={label} value={value} maxValue={maxShip} />
-                            ))}
+                            <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{shippingLabels[mlDetail.decision.shipping.responsible]}</p>
+                            <p className="text-xs text-gray-500 mb-3">Confiance : {mlDetail.decision.shipping.confidence?.toFixed(1)}%</p>
+                            {shipEntries.map(([label, value]) => <ProbabilityBar key={label} label={label} value={value} maxValue={maxShip} />)}
                           </div>
                         )
                       })()}
-
-                      {/* Policy override */}
-                      {mlDetail.decision?.policy_override && (
-                        <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-xl p-3">
-                          <p className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 mb-1">ℹ️ Note politique boutique</p>
-                          <p className="text-xs text-yellow-800 dark:text-yellow-300">{mlDetail.decision.policy_override}</p>
-                        </div>
-                      )}
-
-                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-                        Analysé le {new Date(mlDetail.predicted_at).toLocaleString('fr-FR')}
-                      </p>
                     </div>
                   ) : (
-                    /* Fallback sans détail ML */
                     <div className={resolutionConfig[selectedRetour.mlDecision]?.bg + ' rounded-xl p-4'}>
                       <p className={resolutionConfig[selectedRetour.mlDecision]?.text + ' text-sm font-bold mb-2'}>
                         {resolutionConfig[selectedRetour.mlDecision]?.emoji} {selectedRetour.mlDecisionLabel}
                       </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {selectedRetour.mlConfidence && (
-                          <span className="text-xs bg-white/60 dark:bg-gray-900/60 px-2 py-1 rounded border text-gray-700 dark:text-gray-300">
-                            {selectedRetour.mlConfidence.toFixed(1)}% confiance
-                          </span>
-                        )}
-                        {selectedRetour.mlResponsibility && (
-                          <span className="text-xs bg-white/60 dark:bg-gray-900/60 px-2 py-1 rounded border text-gray-700 dark:text-gray-300">
-                            Frais : {selectedRetour.mlResponsibility}
-                          </span>
-                        )}
-                      </div>
                     </div>
                   )}
                 </div>
               )}
-
               <button onClick={() => { setSelectedRetour(null); setMlDetail(null) }}
                 className="w-full border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
                 Fermer

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import FavoriButton from '@/components/client/FavoriButton'
 import AddToCartButton from '@/components/client/AddToCartButton'
+import FavoriIconButton from '@/components/client/FavoriIconButton'
+import CartIconButton from '@/components/client/CartIconButton'
 
 export default async function ProduitDetailPage({
   params,
@@ -16,7 +18,7 @@ export default async function ProduitDetailPage({
     include: { category: true },
   })
 
-  if (!produit) notFound()
+  if (!produit || !produit.actif) notFound()
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -102,7 +104,7 @@ export default async function ProduitDetailPage({
 
 async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: string; produitId: string }) {
   const produits = await prisma.product.findMany({
-    where: { categoryId, NOT: { id: produitId } },
+    where: { categoryId, actif: true, NOT: { id: produitId } },
     take: 4,
     include: { category: true },
   })
@@ -114,12 +116,16 @@ async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: strin
       {produits.map((produit) => (
         <Link key={produit.id} href={`/produits/${produit.id}`}
           className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300">
-          <div className="h-40 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+          <div className="relative h-40 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
             {produit.images[0] ? (
               <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             ) : (
               <span className="text-3xl">📦</span>
             )}
+            <div className="absolute top-2 right-2 flex flex-col gap-2">
+                          <FavoriIconButton produitId={produit.id} />
+                          <CartIconButton produitId={produit.id} stock={produit.stock} />
+                        </div>
           </div>
           <div className="p-3">
             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2">{produit.nom}</h3>

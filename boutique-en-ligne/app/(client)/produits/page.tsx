@@ -1,15 +1,18 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import FavoriIconButton from '@/components/client/FavoriIconButton'
+import CartIconButton from '@/components/client/CartIconButton'
 
 export default async function ProduitsPage({
   searchParams,
 }: {
-  searchParams: { categorie?: string; recherche?: string }
+  searchParams: Promise<{ categorie?: string; recherche?: string }>
 }) {
-  const { categorie, recherche } = searchParams
+  const { categorie, recherche } = await searchParams
 
   const produits = await prisma.product.findMany({
     where: {
+      actif: true,
       ...(categorie ? { categoryId: categorie } : {}),
       ...(recherche ? { nom: { contains: recherche, mode: 'insensitive' } } : {}),
     },
@@ -35,7 +38,6 @@ export default async function ProduitsPage({
 
         <aside className="w-full md:w-64 shrink-0">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 sticky top-20">
-
             <div className="mb-6">
               <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-3">Recherche</h3>
               <form>
@@ -50,7 +52,6 @@ export default async function ProduitsPage({
                 </button>
               </form>
             </div>
-
             <div>
               <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-3">Catégories</h3>
               <div className="space-y-2">
@@ -84,12 +85,18 @@ export default async function ProduitsPage({
               {produits.map((produit) => (
                 <Link key={produit.id} href={`/produits/${produit.id}`}
                   className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300">
-                  <div className="h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+                  {/* Image + icônes superposées */}
+                  <div className="relative h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
                     {produit.images[0] ? (
                       <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <span className="text-4xl">📦</span>
                     )}
+                    {/* Icônes en overlay */}
+                    <div className="absolute top-2 right-2 flex flex-col gap-2">
+                      <FavoriIconButton produitId={produit.id} />
+                      <CartIconButton produitId={produit.id} stock={produit.stock} />
+                    </div>
                   </div>
                   <div className="p-4">
                     <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{produit.category.nom}</p>

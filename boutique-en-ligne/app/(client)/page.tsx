@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import FavoriIconButton from '@/components/client/FavoriIconButton'
+import CartIconButton from '@/components/client/CartIconButton'
 
 export default function HomePage() {
   return (
@@ -115,7 +117,7 @@ export default function HomePage() {
 async function CategoriesSection() {
   const categories = await prisma.category.findMany({
     take: 6,
-    include: { _count: { select: { products: true } } },
+    include: { _count: { select: { products: { where: { actif: true } } } } },
   })
 
   if (categories.length === 0) {
@@ -123,19 +125,19 @@ async function CategoriesSection() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-gray-200 dark:bg-gray-800">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {categories.map((cat) => (
-        <Link key={cat.id} href={`/categories/${cat.id}`}
-          className="group bg-white dark:bg-gray-950 hover:bg-black dark:hover:bg-white p-8 text-center transition-all duration-500">
-          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-800 dark:group-hover:bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-500 overflow-hidden">
-            {cat.image ? (
-              <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover rounded-full" />
-            ) : (
-              <span className="text-gray-400 group-hover:text-gray-300 text-lg transition-colors">◆</span>
-            )}
+        <Link
+          key={cat.id}
+          href={`/categories/${cat.id}`}
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center hover:shadow-md transition hover:border-blue-500 border border-transparent dark:border-gray-700"
+        >
+          {/* Changement : Icône bg-blue-100 -> dark:bg-blue-900/30 */}
+          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span className="text-2xl">🏷️</span>
           </div>
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-700 dark:text-gray-300 group-hover:text-white dark:group-hover:text-gray-900 transition-colors duration-500">{cat.nom}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-600 mt-1">{cat._count.products} produits</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{cat.nom}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{cat._count.products} produits</p>
         </Link>
       ))}
     </div>
@@ -144,6 +146,7 @@ async function CategoriesSection() {
 
 async function ProduitsSection() {
   const produits = await prisma.product.findMany({
+    where: { actif: true },
     take: 8,
     orderBy: { createdAt: 'desc' },
     include: { category: true },
@@ -156,17 +159,38 @@ async function ProduitsSection() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {produits.map((produit) => (
-        <Link key={produit.id} href={`/produits/${produit.id}`} className="group">
-          <div className="bg-gray-100 dark:bg-gray-800 overflow-hidden aspect-square flex items-center justify-center mb-4 transition-colors duration-300">
+        <Link
+          key={produit.id}
+          href={`/produits/${produit.id}`}
+          className="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden hover:shadow-md transition border border-transparent dark:border-gray-700"
+        >
+          {/* Changement : fond d'image bg-gray-200 -> dark:bg-gray-700 */}
+          <div className="relative h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
             {produit.images[0] ? (
-              <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              <img
+                src={produit.images[0]}
+                alt={produit.nom}
+                className="w-full h-full object-cover"
+              />
             ) : (
-              <span className="text-gray-300 dark:text-gray-600 text-4xl">◆</span>
+              <span className="text-4xl">📦</span>
             )}
+            <div className="absolute top-2 right-2 flex flex-col gap-2">
+              <FavoriIconButton produitId={produit.id} />
+              <CartIconButton produitId={produit.id} stock={produit.stock} />
+            </div>
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{produit.category.nom}</p>
-          <h3 className="text-sm text-gray-800 dark:text-gray-200 mb-2 line-clamp-1 font-light">{produit.nom}</h3>
-          <p className="text-black dark:text-white font-medium text-sm">{produit.prix.toFixed(2)} DA</p>
+          <div className="p-4">
+            <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{produit.category.nom}</p>
+            {/* Changement : text-gray-800 -> dark:text-white */}
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 line-clamp-2">
+              {produit.nom}
+            </h3>
+            {/* Changement : text-blue-600 -> dark:text-blue-400 */}
+            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+              {produit.prix.toFixed(2)} DA
+            </p>
+          </div>
         </Link>
       ))}
     </div>

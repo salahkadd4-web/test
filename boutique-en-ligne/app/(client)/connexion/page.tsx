@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 function ConnexionContent() {
   const router = useRouter()
@@ -47,12 +48,27 @@ function ConnexionContent() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex transition-colors duration-300">
 
-      <div className="hidden lg:flex w-1/2 bg-black dark:bg-gray-900 items-center justify-center p-12 border-r border-gray-800">
-        <div className="text-center text-white">
-          <h1 className="text-5xl font-extralight tracking-[0.3em] uppercase mb-4">Boutique</h1>
-          <div className="w-12 h-px bg-gray-600 mx-auto my-6" />
-          <p className="text-gray-400 font-light text-sm tracking-wider">L'excellence à portée de main</p>
-        </div>
+      <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black dark:bg-gray-900 items-center justify-center p-12 border-r border-gray-800">
+          
+          {/* LOGO EN ARRIÈRE-PLAN (Pleine taille) */}
+          <div className="absolute z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-50%,black_10%)]">
+                  <Image 
+                    src="/logo_noir.png" 
+                    alt="" 
+                    width={750} // Grande taille
+                    height={750}
+                    className="object-contain invert opacity-30 scale-150" 
+                    priority
+                  />
+          </div> 
+
+          {/* CONTENU TEXTUEL (z-10 pour être au-dessus du logo) */}
+          <div className="relative z-10 text-center text-white">
+            <div className="w-12 h-px bg-gray-600 mx-auto my-6" />
+            <p className="text-white font-light text-sm tracking-wider drop-shadow-md">
+              L'excellence à portée de main
+            </p>
+          </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-8 overflow-y-auto">

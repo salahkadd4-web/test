@@ -1,34 +1,64 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import FavoriIconButton from '@/components/client/FavoriIconButton'
+import CartIconButton from '@/components/client/CartIconButton'
+import Image from 'next/image'
+
 
 export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Bienvenue sur notre Boutique
-          </h1>
-          <p className="text-xl text-blue-100 mb-8">
-            Découvrez nos produits de qualité à des prix imbattables
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/produits"
-              className="bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg hover:bg-blue-50 transition"
-            >
-              Voir les produits
-            </Link>
-            <Link
-              href="/categories"
-              className="border-2 border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-white hover:text-blue-600 transition"
-            >
-              Parcourir les catégories
-            </Link>
-          </div>
-        </div>
-      </section>
+      <section className="relative overflow-hidden bg-[#0a0a0a] text-white py-70 px-4 border-b border-gray-800/50">
+  
+  {/* LOGO EN ARRIÈRE-PLAN (Plus visible mais masqué au centre) */}
+  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+    {/* Conteneur pour le masque radial */}
+    <div className="relative z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-20%,black_50%)]">
+        <Image 
+          src="/logo_noir.png" 
+          alt="" 
+          width={780} // Grande taille
+          height={780}
+          className="object-contain invert opacity-30 scale-150" 
+          priority
+        />
+    </div>         
+  </div>
+
+  {/* CONTENU principal (z-index pour passer au-dessus) */}
+  <div className="relative z-10 max-w-5xl mx-auto text-center">
+    
+
+
+
+    
+    {/* Description avec ombre portée subtile */}
+    <p className="text-lg md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)]">
+      Première boutique online en Algérie spécialisée en importation 
+    </p>
+
+    {/* Boutons d'action */}
+    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+      <Link
+        href="/produits"
+        className="w-full sm:w-auto bg-white text-black font-bold px-12 py-5 rounded-full hover:bg-gray-200 shadow-[0_5px_25px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-105 active:scale-95"
+      >
+        Explorer la Boutique
+      </Link>
+      
+      <Link
+        href="/categories"
+        className="w-full sm:w-auto border-2 border-gray-700 text-white font-semibold px-12 py-5 rounded-full hover:bg-white/5 transition-all duration-300 backdrop-blur-sm"
+      >
+        Voir les Catégories
+      </Link>
+    </div>
+  </div>
+
+  {/* Ligne de séparation lumineuse en bas */}
+  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
+</section>
 
       {/* Catégories Section */}
       <section className="max-w-6xl mx-auto px-4 py-16">
@@ -39,7 +69,7 @@ export default function HomePage() {
       </section>
 
       {/* Produits récents */}
-      <section className="bg-white py-16 px-4">
+      <section className="bg-white dark:bg-gray-950 py-16 px-4 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
             Nouveaux Produits
@@ -54,7 +84,7 @@ export default function HomePage() {
 async function CategoriesSection() {
   const categories = await prisma.category.findMany({
     take: 6,
-    include: { _count: { select: { products: true } } },
+    include: { _count: { select: { products: { where: { actif: true } } } } },
   })
 
   if (categories.length === 0) {
@@ -66,18 +96,42 @@ async function CategoriesSection() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    /* Utilisation du même Grid que votre page catégories */
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {categories.map((cat) => (
-        <Link
-          key={cat.id}
+        <Link 
+          key={cat.id} 
           href={`/categories/${cat.id}`}
-          className="bg-white rounded-xl shadow-sm p-4 text-center hover:shadow-md transition hover:border-blue-500 border border-transparent"
+          className="group bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-md border border-transparent dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 p-6 flex flex-col items-center text-center gap-3 transition-all duration-300"
         >
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">🏷️</span>
+          {/* Cercle d'image ou icône */}
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden">
+            {cat.image ? (
+              <img 
+                src={cat.image} 
+                alt={cat.nom} 
+                className="w-full h-full object-cover rounded-full" 
+              />
+            ) : (
+              <span className="text-3xl">🏷️</span>
+            )}
           </div>
-          <p className="text-sm font-medium text-gray-700">{cat.nom}</p>
-          <p className="text-xs text-gray-400">{cat._count.products} produits</p>
+
+          {/* Textes */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              {cat.nom}
+            </h2>
+            {/* On peut garder une description courte (1 ligne) pour l'accueil */}
+            {cat.description && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                {cat.description}
+              </p>
+            )}
+            <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 font-medium">
+              {cat._count.products} produit{cat._count.products > 1 ? 's' : ''}
+            </p>
+          </div>
         </Link>
       ))}
     </div>
@@ -86,6 +140,7 @@ async function CategoriesSection() {
 
 async function ProduitsSection() {
   const produits = await prisma.product.findMany({
+    where: { actif: true },
     take: 8,
     orderBy: { createdAt: 'desc' },
     include: { category: true },
@@ -93,38 +148,55 @@ async function ProduitsSection() {
 
   if (produits.length === 0) {
     return (
-      <p className="text-center text-gray-500">
-        Aucun produit disponible pour le moment.
-      </p>
+      <div className="text-center py-20 text-gray-400 dark:text-gray-500">
+        <p className="text-5xl mb-4">📦</p>
+        <p className="text-lg">Aucun produit disponible pour le moment.</p>
+      </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    /* Grid 2 colonnes sur mobile, 4 sur desktop pour l'accueil */
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {produits.map((produit) => (
-        <Link
-          key={produit.id}
+        <Link 
+          key={produit.id} 
           href={`/produits/${produit.id}`}
-          className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition"
+          className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300"
         >
-          <div className="h-48 bg-gray-200 flex items-center justify-center">
+          {/* Image + icônes superposées */}
+          <div className="relative h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
             {produit.images[0] ? (
-              <img
-                src={produit.images[0]}
-                alt={produit.nom}
-                className="w-full h-full object-cover"
+              <img 
+                src={produit.images[0]} 
+                alt={produit.nom} 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
               />
             ) : (
               <span className="text-4xl">📦</span>
             )}
+            
+            {/* Icônes en overlay (Favoris et Panier) */}
+            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
+              <FavoriIconButton produitId={produit.id} />
+              <CartIconButton produitId={produit.id} stock={produit.stock} />
+            </div>
           </div>
+
+          {/* Détails du produit */}
           <div className="p-4">
-            <p className="text-xs text-blue-600 mb-1">{produit.category.nom}</p>
-            <h3 className="text-sm font-semibold text-gray-800 mb-2 line-clamp-2">
+            <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{produit.category.nom}</p>
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2 line-clamp-2 min-h-[40px]">
               {produit.nom}
             </h3>
-            <p className="text-lg font-bold text-blue-600">
+            
+            <p className="text-lg font-bold text-gray-900 dark:text-white">
               {produit.prix.toFixed(2)} DA
+            </p>
+
+            {/* État du stock */}
+            <p className={`text-[10px] uppercase tracking-wider mt-2 font-bold ${produit.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+              {produit.stock > 0 ? `● En stock` : '○ Rupture'}
             </p>
           </div>
         </Link>

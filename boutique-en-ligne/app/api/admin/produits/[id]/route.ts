@@ -19,26 +19,30 @@ export async function PUT(
     const { id } = await params
     const { nom, description, prix, stock, images, categoryId } = await req.json()
 
+    const newStock = parseInt(stock)
+
     const produit = await prisma.product.update({
       where: { id },
       data: {
         nom,
         description: description || null,
         prix: parseFloat(prix),
-        stock: parseInt(stock),
+        stock: newStock,
         images: images || [],
         categoryId,
+        actif: newStock > 0,
       },
     })
 
     return NextResponse.json(produit)
-  } catch {
+  } catch (error) {
+    console.error('Erreur modification produit:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
-// DELETE — Supprimer un produit
-export async function DELETE(
+// PATCH — Activer / Désactiver un produit
+export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -47,11 +51,16 @@ export async function DELETE(
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { id } = await params
+    const { actif } = await req.json()
 
-    await prisma.product.delete({ where: { id } })
+    const produit = await prisma.product.update({
+      where: { id },
+      data: { actif },
+    })
 
-    return NextResponse.json({ message: 'Produit supprimé' })
-  } catch {
+    return NextResponse.json(produit)
+  } catch (error) {
+    console.error('Erreur changement statut produit:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

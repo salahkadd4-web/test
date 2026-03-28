@@ -4,7 +4,10 @@ import { prisma } from '@/lib/prisma'
 export default async function CategoriesPage() {
   const categories = await prisma.category.findMany({
     orderBy: { nom: 'asc' },
-    include: { _count: { select: { products: true } } },
+    include: {
+      products: { where: { actif: true }, orderBy: { createdAt: 'desc' } },
+      _count: { select: { products: { where: { actif: true } } } },
+    },
   })
 
   return (

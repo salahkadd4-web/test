@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image';
 
 export default function Header() {
   const { data: session } = useSession()
@@ -63,8 +64,24 @@ export default function Header() {
               {menuOpen ? '✕' : '☰'}
             </button>
           {/* Logo */}
-          <Link href="/" className="text-lg font-light tracking-[0.4em] uppercase text-black dark:text-white shrink-0">
-            Boutique
+          <Link href="/" className="shrink-0">
+            <span className="flex items-center gap-x-2 text-lg font-light tracking-[0.4em] uppercase text-black dark:text-white">
+              {/* Première partie du texte */}
+              <span>Caba</span>
+
+              {/* Le Logo - Version vectorielle (.svg) recommandée pour la netteté */}
+              <Image
+                src="/logo_noir.png" // Remplacez par le chemin réel de votre fichier
+                alt="Caba Store Logo"
+                width={50}  // Ajustez la largeur pour qu'elle corresponde à la hauteur du texte (ex: ~2x la taille de la police)
+                height={50} // Ajustez la hauteur proportionnellement
+                className="h-8 w-auto block dark:invert" // H-8 (32px) est une bonne base. 'dark:invert' inverse les couleurs pour le mode sombre si votre logo est noir.
+                priority // Optionnel : charge l'image en priorité pour le LCP
+              />
+
+              {/* Deuxième partie du texte */}
+              <span className="-ml-1">Store</span> {/* -ml-1 compense légèrement l'espace après l'image si nécessaire */}
+            </span>
           </Link>
 
           {/* Nav + Recherche — partie gauche/centre */}
