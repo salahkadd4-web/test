@@ -43,11 +43,11 @@ export type UserMinAggregateOutputType = {
   motDePasse: string | null
   role: $Enums.Role | null
   avatar: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
   age: number | null
   genre: $Enums.Genre | null
   wilaya: string | null
-  createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -59,11 +59,11 @@ export type UserMaxAggregateOutputType = {
   motDePasse: string | null
   role: $Enums.Role | null
   avatar: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
   age: number | null
   genre: $Enums.Genre | null
   wilaya: string | null
-  createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -75,11 +75,11 @@ export type UserCountAggregateOutputType = {
   motDePasse: number
   role: number
   avatar: number
+  createdAt: number
+  updatedAt: number
   age: number
   genre: number
   wilaya: number
-  createdAt: number
-  updatedAt: number
   _all: number
 }
 
@@ -101,11 +101,11 @@ export type UserMinAggregateInputType = {
   motDePasse?: true
   role?: true
   avatar?: true
+  createdAt?: true
+  updatedAt?: true
   age?: true
   genre?: true
   wilaya?: true
-  createdAt?: true
-  updatedAt?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -117,11 +117,11 @@ export type UserMaxAggregateInputType = {
   motDePasse?: true
   role?: true
   avatar?: true
+  createdAt?: true
+  updatedAt?: true
   age?: true
   genre?: true
   wilaya?: true
-  createdAt?: true
-  updatedAt?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -133,11 +133,11 @@ export type UserCountAggregateInputType = {
   motDePasse?: true
   role?: true
   avatar?: true
+  createdAt?: true
+  updatedAt?: true
   age?: true
   genre?: true
   wilaya?: true
-  createdAt?: true
-  updatedAt?: true
   _all?: true
 }
 
@@ -236,11 +236,11 @@ export type UserGroupByOutputType = {
   motDePasse: string | null
   role: $Enums.Role
   avatar: string | null
+  createdAt: Date
+  updatedAt: Date
   age: number | null
   genre: $Enums.Genre | null
   wilaya: string | null
-  createdAt: Date
-  updatedAt: Date
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -275,15 +275,15 @@ export type UserWhereInput = {
   motDePasse?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   age?: Prisma.IntNullableFilter<"User"> | number | null
   genre?: Prisma.EnumGenreNullableFilter<"User"> | $Enums.Genre | null
   wilaya?: Prisma.StringNullableFilter<"User"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   cart?: Prisma.XOR<Prisma.CartNullableScalarRelationFilter, Prisma.CartWhereInput> | null
   favorites?: Prisma.FavoriteListRelationFilter
-  orders?: Prisma.OrderListRelationFilter
   messages?: Prisma.MessageListRelationFilter
+  orders?: Prisma.OrderListRelationFilter
   resetTokens?: Prisma.ResetTokenListRelationFilter
   returns?: Prisma.ReturnListRelationFilter
 }
@@ -297,15 +297,15 @@ export type UserOrderByWithRelationInput = {
   motDePasse?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   age?: Prisma.SortOrderInput | Prisma.SortOrder
   genre?: Prisma.SortOrderInput | Prisma.SortOrder
   wilaya?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
   cart?: Prisma.CartOrderByWithRelationInput
   favorites?: Prisma.FavoriteOrderByRelationAggregateInput
-  orders?: Prisma.OrderOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
+  orders?: Prisma.OrderOrderByRelationAggregateInput
   resetTokens?: Prisma.ResetTokenOrderByRelationAggregateInput
   returns?: Prisma.ReturnOrderByRelationAggregateInput
 }
@@ -322,15 +322,15 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   motDePasse?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   age?: Prisma.IntNullableFilter<"User"> | number | null
   genre?: Prisma.EnumGenreNullableFilter<"User"> | $Enums.Genre | null
   wilaya?: Prisma.StringNullableFilter<"User"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   cart?: Prisma.XOR<Prisma.CartNullableScalarRelationFilter, Prisma.CartWhereInput> | null
   favorites?: Prisma.FavoriteListRelationFilter
-  orders?: Prisma.OrderListRelationFilter
   messages?: Prisma.MessageListRelationFilter
+  orders?: Prisma.OrderListRelationFilter
   resetTokens?: Prisma.ResetTokenListRelationFilter
   returns?: Prisma.ReturnListRelationFilter
 }, "id" | "email" | "telephone">
@@ -344,11 +344,11 @@ export type UserOrderByWithAggregationInput = {
   motDePasse?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   age?: Prisma.SortOrderInput | Prisma.SortOrder
   genre?: Prisma.SortOrderInput | Prisma.SortOrder
   wilaya?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -368,11 +368,11 @@ export type UserScalarWhereWithAggregatesInput = {
   motDePasse?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   avatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   age?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   genre?: Prisma.EnumGenreNullableWithAggregatesFilter<"User"> | $Enums.Genre | null
   wilaya?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
 export type UserCreateInput = {
@@ -384,15 +384,15 @@ export type UserCreateInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnCreateNestedManyWithoutUserInput
 }
@@ -406,15 +406,15 @@ export type UserUncheckedCreateInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnUncheckedCreateNestedManyWithoutUserInput
 }
@@ -428,15 +428,15 @@ export type UserUpdateInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUpdateManyWithoutUserNestedInput
 }
@@ -450,15 +450,15 @@ export type UserUncheckedUpdateInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -472,11 +472,11 @@ export type UserCreateManyInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type UserUpdateManyMutationInput = {
@@ -488,11 +488,11 @@ export type UserUpdateManyMutationInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -504,11 +504,11 @@ export type UserUncheckedUpdateManyInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -520,11 +520,11 @@ export type UserCountOrderByAggregateInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   age?: Prisma.SortOrder
   genre?: Prisma.SortOrder
   wilaya?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -540,11 +540,11 @@ export type UserMaxOrderByAggregateInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   age?: Prisma.SortOrder
   genre?: Prisma.SortOrder
   wilaya?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -556,11 +556,11 @@ export type UserMinOrderByAggregateInput = {
   motDePasse?: Prisma.SortOrder
   role?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   age?: Prisma.SortOrder
   genre?: Prisma.SortOrder
   wilaya?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -584,6 +584,10 @@ export type EnumRoleFieldUpdateOperationsInput = {
   set?: $Enums.Role
 }
 
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
+}
+
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -594,10 +598,6 @@ export type NullableIntFieldUpdateOperationsInput = {
 
 export type NullableEnumGenreFieldUpdateOperationsInput = {
   set?: $Enums.Genre | null
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type UserCreateNestedOneWithoutCartInput = {
@@ -693,14 +693,14 @@ export type UserCreateWithoutCartInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnCreateNestedManyWithoutUserInput
 }
@@ -714,14 +714,14 @@ export type UserUncheckedCreateWithoutCartInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnUncheckedCreateNestedManyWithoutUserInput
 }
@@ -751,14 +751,14 @@ export type UserUpdateWithoutCartInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUpdateManyWithoutUserNestedInput
 }
@@ -772,14 +772,14 @@ export type UserUncheckedUpdateWithoutCartInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -793,14 +793,14 @@ export type UserCreateWithoutFavoritesInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
-  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnCreateNestedManyWithoutUserInput
 }
@@ -814,14 +814,14 @@ export type UserUncheckedCreateWithoutFavoritesInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
-  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnUncheckedCreateNestedManyWithoutUserInput
 }
@@ -851,14 +851,14 @@ export type UserUpdateWithoutFavoritesInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
-  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUpdateManyWithoutUserNestedInput
 }
@@ -872,14 +872,14 @@ export type UserUncheckedUpdateWithoutFavoritesInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
-  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -893,11 +893,11 @@ export type UserCreateWithoutOrdersInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageCreateNestedManyWithoutUserInput
@@ -914,11 +914,11 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutUserInput
@@ -951,11 +951,11 @@ export type UserUpdateWithoutOrdersInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUpdateManyWithoutUserNestedInput
@@ -972,11 +972,11 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutUserNestedInput
@@ -993,11 +993,11 @@ export type UserCreateWithoutMessagesInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
@@ -1014,11 +1014,11 @@ export type UserUncheckedCreateWithoutMessagesInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
@@ -1051,11 +1051,11 @@ export type UserUpdateWithoutMessagesInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
@@ -1072,11 +1072,11 @@ export type UserUncheckedUpdateWithoutMessagesInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
@@ -1093,15 +1093,15 @@ export type UserCreateWithoutResetTokensInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnCreateNestedManyWithoutUserInput
 }
 
@@ -1114,15 +1114,15 @@ export type UserUncheckedCreateWithoutResetTokensInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   returns?: Prisma.ReturnUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1151,15 +1151,15 @@ export type UserUpdateWithoutResetTokensInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUpdateManyWithoutUserNestedInput
 }
 
@@ -1172,15 +1172,15 @@ export type UserUncheckedUpdateWithoutResetTokensInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   returns?: Prisma.ReturnUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1193,15 +1193,15 @@ export type UserCreateWithoutReturnsInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
 }
 
@@ -1214,15 +1214,15 @@ export type UserUncheckedCreateWithoutReturnsInput = {
   motDePasse?: string | null
   role?: $Enums.Role
   avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   age?: number | null
   genre?: $Enums.Genre | null
   wilaya?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   cart?: Prisma.CartUncheckedCreateNestedOneWithoutUserInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
-  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1251,15 +1251,15 @@ export type UserUpdateWithoutReturnsInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
 }
 
@@ -1272,15 +1272,15 @@ export type UserUncheckedUpdateWithoutReturnsInput = {
   motDePasse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   genre?: Prisma.NullableEnumGenreFieldUpdateOperationsInput | $Enums.Genre | null
   wilaya?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cart?: Prisma.CartUncheckedUpdateOneWithoutUserNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
-  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1291,16 +1291,16 @@ export type UserUncheckedUpdateWithoutReturnsInput = {
 
 export type UserCountOutputType = {
   favorites: number
-  orders: number
   messages: number
+  orders: number
   resetTokens: number
   returns: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   favorites?: boolean | UserCountOutputTypeCountFavoritesArgs
-  orders?: boolean | UserCountOutputTypeCountOrdersArgs
   messages?: boolean | UserCountOutputTypeCountMessagesArgs
+  orders?: boolean | UserCountOutputTypeCountOrdersArgs
   resetTokens?: boolean | UserCountOutputTypeCountResetTokensArgs
   returns?: boolean | UserCountOutputTypeCountReturnsArgs
 }
@@ -1325,15 +1325,15 @@ export type UserCountOutputTypeCountFavoritesArgs<ExtArgs extends runtime.Types.
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.OrderWhereInput
+export type UserCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MessageWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MessageWhereInput
+export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderWhereInput
 }
 
 /**
@@ -1360,15 +1360,15 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   age?: boolean
   genre?: boolean
   wilaya?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
   cart?: boolean | Prisma.User$cartArgs<ExtArgs>
   favorites?: boolean | Prisma.User$favoritesArgs<ExtArgs>
-  orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
+  orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   resetTokens?: boolean | Prisma.User$resetTokensArgs<ExtArgs>
   returns?: boolean | Prisma.User$returnsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1383,11 +1383,11 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   age?: boolean
   genre?: boolean
   wilaya?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1399,11 +1399,11 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   age?: boolean
   genre?: boolean
   wilaya?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -1415,19 +1415,19 @@ export type UserSelectScalar = {
   motDePasse?: boolean
   role?: boolean
   avatar?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   age?: boolean
   genre?: boolean
   wilaya?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prenom" | "email" | "telephone" | "motDePasse" | "role" | "avatar" | "age" | "genre" | "wilaya" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prenom" | "email" | "telephone" | "motDePasse" | "role" | "avatar" | "createdAt" | "updatedAt" | "age" | "genre" | "wilaya", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cart?: boolean | Prisma.User$cartArgs<ExtArgs>
   favorites?: boolean | Prisma.User$favoritesArgs<ExtArgs>
-  orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
+  orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   resetTokens?: boolean | Prisma.User$resetTokensArgs<ExtArgs>
   returns?: boolean | Prisma.User$returnsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1440,8 +1440,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     cart: Prisma.$CartPayload<ExtArgs> | null
     favorites: Prisma.$FavoritePayload<ExtArgs>[]
-    orders: Prisma.$OrderPayload<ExtArgs>[]
     messages: Prisma.$MessagePayload<ExtArgs>[]
+    orders: Prisma.$OrderPayload<ExtArgs>[]
     resetTokens: Prisma.$ResetTokenPayload<ExtArgs>[]
     returns: Prisma.$ReturnPayload<ExtArgs>[]
   }
@@ -1454,11 +1454,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     motDePasse: string | null
     role: $Enums.Role
     avatar: string | null
+    createdAt: Date
+    updatedAt: Date
     age: number | null
     genre: $Enums.Genre | null
     wilaya: string | null
-    createdAt: Date
-    updatedAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1855,8 +1855,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   cart<T extends Prisma.User$cartArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cartArgs<ExtArgs>>): Prisma.Prisma__CartClient<runtime.Types.Result.GetResult<Prisma.$CartPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   favorites<T extends Prisma.User$favoritesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FavoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messages<T extends Prisma.User$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   resetTokens<T extends Prisma.User$resetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   returns<T extends Prisma.User$returnsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1896,11 +1896,11 @@ export interface UserFieldRefs {
   readonly motDePasse: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly avatar: Prisma.FieldRef<"User", 'String'>
+  readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly age: Prisma.FieldRef<"User", 'Int'>
   readonly genre: Prisma.FieldRef<"User", 'Genre'>
   readonly wilaya: Prisma.FieldRef<"User", 'String'>
-  readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
-  readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 
@@ -2337,30 +2337,6 @@ export type User$favoritesArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.orders
- */
-export type User$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Order
-   */
-  select?: Prisma.OrderSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Order
-   */
-  omit?: Prisma.OrderOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.OrderInclude<ExtArgs> | null
-  where?: Prisma.OrderWhereInput
-  orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[]
-  cursor?: Prisma.OrderWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
-}
-
-/**
  * User.messages
  */
 export type User$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2382,6 +2358,30 @@ export type User$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
+}
+
+/**
+ * User.orders
+ */
+export type User$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Order
+   */
+  select?: Prisma.OrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Order
+   */
+  omit?: Prisma.OrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderInclude<ExtArgs> | null
+  where?: Prisma.OrderWhereInput
+  orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[]
+  cursor?: Prisma.OrderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
 }
 
 /**

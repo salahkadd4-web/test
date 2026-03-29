@@ -293,8 +293,8 @@ export type ReturnWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type ReturnOrderByWithRelationInput = {
@@ -313,8 +313,8 @@ export type ReturnOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
-  user?: Prisma.UserOrderByWithRelationInput
   product?: Prisma.ProductOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type ReturnWhereUniqueInput = Prisma.AtLeast<{
@@ -336,8 +336,8 @@ export type ReturnWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
 export type ReturnOrderByWithAggregationInput = {
@@ -395,8 +395,8 @@ export type ReturnCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutReturnsInput
-  user: Prisma.UserCreateNestedOneWithoutReturnsInput
   product: Prisma.ProductCreateNestedOneWithoutReturnsInput
+  user: Prisma.UserCreateNestedOneWithoutReturnsInput
 }
 
 export type ReturnUncheckedCreateInput = {
@@ -429,8 +429,8 @@ export type ReturnUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutReturnsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutReturnsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutReturnsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutReturnsNestedInput
 }
 
 export type ReturnUncheckedUpdateInput = {
@@ -859,8 +859,8 @@ export type ReturnCreateWithoutOrderInput = {
   mlDecisionLabel?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutReturnsInput
   product: Prisma.ProductCreateNestedOneWithoutReturnsInput
+  user: Prisma.UserCreateNestedOneWithoutReturnsInput
 }
 
 export type ReturnUncheckedCreateWithoutOrderInput = {
@@ -1061,8 +1061,8 @@ export type ReturnUpdateWithoutOrderInput = {
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutReturnsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutReturnsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutReturnsNestedInput
 }
 
 export type ReturnUncheckedUpdateWithoutOrderInput = {
@@ -1115,8 +1115,8 @@ export type ReturnSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdAt?: boolean
   updatedAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["return"]>
 
 export type ReturnSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1135,8 +1135,8 @@ export type ReturnSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   createdAt?: boolean
   updatedAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["return"]>
 
 export type ReturnSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1155,8 +1155,8 @@ export type ReturnSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   createdAt?: boolean
   updatedAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["return"]>
 
 export type ReturnSelectScalar = {
@@ -1179,26 +1179,26 @@ export type ReturnSelectScalar = {
 export type ReturnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "userId" | "productId" | "returnReason" | "returnStatus" | "daysToReturn" | "description" | "mlDecision" | "mlConfidence" | "mlResponsibility" | "mlDecisionLabel" | "createdAt" | "updatedAt", ExtArgs["result"]["return"]>
 export type ReturnInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type ReturnIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type ReturnIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $ReturnPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Return"
   objects: {
     order: Prisma.$OrderPayload<ExtArgs>
-    user: Prisma.$UserPayload<ExtArgs>
     product: Prisma.$ProductPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1610,8 +1610,8 @@ readonly fields: ReturnFieldRefs;
 export interface Prisma__ReturnClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   order<T extends Prisma.OrderDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrderDefaultArgs<ExtArgs>>): Prisma.Prisma__OrderClient<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

@@ -174,8 +174,8 @@ export type FavoriteWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Favorite"> | Date | string
   userId?: Prisma.StringFilter<"Favorite"> | string
   productId?: Prisma.StringFilter<"Favorite"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type FavoriteOrderByWithRelationInput = {
@@ -183,8 +183,8 @@ export type FavoriteOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   product?: Prisma.ProductOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type FavoriteWhereUniqueInput = Prisma.AtLeast<{
@@ -196,8 +196,8 @@ export type FavoriteWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Favorite"> | Date | string
   userId?: Prisma.StringFilter<"Favorite"> | string
   productId?: Prisma.StringFilter<"Favorite"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_productId">
 
 export type FavoriteOrderByWithAggregationInput = {
@@ -223,8 +223,8 @@ export type FavoriteScalarWhereWithAggregatesInput = {
 export type FavoriteCreateInput = {
   id?: string
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutFavoritesInput
   product: Prisma.ProductCreateNestedOneWithoutFavoritesInput
+  user: Prisma.UserCreateNestedOneWithoutFavoritesInput
 }
 
 export type FavoriteUncheckedCreateInput = {
@@ -237,8 +237,8 @@ export type FavoriteUncheckedCreateInput = {
 export type FavoriteUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutFavoritesNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutFavoritesNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutFavoritesNestedInput
 }
 
 export type FavoriteUncheckedUpdateInput = {
@@ -528,8 +528,8 @@ export type FavoriteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdAt?: boolean
   userId?: boolean
   productId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["favorite"]>
 
 export type FavoriteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -537,8 +537,8 @@ export type FavoriteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   createdAt?: boolean
   userId?: boolean
   productId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["favorite"]>
 
 export type FavoriteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -546,8 +546,8 @@ export type FavoriteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   createdAt?: boolean
   userId?: boolean
   productId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["favorite"]>
 
 export type FavoriteSelectScalar = {
@@ -559,23 +559,23 @@ export type FavoriteSelectScalar = {
 
 export type FavoriteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "userId" | "productId", ExtArgs["result"]["favorite"]>
 export type FavoriteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type FavoriteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type FavoriteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $FavoritePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Favorite"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     product: Prisma.$ProductPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -976,8 +976,8 @@ readonly fields: FavoriteFieldRefs;
  */
 export interface Prisma__FavoriteClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

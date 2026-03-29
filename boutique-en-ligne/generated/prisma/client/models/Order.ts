@@ -41,12 +41,12 @@ export type OrderMinAggregateOutputType = {
   adresse: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  userId: string | null
   scan1Done: boolean | null
   scan1Result: string | null
   scan1ShippingAllowed: boolean | null
   scan2Done: boolean | null
   scan2Result: string | null
-  userId: string | null
 }
 
 export type OrderMaxAggregateOutputType = {
@@ -56,12 +56,12 @@ export type OrderMaxAggregateOutputType = {
   adresse: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  userId: string | null
   scan1Done: boolean | null
   scan1Result: string | null
   scan1ShippingAllowed: boolean | null
   scan2Done: boolean | null
   scan2Result: string | null
-  userId: string | null
 }
 
 export type OrderCountAggregateOutputType = {
@@ -71,12 +71,12 @@ export type OrderCountAggregateOutputType = {
   adresse: number
   createdAt: number
   updatedAt: number
+  userId: number
   scan1Done: number
   scan1Result: number
   scan1ShippingAllowed: number
   scan2Done: number
   scan2Result: number
-  userId: number
   _all: number
 }
 
@@ -96,12 +96,12 @@ export type OrderMinAggregateInputType = {
   adresse?: true
   createdAt?: true
   updatedAt?: true
+  userId?: true
   scan1Done?: true
   scan1Result?: true
   scan1ShippingAllowed?: true
   scan2Done?: true
   scan2Result?: true
-  userId?: true
 }
 
 export type OrderMaxAggregateInputType = {
@@ -111,12 +111,12 @@ export type OrderMaxAggregateInputType = {
   adresse?: true
   createdAt?: true
   updatedAt?: true
+  userId?: true
   scan1Done?: true
   scan1Result?: true
   scan1ShippingAllowed?: true
   scan2Done?: true
   scan2Result?: true
-  userId?: true
 }
 
 export type OrderCountAggregateInputType = {
@@ -126,12 +126,12 @@ export type OrderCountAggregateInputType = {
   adresse?: true
   createdAt?: true
   updatedAt?: true
+  userId?: true
   scan1Done?: true
   scan1Result?: true
   scan1ShippingAllowed?: true
   scan2Done?: true
   scan2Result?: true
-  userId?: true
   _all?: true
 }
 
@@ -228,12 +228,12 @@ export type OrderGroupByOutputType = {
   adresse: string
   createdAt: Date
   updatedAt: Date
+  userId: string
   scan1Done: boolean
   scan1Result: string | null
   scan1ShippingAllowed: boolean
   scan2Done: boolean
   scan2Result: string | null
-  userId: string
   _count: OrderCountAggregateOutputType | null
   _avg: OrderAvgAggregateOutputType | null
   _sum: OrderSumAggregateOutputType | null
@@ -266,12 +266,12 @@ export type OrderWhereInput = {
   adresse?: Prisma.StringFilter<"Order"> | string
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  userId?: Prisma.StringFilter<"Order"> | string
   scan1Done?: Prisma.BoolFilter<"Order"> | boolean
   scan1Result?: Prisma.StringNullableFilter<"Order"> | string | null
   scan1ShippingAllowed?: Prisma.BoolFilter<"Order"> | boolean
   scan2Done?: Prisma.BoolFilter<"Order"> | boolean
   scan2Result?: Prisma.StringNullableFilter<"Order"> | string | null
-  userId?: Prisma.StringFilter<"Order"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   items?: Prisma.OrderItemListRelationFilter
   returns?: Prisma.ReturnListRelationFilter
@@ -284,12 +284,12 @@ export type OrderOrderByWithRelationInput = {
   adresse?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   scan1Done?: Prisma.SortOrder
   scan1Result?: Prisma.SortOrderInput | Prisma.SortOrder
   scan1ShippingAllowed?: Prisma.SortOrder
   scan2Done?: Prisma.SortOrder
   scan2Result?: Prisma.SortOrderInput | Prisma.SortOrder
-  userId?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   items?: Prisma.OrderItemOrderByRelationAggregateInput
   returns?: Prisma.ReturnOrderByRelationAggregateInput
@@ -305,12 +305,12 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   adresse?: Prisma.StringFilter<"Order"> | string
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  userId?: Prisma.StringFilter<"Order"> | string
   scan1Done?: Prisma.BoolFilter<"Order"> | boolean
   scan1Result?: Prisma.StringNullableFilter<"Order"> | string | null
   scan1ShippingAllowed?: Prisma.BoolFilter<"Order"> | boolean
   scan2Done?: Prisma.BoolFilter<"Order"> | boolean
   scan2Result?: Prisma.StringNullableFilter<"Order"> | string | null
-  userId?: Prisma.StringFilter<"Order"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   items?: Prisma.OrderItemListRelationFilter
   returns?: Prisma.ReturnListRelationFilter
@@ -323,12 +323,12 @@ export type OrderOrderByWithAggregationInput = {
   adresse?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   scan1Done?: Prisma.SortOrder
   scan1Result?: Prisma.SortOrderInput | Prisma.SortOrder
   scan1ShippingAllowed?: Prisma.SortOrder
   scan2Done?: Prisma.SortOrder
   scan2Result?: Prisma.SortOrderInput | Prisma.SortOrder
-  userId?: Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
   _avg?: Prisma.OrderAvgOrderByAggregateInput
   _max?: Prisma.OrderMaxOrderByAggregateInput
@@ -346,12 +346,12 @@ export type OrderScalarWhereWithAggregatesInput = {
   adresse?: Prisma.StringWithAggregatesFilter<"Order"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
+  userId?: Prisma.StringWithAggregatesFilter<"Order"> | string
   scan1Done?: Prisma.BoolWithAggregatesFilter<"Order"> | boolean
   scan1Result?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   scan1ShippingAllowed?: Prisma.BoolWithAggregatesFilter<"Order"> | boolean
   scan2Done?: Prisma.BoolWithAggregatesFilter<"Order"> | boolean
   scan2Result?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
-  userId?: Prisma.StringWithAggregatesFilter<"Order"> | string
 }
 
 export type OrderCreateInput = {
@@ -378,12 +378,12 @@ export type OrderUncheckedCreateInput = {
   adresse: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  userId: string
   scan1Done?: boolean
   scan1Result?: string | null
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: string | null
-  userId: string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   returns?: Prisma.ReturnUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -412,12 +412,12 @@ export type OrderUncheckedUpdateInput = {
   adresse?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scan1Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan1Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scan1ShippingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   returns?: Prisma.ReturnUncheckedUpdateManyWithoutOrderNestedInput
 }
@@ -429,12 +429,12 @@ export type OrderCreateManyInput = {
   adresse: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  userId: string
   scan1Done?: boolean
   scan1Result?: string | null
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: string | null
-  userId: string
 }
 
 export type OrderUpdateManyMutationInput = {
@@ -458,12 +458,12 @@ export type OrderUncheckedUpdateManyInput = {
   adresse?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scan1Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan1Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scan1ShippingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type OrderListRelationFilter = {
@@ -483,12 +483,12 @@ export type OrderCountOrderByAggregateInput = {
   adresse?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   scan1Done?: Prisma.SortOrder
   scan1Result?: Prisma.SortOrder
   scan1ShippingAllowed?: Prisma.SortOrder
   scan2Done?: Prisma.SortOrder
   scan2Result?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
 }
 
 export type OrderAvgOrderByAggregateInput = {
@@ -502,12 +502,12 @@ export type OrderMaxOrderByAggregateInput = {
   adresse?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   scan1Done?: Prisma.SortOrder
   scan1Result?: Prisma.SortOrder
   scan1ShippingAllowed?: Prisma.SortOrder
   scan2Done?: Prisma.SortOrder
   scan2Result?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
 }
 
 export type OrderMinOrderByAggregateInput = {
@@ -517,12 +517,12 @@ export type OrderMinOrderByAggregateInput = {
   adresse?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   scan1Done?: Prisma.SortOrder
   scan1Result?: Prisma.SortOrder
   scan1ShippingAllowed?: Prisma.SortOrder
   scan2Done?: Prisma.SortOrder
   scan2Result?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
 }
 
 export type OrderSumOrderByAggregateInput = {
@@ -676,12 +676,12 @@ export type OrderScalarWhereInput = {
   adresse?: Prisma.StringFilter<"Order"> | string
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  userId?: Prisma.StringFilter<"Order"> | string
   scan1Done?: Prisma.BoolFilter<"Order"> | boolean
   scan1Result?: Prisma.StringNullableFilter<"Order"> | string | null
   scan1ShippingAllowed?: Prisma.BoolFilter<"Order"> | boolean
   scan2Done?: Prisma.BoolFilter<"Order"> | boolean
   scan2Result?: Prisma.StringNullableFilter<"Order"> | string | null
-  userId?: Prisma.StringFilter<"Order"> | string
 }
 
 export type OrderCreateWithoutItemsInput = {
@@ -707,12 +707,12 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   adresse: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  userId: string
   scan1Done?: boolean
   scan1Result?: string | null
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: string | null
-  userId: string
   returns?: Prisma.ReturnUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -755,12 +755,12 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   adresse?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scan1Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan1Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scan1ShippingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   returns?: Prisma.ReturnUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -787,12 +787,12 @@ export type OrderUncheckedCreateWithoutReturnsInput = {
   adresse: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  userId: string
   scan1Done?: boolean
   scan1Result?: string | null
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: string | null
-  userId: string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -835,12 +835,12 @@ export type OrderUncheckedUpdateWithoutReturnsInput = {
   adresse?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scan1Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan1Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scan1ShippingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Done?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scan2Result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -951,12 +951,12 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   adresse?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  userId?: boolean
   scan1Done?: boolean
   scan1Result?: boolean
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: boolean
-  userId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   returns?: boolean | Prisma.Order$returnsArgs<ExtArgs>
@@ -970,12 +970,12 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   adresse?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  userId?: boolean
   scan1Done?: boolean
   scan1Result?: boolean
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: boolean
-  userId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -986,12 +986,12 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   adresse?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  userId?: boolean
   scan1Done?: boolean
   scan1Result?: boolean
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: boolean
-  userId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -1002,15 +1002,15 @@ export type OrderSelectScalar = {
   adresse?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  userId?: boolean
   scan1Done?: boolean
   scan1Result?: boolean
   scan1ShippingAllowed?: boolean
   scan2Done?: boolean
   scan2Result?: boolean
-  userId?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "statut" | "total" | "adresse" | "createdAt" | "updatedAt" | "scan1Done" | "scan1Result" | "scan1ShippingAllowed" | "scan2Done" | "scan2Result" | "userId", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "statut" | "total" | "adresse" | "createdAt" | "updatedAt" | "userId" | "scan1Done" | "scan1Result" | "scan1ShippingAllowed" | "scan2Done" | "scan2Result", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
@@ -1038,12 +1038,12 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     adresse: string
     createdAt: Date
     updatedAt: Date
+    userId: string
     scan1Done: boolean
     scan1Result: string | null
     scan1ShippingAllowed: boolean
     scan2Done: boolean
     scan2Result: string | null
-    userId: string
   }, ExtArgs["result"]["order"]>
   composites: {}
 }
@@ -1476,12 +1476,12 @@ export interface OrderFieldRefs {
   readonly adresse: Prisma.FieldRef<"Order", 'String'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
+  readonly userId: Prisma.FieldRef<"Order", 'String'>
   readonly scan1Done: Prisma.FieldRef<"Order", 'Boolean'>
   readonly scan1Result: Prisma.FieldRef<"Order", 'String'>
   readonly scan1ShippingAllowed: Prisma.FieldRef<"Order", 'Boolean'>
   readonly scan2Done: Prisma.FieldRef<"Order", 'Boolean'>
   readonly scan2Result: Prisma.FieldRef<"Order", 'String'>
-  readonly userId: Prisma.FieldRef<"Order", 'String'>
 }
     
 

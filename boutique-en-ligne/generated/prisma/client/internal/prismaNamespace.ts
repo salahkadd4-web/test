@@ -1351,11 +1351,11 @@ export const UserScalarFieldEnum = {
   motDePasse: 'motDePasse',
   role: 'role',
   avatar: 'avatar',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   age: 'age',
   genre: 'genre',
-  wilaya: 'wilaya',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  wilaya: 'wilaya'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1379,11 +1379,11 @@ export const ProductScalarFieldEnum = {
   description: 'description',
   prix: 'prix',
   stock: 'stock',
-  actif: 'actif',
   images: 'images',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  categoryId: 'categoryId'
+  categoryId: 'categoryId',
+  actif: 'actif'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
@@ -1426,12 +1426,12 @@ export const OrderScalarFieldEnum = {
   adresse: 'adresse',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  userId: 'userId',
   scan1Done: 'scan1Done',
   scan1Result: 'scan1Result',
   scan1ShippingAllowed: 'scan1ShippingAllowed',
   scan2Done: 'scan2Done',
-  scan2Result: 'scan2Result',
-  userId: 'userId'
+  scan2Result: 'scan2Result'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -1452,9 +1452,9 @@ export const MessageScalarFieldEnum = {
   id: 'id',
   contenu: 'contenu',
   lu: 'lu',
-  isAdmin: 'isAdmin',
   createdAt: 'createdAt',
-  userId: 'userId'
+  userId: 'userId',
+  isAdmin: 'isAdmin'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
@@ -1563,6 +1563,20 @@ export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1587,20 +1601,6 @@ export type EnumGenreFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
  * Reference to a field of type 'Genre[]'
  */
 export type ListEnumGenreFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Genre[]'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 

@@ -28,27 +28,27 @@ export type MessageMinAggregateOutputType = {
   id: string | null
   contenu: string | null
   lu: boolean | null
-  isAdmin: boolean | null
   createdAt: Date | null
   userId: string | null
+  isAdmin: boolean | null
 }
 
 export type MessageMaxAggregateOutputType = {
   id: string | null
   contenu: string | null
   lu: boolean | null
-  isAdmin: boolean | null
   createdAt: Date | null
   userId: string | null
+  isAdmin: boolean | null
 }
 
 export type MessageCountAggregateOutputType = {
   id: number
   contenu: number
   lu: number
-  isAdmin: number
   createdAt: number
   userId: number
+  isAdmin: number
   _all: number
 }
 
@@ -57,27 +57,27 @@ export type MessageMinAggregateInputType = {
   id?: true
   contenu?: true
   lu?: true
-  isAdmin?: true
   createdAt?: true
   userId?: true
+  isAdmin?: true
 }
 
 export type MessageMaxAggregateInputType = {
   id?: true
   contenu?: true
   lu?: true
-  isAdmin?: true
   createdAt?: true
   userId?: true
+  isAdmin?: true
 }
 
 export type MessageCountAggregateInputType = {
   id?: true
   contenu?: true
   lu?: true
-  isAdmin?: true
   createdAt?: true
   userId?: true
+  isAdmin?: true
   _all?: true
 }
 
@@ -157,9 +157,9 @@ export type MessageGroupByOutputType = {
   id: string
   contenu: string
   lu: boolean
-  isAdmin: boolean
   createdAt: Date
   userId: string
+  isAdmin: boolean
   _count: MessageCountAggregateOutputType | null
   _min: MessageMinAggregateOutputType | null
   _max: MessageMaxAggregateOutputType | null
@@ -187,9 +187,9 @@ export type MessageWhereInput = {
   id?: Prisma.StringFilter<"Message"> | string
   contenu?: Prisma.StringFilter<"Message"> | string
   lu?: Prisma.BoolFilter<"Message"> | boolean
-  isAdmin?: Prisma.BoolFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   userId?: Prisma.StringFilter<"Message"> | string
+  isAdmin?: Prisma.BoolFilter<"Message"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -197,9 +197,9 @@ export type MessageOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   contenu?: Prisma.SortOrder
   lu?: Prisma.SortOrder
-  isAdmin?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -210,9 +210,9 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MessageWhereInput | Prisma.MessageWhereInput[]
   contenu?: Prisma.StringFilter<"Message"> | string
   lu?: Prisma.BoolFilter<"Message"> | boolean
-  isAdmin?: Prisma.BoolFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   userId?: Prisma.StringFilter<"Message"> | string
+  isAdmin?: Prisma.BoolFilter<"Message"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -220,9 +220,9 @@ export type MessageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   contenu?: Prisma.SortOrder
   lu?: Prisma.SortOrder
-  isAdmin?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
   _max?: Prisma.MessageMaxOrderByAggregateInput
   _min?: Prisma.MessageMinOrderByAggregateInput
@@ -235,17 +235,17 @@ export type MessageScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Message"> | string
   contenu?: Prisma.StringWithAggregatesFilter<"Message"> | string
   lu?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
-  isAdmin?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
   userId?: Prisma.StringWithAggregatesFilter<"Message"> | string
+  isAdmin?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
 }
 
 export type MessageCreateInput = {
   id?: string
   contenu: string
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: Date | string
+  isAdmin?: boolean
   user: Prisma.UserCreateNestedOneWithoutMessagesInput
 }
 
@@ -253,17 +253,17 @@ export type MessageUncheckedCreateInput = {
   id?: string
   contenu: string
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: Date | string
   userId: string
+  isAdmin?: boolean
 }
 
 export type MessageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   contenu?: Prisma.StringFieldUpdateOperationsInput | string
   lu?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutMessagesNestedInput
 }
 
@@ -271,35 +271,35 @@ export type MessageUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   contenu?: Prisma.StringFieldUpdateOperationsInput | string
   lu?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type MessageCreateManyInput = {
   id?: string
   contenu: string
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: Date | string
   userId: string
+  isAdmin?: boolean
 }
 
 export type MessageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   contenu?: Prisma.StringFieldUpdateOperationsInput | string
   lu?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type MessageUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   contenu?: Prisma.StringFieldUpdateOperationsInput | string
   lu?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type MessageListRelationFilter = {
@@ -316,27 +316,27 @@ export type MessageCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   contenu?: Prisma.SortOrder
   lu?: Prisma.SortOrder
-  isAdmin?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
 }
 
 export type MessageMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   contenu?: Prisma.SortOrder
   lu?: Prisma.SortOrder
-  isAdmin?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
 }
 
 export type MessageMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   contenu?: Prisma.SortOrder
   lu?: Prisma.SortOrder
-  isAdmin?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
 }
 
 export type MessageCreateNestedManyWithoutUserInput = {
@@ -385,16 +385,16 @@ export type MessageCreateWithoutUserInput = {
   id?: string
   contenu: string
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type MessageUncheckedCreateWithoutUserInput = {
   id?: string
   contenu: string
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type MessageCreateOrConnectWithoutUserInput = {
@@ -430,41 +430,41 @@ export type MessageScalarWhereInput = {
   id?: Prisma.StringFilter<"Message"> | string
   contenu?: Prisma.StringFilter<"Message"> | string
   lu?: Prisma.BoolFilter<"Message"> | boolean
-  isAdmin?: Prisma.BoolFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   userId?: Prisma.StringFilter<"Message"> | string
+  isAdmin?: Prisma.BoolFilter<"Message"> | boolean
 }
 
 export type MessageCreateManyUserInput = {
   id?: string
   contenu: string
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type MessageUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   contenu?: Prisma.StringFieldUpdateOperationsInput | string
   lu?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type MessageUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   contenu?: Prisma.StringFieldUpdateOperationsInput | string
   lu?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type MessageUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   contenu?: Prisma.StringFieldUpdateOperationsInput | string
   lu?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -473,9 +473,9 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   id?: boolean
   contenu?: boolean
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: boolean
   userId?: boolean
+  isAdmin?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -483,9 +483,9 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   contenu?: boolean
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: boolean
   userId?: boolean
+  isAdmin?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -493,9 +493,9 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   contenu?: boolean
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: boolean
   userId?: boolean
+  isAdmin?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -503,12 +503,12 @@ export type MessageSelectScalar = {
   id?: boolean
   contenu?: boolean
   lu?: boolean
-  isAdmin?: boolean
   createdAt?: boolean
   userId?: boolean
+  isAdmin?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contenu" | "lu" | "isAdmin" | "createdAt" | "userId", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contenu" | "lu" | "createdAt" | "userId" | "isAdmin", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -528,9 +528,9 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     contenu: string
     lu: boolean
-    isAdmin: boolean
     createdAt: Date
     userId: string
+    isAdmin: boolean
   }, ExtArgs["result"]["message"]>
   composites: {}
 }
@@ -958,9 +958,9 @@ export interface MessageFieldRefs {
   readonly id: Prisma.FieldRef<"Message", 'String'>
   readonly contenu: Prisma.FieldRef<"Message", 'String'>
   readonly lu: Prisma.FieldRef<"Message", 'Boolean'>
-  readonly isAdmin: Prisma.FieldRef<"Message", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly userId: Prisma.FieldRef<"Message", 'String'>
+  readonly isAdmin: Prisma.FieldRef<"Message", 'Boolean'>
 }
     
 
