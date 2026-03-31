@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useIsMobile, useHideOnScroll } from '@/app/hooks/useIsMobile'
+import SearchBar from '@/components/client/SearchBar'
 
 export default function Header() {
   const { data: session } = useSession()
@@ -161,18 +162,9 @@ export default function Header() {
               <Link href="/categories" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors duration-300">Catégories</Link>
               <Link href="/produits" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors duration-300">Produits</Link>
             </nav>
-            <form onSubmit={handleSearch} className="flex-1 max-w-sm hidden md:flex items-center">
-              <div className="relative w-full">
-                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Rechercher un produit..."
-                  className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black outline-none py-2 pr-8 text-xs text-gray-700 dark:text-gray-200 bg-transparent placeholder-gray-400 transition-colors duration-300" />
-                <button type="submit" className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                  </svg>
-                </button>
-              </div>
-            </form>
+            <div className="flex-1 max-w-sm hidden md:flex items-center">
+              <SearchBar />
+            </div>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             {session ? (
