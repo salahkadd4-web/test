@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
 import Image from 'next/image'
+import CategoriesCarousel from '@/components/client/CategoriesCarousel'
 
 
 export default function HomePage() {
@@ -96,45 +97,44 @@ async function CategoriesSection() {
   }
 
   return (
-    /* Utilisation du même Grid que votre page catégories */
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {categories.map((cat) => (
-        <Link 
-          key={cat.id} 
-          href={`/categories/${cat.id}`}
-          className="group bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-md border border-transparent dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 p-6 flex flex-col items-center text-center gap-3 transition-all duration-300"
-        >
-          {/* Cercle d'image ou icône */}
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden">
-            {cat.image ? (
-              <img 
-                src={cat.image} 
-                alt={cat.nom} 
-                className="w-full h-full object-cover rounded-full" 
-              />
-            ) : (
-              <span className="text-3xl">🏷️</span>
-            )}
-          </div>
+    <>
+      {/* Mobile → carrousel horizontal */}
+      <div className="md:hidden">
+        <CategoriesCarousel categories={categories} />
+      </div>
 
-          {/* Textes */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              {cat.nom}
-            </h2>
-            {/* On peut garder une description courte (1 ligne) pour l'accueil */}
-            {cat.description && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
-                {cat.description}
+      {/* Desktop → grille normale */}
+      <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {categories.map((cat) => (
+          <Link
+            key={cat.id}
+            href={`/categories/${cat.id}`}
+            className="group bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-md border border-transparent dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 p-6 flex flex-col items-center text-center gap-3 transition-all duration-300"
+          >
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden">
+              {cat.image ? (
+                <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <span className="text-3xl">🏷️</span>
+              )}
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {cat.nom}
+              </h2>
+              {cat.description && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                  {cat.description}
+                </p>
+              )}
+              <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 font-medium">
+                {cat._count.products} produit{cat._count.products > 1 ? 's' : ''}
               </p>
-            )}
-            <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 font-medium">
-              {cat._count.products} produit{cat._count.products > 1 ? 's' : ''}
-            </p>
-          </div>
-        </Link>
-      ))}
-    </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </>
   )
 }
 

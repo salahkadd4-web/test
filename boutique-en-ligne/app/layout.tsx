@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/ThemeProvider'
 import SessionProvider from '@/components/client/SessionProvider'
 import Header from '../components/client/Header'
 import ThemeToggle from '@/components/ThemeToggle'
+import BottomNav from '@/components/BottomNav'
 
 export const metadata: Metadata = {
   title: 'Boutique en ligne',
@@ -35,7 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <SessionProvider>
             <Header />
-            {children}
+            <main className="pb-16 md:pb-0">
+              {children}
+            </main>
+            <BottomNav />
             <ThemeToggle />
           </SessionProvider>
         </ThemeProvider>

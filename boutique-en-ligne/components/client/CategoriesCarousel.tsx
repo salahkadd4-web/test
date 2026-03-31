@@ -1,0 +1,41 @@
+'use client'
+
+import Link from 'next/link'
+
+type Category = {
+  id: string
+  nom: string
+  image: string | null
+  description: string | null
+  _count: { products: number }
+}
+
+export default function CategoriesCarousel({ categories }: { categories: Category[] }) {
+  return (
+    <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 scrollbar-hide -mx-4 px-4">
+      {categories.map((cat) => (
+        <Link
+          key={cat.id}
+          href={`/categories/${cat.id}`}
+          className="snap-start shrink-0 w-36 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-transparent dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 p-4 flex flex-col items-center text-center gap-3 transition-all duration-300"
+        >
+          <div className="w-14 h-14 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden">
+            {cat.image ? (
+              <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover rounded-full" />
+            ) : (
+              <span className="text-3xl">🏷️</span>
+            )}
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              {cat.nom}
+            </h2>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
+              {cat._count.products} produit{cat._count.products > 1 ? 's' : ''}
+            </p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  )
+}
