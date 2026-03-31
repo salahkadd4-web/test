@@ -1,0 +1,26 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+
+export async function GET(req: NextRequest) {
+  const recherche = req.nextUrl.searchParams.get('recherche')?.trim()
+  const categorie = req.nextUrl.searchParams.get('categorie')?.trim()
+
+  const produits = await prisma.product.findMany({
+    where: {
+      actif: true,
+      ...(categorie ? { categoryId: categorie } : {}),
+      ...(recherche ? { nom: { contains: recherche, mode: 'insensitive' } } : {}),
+    },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      nom: true,
+      images: true,
+      prix: true,
+      stock: true,
+      category: { select: { nom: true } },
+    },
+  })
+
+  return NextResponse.json(produits)
+}

@@ -4,11 +4,12 @@ import Google from 'next-auth/providers/google'
 import { prisma } from './lib/prisma'
 import bcrypt from 'bcryptjs'
 
+const BASE_URL = process.env.NEXTAUTH_URL || 'https://test-rosy-omega-60.vercel.app'
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,
 
   providers: [
-    // ── Connexion classique ──────────────────────────────
     Credentials({
       name: 'Credentials',
       credentials: {
@@ -17,10 +18,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.identifiant || !credentials?.motDePasse) return null
-
         const identifiant = credentials.identifiant as string
         const motDePasse  = credentials.motDePasse  as string
-
         const user = await prisma.user.findFirst({
           where: {
             OR: [
@@ -29,13 +28,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             ],
           },
         })
-
         if (!user) return null
-        
         if (!user.motDePasse) return null
         const passwordMatch = await bcrypt.compare(motDePasse, user.motDePasse)
         if (!passwordMatch) return null
-
         return {
           id:    user.id,
           name:  `${user.prenom} ${user.nom}`,
@@ -45,17 +41,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
 
-    // ── Google ───────────────────────────────────────────
     Google({
       clientId:     process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-
-    // Facebook et Apple → à ajouter plus tard avec leurs clés
   ],
 
   pages: {
-    signIn: '/connexion',
+    signIn:  '/connexion',
+    signOut: '/connexion',  // ← après déconnexion → page connexion
+    error:   '/connexion',  // ← erreur → page connexion
   },
 
   session: {
@@ -77,7 +72,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 prenom:     parts[0] || '',
                 nom:        parts.slice(1).join(' ') || '',
                 role:       'CLIENT',
-                motDePasse: '',
+                motDePasse: null,
               },
             })
           }
@@ -112,6 +107,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role
       }
       return session
+    },
+
+    // ── Redirection après connexion/déconnexion ──────────
+    async redirect({ url, baseUrl }) {
+      // Toujours utiliser l'URL Vercel, jamais localhost
+      const base = BASE_URL
+
+      // Si l'URL commence par le baseUrl ou est relative → OK
+      if (url.startsWith('/')) return `${base}${url}`
+      if (url.startsWith(base)) return url
+
+      // Sinon → accueil
+      return base
     },
   },
 })

@@ -91,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Titre de la page courante */}
           <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 lg:hidden">
-            {navItems.find(i => i.href === pathname)?.label || 'Administration'}
+            {navItems.find(i => i.href === pathname)?.label || 'Admin'}
           </p>
 
           <div className="flex items-center gap-3">

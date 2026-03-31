@@ -42,14 +42,14 @@ export default function Header() {
       <header className="bg-black text-white sticky top-0 z-50 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/admin" className="text-sm font-light tracking-[0.4em] uppercase text-gray-300">
-            Administration
+            Admin
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors">
               Boutique
             </Link>
             <button
-              onClick={() => signOut({ callbackUrl: '/connexion' })}
+              onClick={() => signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL || ''}/` })}
               className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors"
             >
               Déconnexion
@@ -118,7 +118,7 @@ export default function Header() {
                     ))}
                   </div>
                   <div className="border-t border-gray-100 dark:border-gray-800 py-1">
-                    <button onClick={() => signOut({ callbackUrl: '/' })}
+                    <button onClick={() => signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL || ''}/` })}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
                       <span>🚪</span>
                       <span className="text-xs uppercase tracking-widest">Déconnexion</span>
@@ -200,7 +200,7 @@ export default function Header() {
                       ))}
                     </div>
                     <div className="border-t border-gray-100 dark:border-gray-800 py-1">
-                      <button onClick={() => signOut({ callbackUrl: '/' })}
+                      <button onClick={() => signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL || ''}/` })}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
                         <span>🚪</span>
                         <span className="text-xs uppercase tracking-[0.15em]">Déconnexion</span>
@@ -248,7 +248,7 @@ export default function Header() {
               </Link>
             ))}
             {session ? (
-              <button onClick={() => signOut({ callbackUrl: '/' })}
+              <button onClick={() => signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL || ''}/` })}
                 className="block text-red-500 text-xs uppercase tracking-[0.2em]">
                 Déconnexion
               </button>
