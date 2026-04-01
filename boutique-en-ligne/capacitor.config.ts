@@ -5,8 +5,9 @@ const config: CapacitorConfig = {
   appName: 'CabaStore',
   webDir: 'out',
   server: {
-    url: 'https://test-rosy-omega-60.vercel.app/', // ← mets ton URL Vercel ici
+    url: 'https://test-rosy-omega-60.vercel.app/',
     cleartext: false,
+    androidScheme: 'https',
   },
 };
 

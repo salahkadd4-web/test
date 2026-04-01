@@ -37,7 +37,7 @@ export default function Header() {
   }
 
   // ─── Header Admin ───────────────────────────────────────────
-  if (session?.user?.role === 'ADMIN' && !isMobile) {
+  if (session?.user?.role === 'ADMIN') {
     return (
       <header className="bg-black text-white sticky top-0 z-50 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
