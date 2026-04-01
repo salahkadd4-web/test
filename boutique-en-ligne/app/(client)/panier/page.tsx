@@ -61,7 +61,7 @@ export default function PanierPage() {
 
   if (!panier || panier.items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-12 pt-4 text-center">
         <p className="text-6xl mb-4">🛒</p>
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Votre panier est vide</h1>
         <p className="text-gray-500 dark:text-gray-400 mb-6">Ajoutez des produits pour commencer vos achats</p>
@@ -73,7 +73,7 @@ export default function PanierPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12 pt-4">
       <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">Mon Panier</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

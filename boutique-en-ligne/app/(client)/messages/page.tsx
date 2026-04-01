@@ -89,7 +89,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-8 pt-4">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">💬 Discussion avec le support</h1>
 
       {/* Zone messages */}

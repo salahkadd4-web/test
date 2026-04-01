@@ -38,7 +38,7 @@ export default function FavorisPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12 pt-4">
       <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Mes Favoris</h1>
       <p className="text-gray-500 dark:text-gray-400 mb-8">
         {favoris.length} produit{favoris.length > 1 ? 's' : ''} en favori

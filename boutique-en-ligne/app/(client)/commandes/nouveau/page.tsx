@@ -77,14 +77,14 @@ export default function NouvelleCommandePage() {
   }
 
   if (loading) return (
-    <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+    <div className="max-w-4xl mx-auto px-4 py-12 pt-4 text-center text-gray-500 dark:text-gray-400">
       Chargement...
     </div>
   )
 
   if (!panier || panier.items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-12 pt-4 text-center">
         <p className="text-6xl mb-4">🛒</p>
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Votre panier est vide</h1>
         <Link href="/produits" className="bg-black dark:bg-white text-white dark:text-black px-8 py-3 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition">
@@ -95,7 +95,7 @@ export default function NouvelleCommandePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12 pt-4">
       <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">Passer la commande</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

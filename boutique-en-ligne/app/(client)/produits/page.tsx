@@ -29,7 +29,7 @@ export default async function ProduitsPage({
   ])
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12 pt-4">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Produits</h1>
       </div>

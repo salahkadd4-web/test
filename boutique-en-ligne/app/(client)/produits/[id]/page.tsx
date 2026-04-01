@@ -21,7 +21,7 @@ export default async function ProduitDetailPage({
   if (!produit || !produit.actif) notFound()
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12 pt-4">
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">

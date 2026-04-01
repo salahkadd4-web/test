@@ -10,56 +10,65 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#0a0a0a] text-white py-70 px-4 border-b border-gray-800/50">
-  
-  {/* LOGO EN ARRIÈRE-PLAN (Plus visible mais masqué au centre) */}
-  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-    {/* Conteneur pour le masque radial */}
-    <div className="relative z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-20%,black_50%)]">
-        <Image 
-          src="/logo_noir.png" 
-          alt="" 
-          width={780} // Grande taille
-          height={780}
-          className="object-contain invert opacity-30 scale-150" 
-          priority
-        />
-    </div>         
-  </div>
+      <section className="relative overflow-hidden bg-[#0a0a0a] text-white px-4 border-b border-gray-800/50"
+        style={{ paddingTop: '60px', paddingBottom: '60px', minHeight: '100svh' }}>
 
-  {/* CONTENU principal (z-index pour passer au-dessus) */}
-  <div className="relative z-10 max-w-5xl mx-auto text-center">
-    
+        {/* LOGO EN ARRIÈRE-PLAN — visible sur mobile, discret sur desktop */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <Image
+            src="/logo_noir.png"
+            alt=""
+            width={700}
+            height={700}
+            className="object-contain invert opacity-10 md:opacity-5"
+            priority
+          />
+        </div>
 
+        {/* CONTENU principal */}
+        <div className="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center justify-center h-full">
 
+          {/* Logo grand et lisible — mobile uniquement */}
+          <div className="block md:hidden mb-8">
+            <Image
+              src="/logo_noir.png"
+              alt="Caba Store"
+              width={220}
+              height={220}
+              className="object-contain invert mx-auto drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+              priority
+            />
+            <p className="text-white text-xl font-bold tracking-[0.4em] uppercase mt-3">
+              Caba Store
+            </p>
+          </div>
 
-    
-    {/* Description avec ombre portée subtile */}
-    <p className="text-lg md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)]">
-      Première boutique online en Algérie spécialisée en importation 
-    </p>
+          {/* Description */}
+          <p className="text-lg md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)]">
+            Première boutique online en Algérie spécialisée en importation
+          </p>
 
-    {/* Boutons d'action */}
-    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-      <Link
-        href="/produits"
-        className="w-full sm:w-auto bg-white text-black font-bold px-12 py-5 rounded-full hover:bg-gray-200 shadow-[0_5px_25px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-105 active:scale-95"
-      >
-        Explorer la Boutique
-      </Link>
-      
-      <Link
-        href="/categories"
-        className="w-full sm:w-auto border-2 border-gray-700 text-white font-semibold px-12 py-5 rounded-full hover:bg-white/5 transition-all duration-300 backdrop-blur-sm"
-      >
-        Voir les Catégories
-      </Link>
-    </div>
-  </div>
+          {/* Boutons d'action */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full">
+            <Link
+              href="/produits"
+              className="w-full sm:w-auto bg-white text-black font-bold px-12 py-5 rounded-full hover:bg-gray-200 shadow-[0_5px_25px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-105 active:scale-95"
+            >
+              Explorer la Boutique
+            </Link>
 
-  {/* Ligne de séparation lumineuse en bas */}
-  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
-</section>
+            <Link
+              href="/categories"
+              className="w-full sm:w-auto border-2 border-gray-700 text-white font-semibold px-12 py-5 rounded-full hover:bg-white/5 transition-all duration-300 backdrop-blur-sm"
+            >
+              Voir les Catégories
+            </Link>
+          </div>
+        </div>
+
+        {/* Ligne de séparation lumineuse en bas */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
+      </section>
 
       {/* Catégories Section */}
       <section className="max-w-6xl mx-auto px-4 py-16">
@@ -156,45 +165,36 @@ async function ProduitsSection() {
   }
 
   return (
-    /* Grid 2 colonnes sur mobile, 4 sur desktop pour l'accueil */
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {produits.map((produit) => (
-        <Link 
-          key={produit.id} 
+        <Link
+          key={produit.id}
           href={`/produits/${produit.id}`}
           className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300"
         >
-          {/* Image + icônes superposées */}
           <div className="relative h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
             {produit.images[0] ? (
-              <img 
-                src={produit.images[0]} 
-                alt={produit.nom} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+              <img
+                src={produit.images[0]}
+                alt={produit.nom}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             ) : (
               <span className="text-4xl">📦</span>
             )}
-            
-            {/* Icônes en overlay (Favoris et Panier) */}
             <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
               <FavoriIconButton produitId={produit.id} />
               <CartIconButton produitId={produit.id} stock={produit.stock} />
             </div>
           </div>
-
-          {/* Détails du produit */}
           <div className="p-4">
             <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{produit.category.nom}</p>
             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2 line-clamp-2 min-h-[40px]">
               {produit.nom}
             </h3>
-            
             <p className="text-lg font-bold text-gray-900 dark:text-white">
               {produit.prix.toFixed(2)} DA
             </p>
-
-            {/* État du stock */}
             <p className={`text-[10px] uppercase tracking-wider mt-2 font-bold ${produit.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
               {produit.stock > 0 ? `● En stock` : '○ Rupture'}
             </p>

@@ -193,7 +193,7 @@ export default function RetoursPage() {
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">Chargement...</div>
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-12 pt-4">
 
       {/* Header */}
       {!mlResult && (

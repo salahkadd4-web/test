@@ -186,7 +186,7 @@ export default function ProfilPage() {
   )
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
+    <div className="max-w-2xl mx-auto px-4 py-12 pt-4">
 
       {/* Header */}
       <div className="mb-8">
