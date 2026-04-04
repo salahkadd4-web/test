@@ -4,7 +4,6 @@ import Google from 'next-auth/providers/google'
 import { prisma } from './lib/prisma'
 import bcrypt from 'bcryptjs'
 
-const BASE_URL = process.env.NEXTAUTH_URL || 'https://test-rosy-omega-60.vercel.app'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,
@@ -112,12 +111,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     // ── Redirection après connexion/déconnexion ──────────
     async redirect({ url, baseUrl }) {
       // Toujours utiliser l'URL Vercel, jamais localhost
-      const base = BASE_URL
+      const base = 'https://test-rosy-omega-60.vercel.app'
 
+      
+      // Ignorer complètement localhost
+      if (url.includes('localhost')) return base
       // Si l'URL commence par le baseUrl ou est relative → OK
       if (url.startsWith('/')) return `${base}${url}`
       if (url.startsWith(base)) return url
-
       // Sinon → accueil
       return base
     },

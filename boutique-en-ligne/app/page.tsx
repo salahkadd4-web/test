@@ -10,56 +10,52 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#0a0a0a] text-white py-70 px-4 border-b border-gray-800/50">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-[#0a0a0a] text-white min-h-screen flex items-center justify-center px-4 border-b border-gray-800/50">
   
-  {/* LOGO EN ARRIÈRE-PLAN (Plus visible mais masqué au centre) */}
-  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-    {/* Conteneur pour le masque radial */}
-    <div className="relative z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-20%,black_50%)]">
-        <Image 
-          src="/logo_noir.png" 
-          alt="" 
-          width={780} // Grande taille
-          height={780}
-          className="object-contain invert opacity-30 scale-150" 
-          priority
-        />
-    </div>         
-  </div>
-
-  {/* CONTENU principal (z-index pour passer au-dessus) */}
-  <div className="relative z-10 max-w-5xl mx-auto text-center">
-    
-
-
-
-    
-    {/* Description avec ombre portée subtile */}
-    <p className="text-lg md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)]">
-      Première boutique online en Algérie spécialisée en importation 
-    </p>
-
-    {/* Boutons d'action */}
-    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-      <Link
-        href="/produits"
-        className="w-full sm:w-auto bg-white text-black font-bold px-12 py-5 rounded-full hover:bg-gray-200 shadow-[0_5px_25px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-105 active:scale-95"
-      >
-        Explorer la Boutique
-      </Link>
-      
-      <Link
-        href="/categories"
-        className="w-full sm:w-auto border-2 border-gray-700 text-white font-semibold px-12 py-5 rounded-full hover:bg-white/5 transition-all duration-300 backdrop-blur-sm"
-      >
-        Voir les Catégories
-      </Link>
-    </div>
-  </div>
-
-  {/* Ligne de séparation lumineuse en bas */}
-  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
-</section>
+        {/* LOGO EN ARRIÈRE-PLAN — centré et agrandi */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="[mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]">
+            <Image 
+              src="/logo_noir.png" 
+              alt="" 
+              width={500}
+              height={500}
+              className="object-contain invert opacity-20 w-[280px] h-[280px] md:w-[500px] md:h-[500px]"
+              priority
+            />
+          </div>         
+        </div>
+ 
+        {/* CONTENU principal */}
+        <div className="relative z-10 max-w-5xl mx-auto text-center">
+          
+          {/* Description */}
+          <p className="text-lg md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_1px_5px_rgba(0,0,0,0.5)]">
+            Première boutique online en Algérie spécialisée en importation 
+          </p>
+ 
+          {/* Boutons */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <Link
+              href="/produits"
+              className="w-full sm:w-auto bg-white text-black font-bold px-12 py-5 rounded-full hover:bg-gray-200 shadow-[0_5px_25px_rgba(255,255,255,0.15)] transition-all duration-300 hover:scale-105 active:scale-95"
+            >
+              Explorer la Boutique
+            </Link>
+            
+            <Link
+              href="/categories"
+              className="w-full sm:w-auto border-2 border-gray-700 text-white font-semibold px-12 py-5 rounded-full hover:bg-white/5 transition-all duration-300 backdrop-blur-sm"
+            >
+              Voir les Catégories
+            </Link>
+          </div>
+        </div>
+ 
+        {/* Ligne de séparation */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
+      </section>
 
       {/* Catégories Section */}
       <section className="max-w-6xl mx-auto px-4 py-16">

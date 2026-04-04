@@ -3,17 +3,24 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { useIsMobile } from '@/app/hooks/useIsMobile'
 
 export default function ClearAdminSession() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const pathname = usePathname()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
-    // Si admin essaie d'accéder à une page non-admin → déconnexion
-    if (session?.user?.role === 'ADMIN' && !pathname.startsWith('/admin')) {
-      signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/connexion` })
+    // Sur mobile, si session admin et pas sur page admin → déconnexion forcée
+    if (
+      isMobile &&
+      status === 'authenticated' &&
+      session?.user?.role === 'ADMIN' &&
+      !pathname.startsWith('/admin')
+    ) {
+      signOut({ redirect: false }) // déconnexion silencieuse sans redirect
     }
-  }, [session, pathname])
+  }, [session, status, pathname, isMobile])
 
   return null
 }
