@@ -57,26 +57,26 @@ function ConnexionContent() {
 }
 
   const handleGoogle = async () => {
-  setLoadingGoogle(true)
-  try {
-    const { Capacitor } = await import('@capacitor/core')
-    
-    if (Capacitor.isNativePlatform()) {
-      // Sur mobile → ouvre dans l'app via InAppBrowser
-      const { Browser } = await import('@capacitor/browser')
-      const callbackUrl = encodeURIComponent('https://test-rosy-omega-60.vercel.app/')
-      await Browser.open({
-        url: `https://test-rosy-omega-60.vercel.app/api/auth/signin/google?callbackUrl=${callbackUrl}`,
-        windowName: '_self',
-      })
-    } else {
-      // Sur web → comportement normal
-      await signIn('google', { callbackUrl: 'https://test-rosy-omega-60.vercel.app/' })
+    setLoadingGoogle(true)
+    try {
+      const { Capacitor } = await import('@capacitor/core')
+
+      if (Capacitor.isNativePlatform()) {
+        const { Browser } = await import('@capacitor/browser')
+        await Browser.open({
+          url: `https://test-rosy-omega-60.vercel.app/api/auth/signin/google?callbackUrl=${encodeURIComponent('https://test-rosy-omega-60.vercel.app/')}`,
+          windowName: '_self',
+          presentationStyle: 'popover',
+        })
+      } else {
+        await signIn('google', {
+          callbackUrl: 'https://test-rosy-omega-60.vercel.app/'
+        })
+      }
+    } catch {
+      setLoadingGoogle(false)
     }
-  } catch {
-    setLoadingGoogle(false)
   }
-}
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex transition-colors duration-300">

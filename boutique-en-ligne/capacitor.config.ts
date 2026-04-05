@@ -9,6 +9,11 @@ const config: CapacitorConfig = {
     cleartext: false,
     androidScheme: 'https',
   },
+  plugins: {
+    Browser: {
+      presentationStyle: 'popover',
+    },
+  },
 };
 
 export default config;

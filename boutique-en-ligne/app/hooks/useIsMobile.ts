@@ -3,10 +3,15 @@
 import { useState, useEffect } from 'react'
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(true) // ← true par défaut pour mobile-first
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
+    const check = () => {
+      // Détecte Capacitor (app native) ou petite fenêtre
+      const isCapacitor = !!(window as any).Capacitor?.isNativePlatform?.()
+      const isSmallScreen = window.innerWidth < 768
+      setIsMobile(isCapacitor || isSmallScreen)
+    }
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
