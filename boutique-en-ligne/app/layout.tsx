@@ -5,7 +5,6 @@ import SessionProvider from '@/components/client/SessionProvider'
 import Header from '../components/client/Header'
 import ThemeToggle from '@/components/ThemeToggle'
 import BottomNav from '@/components/BottomNav'
-import ClearAdminSession from '@/components/client/ClearAdminSession'
 import AndroidBackButton from '@/components/client/AndroidBackButton'
 
 
@@ -38,7 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
         <ThemeProvider>
           <SessionProvider>
-            <ClearAdminSession />
             <AndroidBackButton />
             <Header />
             <main className="pb-16 md:pb-0">

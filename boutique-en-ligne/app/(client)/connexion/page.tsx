@@ -23,52 +23,75 @@ function ConnexionContent() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const result = await signIn('credentials', {
-        identifiant: form.identifiant,
-        motDePasse: form.motDePasse,
-        redirect: false,
-      })
-      if (result?.error) { setError('Identifiant ou mot de passe incorrect'); return }
-      const res = await fetch('/api/auth/session')
-      const session = await res.json()
-      router.push(session?.user?.role === 'ADMIN' ? '/admin' : '/')
-      router.refresh()
-    } catch { setError('Erreur serveur, veuillez réessayer') } finally { setLoading(false) }
+  e.preventDefault()
+  setError('')
+  setLoading(true)
+  try {
+    const result = await signIn('credentials', {
+      identifiant: form.identifiant,
+      motDePasse: form.motDePasse,
+      redirect: false,
+    })
+    if (result?.error) {
+      setError('Identifiant ou mot de passe incorrect')
+      return
+    }
+
+    // Attendre que la session soit bien établie
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    const res = await fetch('/api/auth/session')
+    const session = await res.json()
+
+    if (session?.user?.role === 'ADMIN') {
+      router.push('/admin')
+    } else {
+      router.push('/')
+    }
+    router.refresh()
+  } catch {
+    setError('Erreur serveur, veuillez réessayer')
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleGoogle = async () => {
-    setLoadingGoogle(true)
-    await signIn('google', { callbackUrl: '/' })
+  setLoadingGoogle(true)
+  try {
+    const { Capacitor } = await import('@capacitor/core')
+    
+    if (Capacitor.isNativePlatform()) {
+      // Sur mobile → ouvre dans l'app via InAppBrowser
+      const { Browser } = await import('@capacitor/browser')
+      const callbackUrl = encodeURIComponent('https://test-rosy-omega-60.vercel.app/')
+      await Browser.open({
+        url: `https://test-rosy-omega-60.vercel.app/api/auth/signin/google?callbackUrl=${callbackUrl}`,
+        windowName: '_self',
+      })
+    } else {
+      // Sur web → comportement normal
+      await signIn('google', { callbackUrl: 'https://test-rosy-omega-60.vercel.app/' })
+    }
+  } catch {
+    setLoadingGoogle(false)
   }
+}
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex transition-colors duration-300">
 
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black dark:bg-gray-900 items-center justify-center p-12 border-r border-gray-800">
-          
-          {/* LOGO EN ARRIÈRE-PLAN (Pleine taille) */}
-          <div className="absolute z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-50%,black_10%)]">
-                  <Image 
-                    src="/logo_noir.png" 
-                    alt="" 
-                    width={750} // Grande taille
-                    height={750}
-                    className="object-contain invert opacity-30 scale-150" 
-                    priority
-                  />
-          </div> 
-
-          {/* CONTENU TEXTUEL (z-10 pour être au-dessus du logo) */}
-          <div className="relative z-10 text-center text-white">
-            <div className="w-12 h-px bg-gray-600 mx-auto my-6" />
-            <p className="text-white font-light text-sm tracking-wider drop-shadow-md">
-              L'excellence à portée de main
-            </p>
-          </div>
+        <div className="absolute z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-50%,black_10%)]">
+          <Image src="/logo_noir.png" alt="" width={750} height={750}
+            className="object-contain invert opacity-30 scale-150" priority />
+        </div>
+        <div className="relative z-10 text-center text-white">
+          <div className="w-12 h-px bg-gray-600 mx-auto my-6" />
+          <p className="text-white font-light text-sm tracking-wider drop-shadow-md">
+            L'excellence à portée de main
+          </p>
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-8 overflow-y-auto">
@@ -176,7 +199,11 @@ function ConnexionContent() {
 
 export default function ConnexionPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center"><p className="text-gray-500 dark:text-gray-400">Chargement...</p></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
+        <p className="text-gray-500 dark:text-gray-400">Chargement...</p>
+      </div>
+    }>
       <ConnexionContent />
     </Suspense>
   )

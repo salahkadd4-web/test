@@ -48,9 +48,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   pages: {
     signIn:  '/connexion',
-    signOut: '/connexion',  // ← après déconnexion → page connexion
+    signOut: '/',
     error:   '/connexion',  // ← erreur → page connexion
-  },
+    },
 
   session: {
     strategy: 'jwt',
@@ -110,16 +110,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     // ── Redirection après connexion/déconnexion ──────────
     async redirect({ url, baseUrl }) {
-      // Toujours utiliser l'URL Vercel, jamais localhost
       const base = 'https://test-rosy-omega-60.vercel.app'
-
-      
-      // Ignorer complètement localhost
       if (url.includes('localhost')) return base
-      // Si l'URL commence par le baseUrl ou est relative → OK
       if (url.startsWith('/')) return `${base}${url}`
       if (url.startsWith(base)) return url
-      // Sinon → accueil
       return base
     },
   },
