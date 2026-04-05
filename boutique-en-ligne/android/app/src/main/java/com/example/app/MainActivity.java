@@ -1,4 +1,5 @@
-package com.cabastore.app;
+package com.example.app;
+
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

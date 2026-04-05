@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.cabastore.app',
+  appId: 'com.example.app',
   appName: 'CabaStore',
   webDir: 'out',
   server: {
