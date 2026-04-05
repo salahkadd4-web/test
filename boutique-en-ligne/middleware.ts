@@ -5,24 +5,20 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ 
     req,
     secret: process.env.AUTH_SECRET,
-    secureCookie: process.env.NODE_ENV === 'production',
-    cookieName: process.env.NODE_ENV === 'production' 
-      ? '__Secure-next-auth.session-token'
-      : 'next-auth.session-token',
+    secureCookie: false,
+    cookieName: 'next-auth.session-token',
   })
 
   const { pathname } = req.nextUrl
   const isLoggedIn = !!token
   const isAdmin    = token?.role === 'ADMIN'
 
-  // ── 1. Routes admin → ADMIN uniquement ───────────────
   if (pathname.startsWith('/admin')) {
     if (!isLoggedIn || !isAdmin) {
       return NextResponse.redirect(new URL('/connexion', req.nextUrl))
     }
   }
 
-  // ── 2. Routes protégées client ────────────────────────
   const isProtectedRoute =
     pathname.startsWith('/panier') ||
     pathname.startsWith('/commandes') ||
@@ -35,7 +31,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/connexion', req.nextUrl))
   }
 
-  // ── 3. Déjà connecté → redirect selon rôle ───────────
   if (pathname.startsWith('/connexion') || pathname.startsWith('/inscription')) {
     if (isLoggedIn && isAdmin) {
       return NextResponse.redirect(new URL('/admin', req.nextUrl))
