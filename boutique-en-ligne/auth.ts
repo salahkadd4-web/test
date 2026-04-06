@@ -4,11 +4,21 @@ import Google from 'next-auth/providers/google'
 import { prisma } from './lib/prisma'
 import bcrypt from 'bcryptjs'
 
-const BASE_URL = process.env.NEXTAUTH_URL || 'https://test-rosy-omega-60.vercel.app'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret:     process.env.AUTH_SECRET,
-  trustHost:  true,  // ← CRITIQUE pour Vercel
+  secret: process.env.AUTH_SECRET,
+  useSecureCookies: false,
+  cookies: {
+    sessionToken: {
+      name: 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false, // ← important pour Capacitor
+      },
+    },
+  },
 
   providers: [
     Credentials({
@@ -50,9 +60,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   pages: {
     signIn:  '/connexion',
-    signOut: '/connexion',
-    error:   '/connexion',
-  },
+    signOut: '/',
+    error:   '/connexion',  // ← erreur → page connexion
+    },
 
   session: {
     strategy: 'jwt',
@@ -110,8 +120,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     },
 
+    // ── Redirection après connexion/déconnexion ──────────
     async redirect({ url, baseUrl }) {
-      const base = BASE_URL
+      const base = 'https://test-rosy-omega-60.vercel.app'
+      if (url.includes('localhost')) return base
       if (url.startsWith('/')) return `${base}${url}`
       if (url.startsWith(base)) return url
       return base
