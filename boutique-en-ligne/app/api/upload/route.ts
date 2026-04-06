@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 import cloudinary from '@/lib/cloudinary'
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token || token.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }

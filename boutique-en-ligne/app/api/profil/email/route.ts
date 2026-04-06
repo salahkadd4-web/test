@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 import bcrypt from 'bcryptjs'
 import { sendConfirmationEmail } from '@/lib/mail'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const body = await req.json()

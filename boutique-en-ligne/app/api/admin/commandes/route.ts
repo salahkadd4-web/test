@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 
 async function checkAdmin(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+  const token = await getAuthToken(req)
   return token?.role === 'ADMIN' ? token : null
 }
 

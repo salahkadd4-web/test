@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 import { analyzeReturn } from '@/lib/mlApi'
 
 const reasonMap: Record<string, string> = {
@@ -18,7 +18,7 @@ const genreMap: Record<string, string> = {
 
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const retours = await prisma.return.findMany({
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { orderId, productId, returnReason, description } = await req.json()

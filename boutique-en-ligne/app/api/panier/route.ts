@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 
 // GET — Récupérer le panier
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const panier = await prisma.cart.findUnique({
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 // POST — Ajouter un produit au panier
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { produitId, quantite = 1 } = await req.json()

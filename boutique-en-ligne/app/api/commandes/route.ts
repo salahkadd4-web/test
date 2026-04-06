@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 
 // GET — Récupérer les commandes de l'utilisateur
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const commandes = await prisma.order.findMany({
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 // POST — Créer une commande
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { adresse } = await req.json()
