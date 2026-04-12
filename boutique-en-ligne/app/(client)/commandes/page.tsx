@@ -34,7 +34,7 @@ const statutConfig: Record<string, { label: string; color: string; emoji: string
 }
 
 // ─── Remplace par ta vraie clé et URL Flowmerce ───────────────────────────────
-const FLOWMERCE_URL = 'https://tulip-gulp-coveting.ngrok-free.dev/return/flk_0AnrpWFQbd6r6PxI4qbB7JXJkSmAERD7'
+const FLOWMERCE_URL = 'https://tulip-gulp-coveting.ngrok-free.dev/api/return/flk_0AnrpWFQbd6r6PxI4qbB7JXJkSmAERD7'
 const SHOP_NAME     = 'CabaStore'
 // ─────────────────────────────────────────────────────────────────────────────
 
