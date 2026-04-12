@@ -42,7 +42,7 @@ function CommandesContent() {
   const searchParams   = useSearchParams()
   const success        = searchParams.get('success')
   const { data: session } = useSession()
-  const user = session?.user as { nom?: string; prenom?: string; email?: string } | undefined
+  const user = session?.user as { nom?: string; prenom?: string; name?: string; email?: string } | undefined
 
   const [commandes, setCommandes] = useState<Order[]>([])
   const [loading, setLoading]     = useState(true)
@@ -110,25 +110,27 @@ function CommandesContent() {
     if (!returnCommande || !returnItem || !returnReason.trim()) return
     setReturnLoading(true)
     try {
-      const url = new URL(FLOWMERCE_URL)
-      url.searchParams.set('customer_name',  `${user?.nom ?? ''} ${user?.prenom ?? ''}`.trim())
-      url.searchParams.set('customer_email', user?.email ?? '')
-      url.searchParams.set('product_name',   returnItem.product.nom)
-      url.searchParams.set('order_id',       returnCommande.id)
-      url.searchParams.set('shop_name',      SHOP_NAME)
-      url.searchParams.set('order_date',     returnCommande.createdAt)
-      url.searchParams.set('reason',         returnReason)
-
-      const res = await fetch(url.toString(), { method: 'POST' })
-      if (res.ok) {
-        setReturnResult({
-          success: true,
-          message: 'Votre demande de retour a bien été envoyée. Notre équipe vous contactera sous 48h.',
-        })
+      const res = await fetch('/api/flowmerce-return', {   // ← proxy local
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey:         'flk_0AnrpWFQbd6r6PxI4qbB7JXJkSmAERD7',
+          customer_name:  `${user?.nom ?? ''} ${user?.prenom ?? ''}`.trim() || user?.name || '',
+          customer_email: user?.email ?? '',
+          product_name:   returnItem.product.nom,
+          order_id:       returnCommande.id,
+          shop_name:      'CabaStore',
+          order_date:     returnCommande.createdAt,
+          reason:         returnReason,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setReturnResult({ success: true, message: 'Demande envoyée. Notre équipe vous contactera sous 48h.' })
       } else {
-        setReturnResult({ success: false, message: 'Une erreur est survenue. Veuillez réessayer.' })
+        setReturnResult({ success: false, message: data.error ?? 'Erreur. Réessayez.' })
       }
-    } catch {
+    } catch (err) {
       setReturnResult({ success: false, message: 'Impossible de contacter le serveur. Réessayez plus tard.' })
     } finally {
       setReturnLoading(false)
