@@ -35,7 +35,7 @@ const statutConfig: Record<string, { label: string; color: string; emoji: string
 
 // ── Flowmerce config ──────────────────────────────────────────────────────────
 const FLOWMERCE_BASE    = process.env.NEXT_PUBLIC_FLOWMERCE_URL ?? 'https://tulip-gulp-coveting.ngrok-free.dev'
-const FLOWMERCE_API_KEY = 'flk_YyTkeVs3VMEjWzBwHs4uetlZfCIBaUCK'
+const FLOWMERCE_API_KEY = 'flk_K34y3sJxXNzBezNxBqio4qEPDqPsJfHP'
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CommandesContent() {
