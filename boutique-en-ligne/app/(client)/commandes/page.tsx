@@ -42,7 +42,7 @@ function CommandesContent() {
   const searchParams      = useSearchParams()
   const success           = searchParams.get('success')
   const { data: session } = useSession()
-  const user = session?.user as { nom?: string; prenom?: string; name?: string; email?: string } | undefined
+  const user = session?.user as { nom?: string; prenom?: string; name?: string; email?: string; telephone?: string } | undefined
 
   const [commandes, setCommandes] = useState<Order[]>([])
   const [loading, setLoading]     = useState(true)
@@ -102,6 +102,7 @@ function CommandesContent() {
     const url = new URL(`${FLOWMERCE_BASE}/return/${FLOWMERCE_API_KEY}`)
     url.searchParams.set('customer_name',  `${user?.nom ?? ''} ${user?.prenom ?? ''}`.trim() || user?.name || '')
     url.searchParams.set('customer_email', user?.email ?? '')
+    url.searchParams.set('customer_telephone', user?.telephone ?? '')
     url.searchParams.set('product_name',   item.product.nom)
     url.searchParams.set('order_id',       commande.id)
     url.searchParams.set('shop_name',      'CabaStore')
