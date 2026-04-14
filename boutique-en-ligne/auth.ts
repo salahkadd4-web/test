@@ -48,6 +48,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name:  `${user.prenom} ${user.nom}`,
           email: user.email,
           role:  user.role,
+          telephone: user.telephone ?? null,
         }
       },
     }),
@@ -99,6 +100,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id   = user.id!
         token.role = (user as any).role
+        token.telephone = (user as any).telephone ?? null
       }
       if (account?.provider !== 'credentials' && token.email) {
         const dbUser = await prisma.user.findFirst({
@@ -107,6 +109,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (dbUser) {
           token.id   = dbUser.id
           token.role = dbUser.role
+          token.telephone = dbUser.telephone ?? null
         }
       }
       return token
@@ -116,6 +119,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token) {
         session.user.id   = token.id
         session.user.role = token.role
+        ;(session.user as any).telephone = token.telephone ?? null
       }
       return session
     },

@@ -100,13 +100,19 @@ function CommandesContent() {
   // ── Ouvre la page Flowmerce dans un nouvel onglet ────────────────────────
   const openFlowmerceReturn = (commande: Order, item: OrderItem) => {
     const url = new URL(`${FLOWMERCE_BASE}/return/${FLOWMERCE_API_KEY}`)
-    url.searchParams.set('customer_name',  `${user?.nom ?? ''} ${user?.prenom ?? ''}`.trim() || user?.name || '')
-    url.searchParams.set('customer_email', user?.email ?? '')
-    url.searchParams.set('customer_telephone', user?.telephone ?? '')
-    url.searchParams.set('product_name',   item.product.nom)
-    url.searchParams.set('order_id',       commande.id)
-    url.searchParams.set('shop_name',      'CabaStore')
-    url.searchParams.set('order_date',     commande.createdAt)
+    // Infos client
+    url.searchParams.set('customer_name',      `${user?.nom ?? ''} ${user?.prenom ?? ''}`.trim() || user?.name || '')
+    url.searchParams.set('customer_email',     user?.email ?? '')
+    url.searchParams.set('customer_telephone', (user as any)?.telephone ?? '')
+    // Infos produit & commande
+    url.searchParams.set('product_name',       item.product.nom)
+    url.searchParams.set('product_price',      item.prix.toFixed(2))
+    url.searchParams.set('product_quantity',   String(item.quantite))
+    url.searchParams.set('order_id',           commande.id)
+    url.searchParams.set('order_total',        commande.total.toFixed(2))
+    url.searchParams.set('order_address',      commande.adresse)
+    url.searchParams.set('shop_name',          'CabaStore')
+    url.searchParams.set('order_date',         commande.createdAt)
     window.open(url.toString(), '_blank', 'noopener,noreferrer')
   }
 
