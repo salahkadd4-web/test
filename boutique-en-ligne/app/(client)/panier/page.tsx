@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
@@ -21,7 +20,6 @@ type Cart = {
   items: CartItem[]
 }
 
-// ─── Contrôle de quantité avec input + boutons + validation stock ─────────────
 function QuantiteControl({
   item,
   onUpdate,
@@ -33,7 +31,6 @@ function QuantiteControl({
   const [stockMsg, setStockMsg] = useState('')
   const [updating, setUpdating] = useState(false)
 
-  // Sync si le parent rafraîchit
   useEffect(() => {
     setVal(String(item.quantite))
   }, [item.quantite])
@@ -67,7 +64,6 @@ function QuantiteControl({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        {/* Bouton − */}
         <button
           onClick={() => apply(currentQ - 1)}
           disabled={atMin || updating}
@@ -75,8 +71,6 @@ function QuantiteControl({
         >
           −
         </button>
-
-        {/* Input clavier */}
         <input
           type="number"
           min={1}
@@ -84,7 +78,6 @@ function QuantiteControl({
           value={val}
           onChange={(e) => {
             setVal(e.target.value)
-            // Vérifie en temps réel si dépassement
             const n = Number(e.target.value)
             if (!isNaN(n) && n > item.product.stock) {
               setStockMsg(
@@ -107,8 +100,6 @@ function QuantiteControl({
           }}
           className="w-14 text-center font-semibold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
-
-        {/* Bouton + — bloqué si stock atteint */}
         <button
           onClick={() => apply(currentQ + 1)}
           disabled={atMax || updating}
@@ -118,8 +109,6 @@ function QuantiteControl({
           +
         </button>
       </div>
-
-      {/* Message stock (AJAX-style : apparaît sans rechargement) */}
       {stockMsg && (
         <p className="text-xs text-orange-500 dark:text-orange-400 flex items-center gap-1">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 shrink-0">
@@ -132,7 +121,6 @@ function QuantiteControl({
   )
 }
 
-// ─── Page principale ──────────────────────────────────────────────────────────
 export default function PanierPage() {
   const [panier, setPanier] = useState<Cart | null>(null)
   const [loading, setLoading] = useState(true)
@@ -149,7 +137,9 @@ export default function PanierPage() {
     }
   }
 
-  useEffect(() => { fetchPanier() }, [])
+  useEffect(() => {
+    fetchPanier()
+  }, [])
 
   const updateQuantite = async (itemId: string, quantite: number) => {
     await fetch(`/api/panier/${itemId}`, {
@@ -166,6 +156,9 @@ export default function PanierPage() {
   }
 
   const total = panier?.items.reduce((acc, item) => acc + item.product.prix * item.quantite, 0) ?? 0
+
+  // ✅ NOUVEAU : vérifie si un article dépasse son stock
+  const hasStockError = panier?.items.some((item) => item.quantite > item.product.stock) ?? false
 
   if (loading) {
     return (
@@ -191,9 +184,7 @@ export default function PanierPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">Mon Panier</h1>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         {/* ── Liste des articles ── */}
         <div className="lg:col-span-2 space-y-3">
           {panier.items.map((item) => (
@@ -201,22 +192,14 @@ export default function PanierPage() {
               key={item.id}
               className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
             >
-              {/* Partie haute : image + infos + supprimer */}
               <div className="flex gap-3 p-3">
-                {/* Image */}
                 <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0">
                   {item.product.images[0] ? (
-                    <img
-                      src={item.product.images[0]}
-                      alt={item.product.nom}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={item.product.images[0]} alt={item.product.nom} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>
                   )}
                 </div>
-
-                {/* Infos produit */}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-blue-600 dark:text-blue-400 mb-0.5 truncate">
                     {item.product.category.nom}
@@ -231,8 +214,6 @@ export default function PanierPage() {
                     Stock : {item.product.stock} pièce{item.product.stock > 1 ? 's' : ''}
                   </p>
                 </div>
-
-                {/* Bouton supprimer */}
                 <button
                   onClick={() => supprimerItem(item.id)}
                   className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition self-start mt-0.5 p-1"
@@ -243,8 +224,6 @@ export default function PanierPage() {
                   </svg>
                 </button>
               </div>
-
-              {/* Partie basse : quantité + sous-total */}
               <div className="border-t border-gray-100 dark:border-gray-800 px-3 py-2.5 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
                 <QuantiteControl item={item} onUpdate={updateQuantite} />
                 <div className="text-right">
@@ -261,7 +240,6 @@ export default function PanierPage() {
         {/* ── Résumé commande ── */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-800 h-fit lg:sticky lg:top-20">
           <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Résumé</h2>
-
           <div className="space-y-2 mb-4">
             {panier.items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
@@ -272,7 +250,6 @@ export default function PanierPage() {
               </div>
             ))}
           </div>
-
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-5">
             <div className="flex justify-between font-bold text-lg">
               <span className="text-gray-800 dark:text-gray-100">Total</span>
@@ -280,12 +257,25 @@ export default function PanierPage() {
             </div>
           </div>
 
-          <Link
-            href="/commandes/nouveau"
-            className="block w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-3 rounded-xl text-center transition text-sm"
-          >
-            Passer la commande
-          </Link>
+          {/* ✅ MODIFIÉ : bouton désactivé si hasStockError */}
+          {hasStockError ? (
+            <div className="block w-full bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold py-3 rounded-xl text-center text-sm cursor-not-allowed select-none">
+              Passer la commande
+            </div>
+          ) : (
+            <Link
+              href="/commandes/nouveau"
+              className="block w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-3 rounded-xl text-center transition text-sm"
+            >
+              Passer la commande
+            </Link>
+          )}
+
+          {hasStockError && (
+            <p className="text-xs text-red-500 dark:text-red-400 text-center mt-2">
+              Certains articles dépassent le stock disponible.
+            </p>
+          )}
 
           <Link
             href="/produits"
@@ -294,7 +284,6 @@ export default function PanierPage() {
             ← Continuer les achats
           </Link>
         </div>
-
       </div>
     </div>
   )
