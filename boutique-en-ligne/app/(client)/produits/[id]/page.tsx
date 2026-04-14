@@ -122,10 +122,10 @@ async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: strin
             ) : (
               <span className="text-3xl">📦</span>
             )}
-            <div className="absolute top-2 right-2 flex flex-col gap-2">
+              <div className="absolute top-2 right-2 flex flex-col gap-2">
                           <FavoriIconButton produitId={produit.id} />
                           <CartIconButton produitId={produit.id} stock={produit.stock} />
-                        </div>
+              </div>
           </div>
           <div className="p-3">
             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2">{produit.nom}</h3>

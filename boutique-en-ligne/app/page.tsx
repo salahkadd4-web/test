@@ -173,9 +173,9 @@ async function ProduitsSection() {
             )}
             
             {/* Icônes en overlay (Favoris et Panier) */}
-            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-              <FavoriIconButton produitId={produit.id} />
-              <CartIconButton produitId={produit.id} stock={produit.stock} />
+            <div className="absolute top-2 right-2 flex flex-col gap-2">
+                              <FavoriIconButton produitId={produit.id} />
+                              <CartIconButton produitId={produit.id} stock={produit.stock} />
             </div>
           </div>
 

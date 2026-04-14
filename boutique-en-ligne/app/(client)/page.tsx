@@ -212,12 +212,8 @@ async function ProduitsSection() {
               <span className="text-4xl">📦</span>
             )}
             <div className="absolute top-2 right-2 flex flex-col gap-2">
-              <Suspense fallback={<div className="w-9 h-9 rounded-full bg-white/80 shadow-md" />}>
-                <FavoriIconButton produitId={produit.id} />
-              </Suspense>
-              <Suspense fallback={<div className="w-9 h-9 rounded-full bg-white/80 shadow-md" />}>
-                <CartIconButton produitId={produit.id} stock={produit.stock} />
-              </Suspense>
+                              <FavoriIconButton produitId={produit.id} />
+                              <CartIconButton produitId={produit.id} stock={produit.stock} />
             </div>
           </div>
           <div className="p-4">
