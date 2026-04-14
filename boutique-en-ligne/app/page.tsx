@@ -19,8 +19,8 @@ export default function HomePage() {
             <Image 
               src="/logo_noir.png" 
               alt="" 
-              width={1000}
-              height={1000}
+              width={1750}
+              height={1750}
               className="object-contain invert opacity-20 w-[280px] h-[280px] md:w-[500px] md:h-[500px]"
               priority
             />
