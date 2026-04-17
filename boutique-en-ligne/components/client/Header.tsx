@@ -8,6 +8,32 @@ import Image from 'next/image'
 import { useIsMobile, useHideOnScroll } from '@/app/hooks/useIsMobile'
 import SearchBar from '@/components/client/SearchBar'
 
+const APP_URL = 'https://test-rosy-omega-60.vercel.app'
+
+// ── Icône flèche bas ──────────────────────────────────────────
+function ChevronDown({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="12" height="12" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round"
+      className={`transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'}`}
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  )
+}
+
+// ── Menu items utilisateur ────────────────────────────────────
+const userMenuItems = [
+  { href: '/profil',    label: 'Mon Profil',    icon: '👤' },
+  { href: '/favoris',   label: 'Mes Favoris',   icon: '🤍' },
+  { href: '/panier',    label: 'Mon Panier',     icon: '🛒' },
+  { href: '/commandes', label: 'Mes Commandes',  icon: '📦' },
+  { href: '/retours',   label: 'Mes Retours',    icon: '🔄' },
+  { href: '/messages',  label: 'Messages',       icon: '💬' },
+]
+
 export default function Header() {
   const { data: session } = useSession()
   const router = useRouter()
@@ -36,7 +62,40 @@ export default function Header() {
     }
   }
 
-  // ─── Header Admin ───────────────────────────────────────────
+  // ── Connexion Google adaptée Capacitor ────────────────────
+  const handleGoogle = async () => {
+    try {
+      const { Capacitor } = await import('@capacitor/core')
+
+      if (Capacitor.isNativePlatform()) {
+        // Sur l'app native : utiliser le plugin App pour gérer le deep link
+        // et ouvrir Google dans une WebView intégrée (pas Chrome externe)
+        const { Browser } = await import('@capacitor/browser')
+        const googleUrl = `${APP_URL}/api/auth/signin/google?callbackUrl=${encodeURIComponent(APP_URL + '/')}`
+
+        await Browser.open({
+          url:               googleUrl,
+          windowName:        '_self',      // ← dans l'app, pas Chrome
+          presentationStyle: 'fullscreen', // ← plein écran dans l'app
+          toolbarColor:      '#000000',
+        })
+      } else {
+        // Web normal
+        const { signIn } = await import('next-auth/react')
+        await signIn('google', { callbackUrl: `${APP_URL}/` })
+      }
+    } catch (err) {
+      console.error('Erreur Google:', err)
+    }
+  }
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: `${APP_URL}/`, redirect: true })
+    setUserMenuOpen(false)
+    setMenuOpen(false)
+  }
+
+  // ── Header Admin ──────────────────────────────────────────
   if (session?.user?.role === 'ADMIN') {
     return (
       <header className="bg-black text-white sticky top-0 z-50 border-b border-gray-800">
@@ -48,10 +107,8 @@ export default function Header() {
             <Link href="/" className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors">
               Boutique
             </Link>
-            <button
-              onClick={() => signOut({callbackUrl: 'https://test-rosy-omega-60.vercel.app/', redirect: true })}
-              className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors"
-            >
+            <button onClick={handleSignOut}
+              className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors">
               Déconnexion
             </button>
           </div>
@@ -60,56 +117,49 @@ export default function Header() {
     )
   }
 
-  // ─── Header Mobile ───────────────────────────────────────────
+  // ── Header Mobile ─────────────────────────────────────────
   if (isMobile) {
     return (
-      <header
-        className={`bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-50 border-b border-gray-200 dark:border-gray-800 transition-transform duration-300 ${
-          hidden ? '-translate-y-full' : 'translate-y-0'
-        }`}
-      >
+      <header className={`bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-50 border-b border-gray-200 dark:border-gray-800 transition-transform duration-300 ${
+        hidden ? '-translate-y-full' : 'translate-y-0'
+      }`}>
         <div className="px-4 py-3 flex items-center justify-between">
-          {/* Logo mobile : CABA {logo} STORE */}
+
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-1">
             <span className="text-sm font-light tracking-[0.3em] uppercase text-black dark:text-white">Caba</span>
-            <Image
-              src="/logo_noir.png"
-              alt="Logo"
-              width={32}
-              height={32}
-              className="h-7 w-auto dark:invert"
-              priority
-            />
+            <Image src="/logo_noir.png" alt="Logo" width={32} height={32}
+              className="h-7 w-auto dark:invert" priority />
             <span className="text-sm font-light tracking-[0.3em] uppercase text-black dark:text-white -ml-1">Store</span>
           </Link>
 
-          {/* Bouton connexion / avatar */}
+          {/* Avatar + flèche / Connexion */}
           {session ? (
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="w-8 h-8 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center"
+                className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 rounded-full pl-1 pr-2.5 py-1"
               >
-                <span className="text-white dark:text-gray-900 text-xs font-semibold">
-                  {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
+                {/* Avatar */}
+                <div className="w-7 h-7 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
+                  <span className="text-white dark:text-gray-900 text-xs font-semibold">
+                    {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
+                  </span>
+                </div>
+                {/* Flèche bas */}
+                <span className="text-gray-500 dark:text-gray-400">
+                  <ChevronDown open={userMenuOpen} />
                 </span>
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-12 w-52 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden z-50">
+                <div className="absolute right-0 top-12 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden z-50">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                     <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{session.user?.name}</p>
                     <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
                   </div>
                   <div className="py-1">
-                    {[
-                      { href: '/profil',    label: 'Mon Profil',    icon: '👤' },
-                      { href: '/favoris',   label: 'Mes Favoris',   icon: '🤍' },
-                      { href: '/panier',    label: 'Mon Panier',    icon: '🛒' },
-                      { href: '/commandes', label: 'Mes Commandes', icon: '📦' },
-                      { href: '/retours',   label: 'Mes Retours',   icon: '🔄' },
-                      { href: '/messages',  label: 'Messages',      icon: '💬' },
-                    ].map((item) => (
+                    {userMenuItems.map((item) => (
                       <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors uppercase tracking-widest">
                         <span>{item.icon}</span>
@@ -118,7 +168,7 @@ export default function Header() {
                     ))}
                   </div>
                   <div className="border-t border-gray-100 dark:border-gray-800 py-1">
-                    <button onClick={() => signOut({callbackUrl: 'https://test-rosy-omega-60.vercel.app/', redirect: true})}
+                    <button onClick={handleSignOut}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
                       <span>🚪</span>
                       <span className="text-xs uppercase tracking-widest">Déconnexion</span>
@@ -128,10 +178,8 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <Link
-              href="/connexion"
-              className="bg-black dark:bg-white text-white dark:text-black text-xs uppercase tracking-widest px-4 py-2 rounded-full"
-            >
+            <Link href="/connexion"
+              className="bg-black dark:bg-white text-white dark:text-black text-xs uppercase tracking-widest px-4 py-2 rounded-full">
               Connexion
             </Link>
           )}
@@ -140,14 +188,16 @@ export default function Header() {
     )
   }
 
-  // ─── Header Web (inchangé) ────────────────────────────────────
+  // ── Header Web ────────────────────────────────────────────
   return (
     <>
       <header className="bg-white dark:bg-gray-900 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
+
           <button className="md:hidden text-black dark:text-white" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? '✕' : '☰'}
           </button>
+
           <Link href="/" className="shrink-0">
             <span className="flex items-center gap-x-2 text-lg font-light tracking-[0.4em] uppercase text-black dark:text-white">
               <span>Caba</span>
@@ -156,6 +206,7 @@ export default function Header() {
               <span className="-ml-1">Store</span>
             </span>
           </Link>
+
           <div className="flex items-center gap-6 flex-1">
             <nav className="hidden md:flex items-center gap-6 shrink-0">
               <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors duration-300">Accueil</Link>
@@ -166,17 +217,28 @@ export default function Header() {
               <SearchBar />
             </div>
           </div>
+
           <div className="flex items-center gap-3 shrink-0">
             {session ? (
               <div className="relative" ref={userMenuRef}>
-                <button onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-black transition-colors duration-300">
-                  <div className="w-8 h-8 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
+                {/* Avatar + flèche bas — version web */}
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full pl-1 pr-3 py-1 transition-colors duration-200"
+                >
+                  <div className="w-7 h-7 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
                     <span className="text-white dark:text-gray-900 text-xs font-semibold">
                       {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
                     </span>
                   </div>
+                  <span className="text-xs text-gray-700 dark:text-gray-300 font-medium hidden sm:block max-w-[80px] truncate">
+                    {session.user?.name?.split(' ')[0]}
+                  </span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    <ChevronDown open={userMenuOpen} />
+                  </span>
                 </button>
+
                 {userMenuOpen && (
                   <div className="absolute right-0 top-12 w-52 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden z-50">
                     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
@@ -184,14 +246,7 @@ export default function Header() {
                       <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
                     </div>
                     <div className="py-1">
-                      {[
-                        { href: '/profil',    label: 'Mon Profil',    icon: '👤' },
-                        { href: '/favoris',   label: 'Mes Favoris',   icon: '🤍' },
-                        { href: '/panier',    label: 'Mon Panier',    icon: '🛒' },
-                        { href: '/commandes', label: 'Mes Commandes', icon: '📦' },
-                        { href: '/retours',   label: 'Mes Retours',   icon: '🔄' },
-                        { href: '/messages',  label: 'Messages',      icon: '💬' },
-                      ].map((item) => (
+                      {userMenuItems.map((item) => (
                         <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <span>{item.icon}</span>
@@ -200,7 +255,7 @@ export default function Header() {
                       ))}
                     </div>
                     <div className="border-t border-gray-100 dark:border-gray-800 py-1">
-                      <button onClick={() => signOut({callbackUrl: 'https://test-rosy-omega-60.vercel.app/', redirect: true})}
+                      <button onClick={handleSignOut}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
                         <span>🚪</span>
                         <span className="text-xs uppercase tracking-[0.15em]">Déconnexion</span>
@@ -217,6 +272,8 @@ export default function Header() {
             )}
           </div>
         </div>
+
+        {/* Menu mobile hamburger */}
         {menuOpen && (
           <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-6 py-6 space-y-4">
             <form onSubmit={handleSearch} className="relative mb-4">
@@ -233,14 +290,7 @@ export default function Header() {
               { href: '/', label: 'Accueil' },
               { href: '/categories', label: 'Catégories' },
               { href: '/produits', label: 'Produits' },
-              ...(session ? [
-                { href: '/profil', label: 'Mon Profil' },
-                { href: '/favoris', label: 'Favoris' },
-                { href: '/panier', label: 'Panier' },
-                { href: '/commandes', label: 'Commandes' },
-                { href: '/retours', label: 'Retours' },
-                { href: '/messages', label: 'Messages' },
-              ] : []),
+              ...(session ? userMenuItems.map(i => ({ href: i.href, label: i.label })) : []),
             ].map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
                 className="block text-gray-600 dark:text-gray-300 hover:text-black text-xs uppercase tracking-[0.2em] transition-colors">
@@ -248,8 +298,7 @@ export default function Header() {
               </Link>
             ))}
             {session ? (
-              <button onClick={() => signOut({callbackUrl: 'https://test-rosy-omega-60.vercel.app/', redirect: true})}
-                className="block text-red-500 text-xs uppercase tracking-[0.2em]">
+              <button onClick={handleSignOut} className="block text-red-500 text-xs uppercase tracking-[0.2em]">
                 Déconnexion
               </button>
             ) : (
