@@ -1,1 +1,42 @@
-{"installed":{"client_id":"502936788244-kjr3pb0b8196ru6p3gsb7c2c3oea6fp9.apps.googleusercontent.com","project_id":"nextjs-auth-490800","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs"}}
+{
+  "project_info": {
+    "project_number": "502936788244",
+    "project_id": "nextjs-auth-490800",
+    "storage_bucket": "nextjs-auth-490800.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502936788244:android:cabastore000000000000",
+        "android_client_info": {
+          "package_name": "com.cabastore.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "502936788244-dqait91nm2t0stlg0moj4lua7mpfohfn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cabastore.app",
+            "certificate_hash": "C321BE15512C15E6BF2224070B78A13DD23E0497"
+          }
+        },
+        {
+          "client_id": "502936788244-kjr3pb0b8196ru6p3gsb7c2c3oea6fp9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

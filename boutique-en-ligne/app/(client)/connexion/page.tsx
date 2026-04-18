@@ -108,14 +108,11 @@ function ConnexionContent() {
         // Web normal — OAuth classique
         await signIn('google', { callbackUrl: 'https://test-rosy-omega-60.vercel.app/' })
       }
-    } catch (err: any) {
-      // L'utilisateur a annulé → pas d'erreur affichée
-      if (err?.error !== 'popup_closed_by_user' && err?.message !== 'User cancelled') {
-        setError('Connexion Google annulée ou échouée.')
+      } catch (err: any) {
+        setError(err?.message || err?.code || JSON.stringify(err))
+      } finally {
+        setLoadingGoogle(false)
       }
-    } finally {
-      setLoadingGoogle(false)
-    }
   }
 
   const GoogleIcon = () => (
