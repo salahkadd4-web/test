@@ -10,7 +10,6 @@ import SearchBar from '@/components/client/SearchBar'
 
 const APP_URL = 'https://test-rosy-omega-60.vercel.app'
 
-// ── Icône flèche bas ──────────────────────────────────────────
 function ChevronDown({ open }: { open: boolean }) {
   return (
     <svg
@@ -24,7 +23,6 @@ function ChevronDown({ open }: { open: boolean }) {
   )
 }
 
-// ── Menu items utilisateur ────────────────────────────────────
 const userMenuItems = [
   { href: '/profil',    label: 'Mon Profil',    icon: '👤' },
   { href: '/favoris',   label: 'Mes Favoris',   icon: '🤍' },
@@ -62,25 +60,14 @@ export default function Header() {
     }
   }
 
-  // ── Connexion Google adaptée Capacitor ────────────────────
   const handleGoogle = async () => {
     try {
       const { Capacitor } = await import('@capacitor/core')
-
       if (Capacitor.isNativePlatform()) {
-        // Sur l'app native : utiliser le plugin App pour gérer le deep link
-        // et ouvrir Google dans une WebView intégrée (pas Chrome externe)
         const { Browser } = await import('@capacitor/browser')
         const googleUrl = `${APP_URL}/api/auth/signin/google?callbackUrl=${encodeURIComponent(APP_URL + '/')}`
-
-        await Browser.open({
-          url:               googleUrl,
-          windowName:        '_self',      // ← dans l'app, pas Chrome
-          presentationStyle: 'fullscreen', // ← plein écran dans l'app
-          toolbarColor:      '#000000',
-        })
+        await Browser.open({ url: googleUrl, windowName: '_self', presentationStyle: 'fullscreen', toolbarColor: '#000000' })
       } else {
-        // Web normal
         const { signIn } = await import('next-auth/react')
         await signIn('google', { callbackUrl: `${APP_URL}/` })
       }
@@ -100,17 +87,10 @@ export default function Header() {
     return (
       <header className="bg-black text-white sticky top-0 z-50 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/admin" className="text-sm font-light tracking-[0.4em] uppercase text-gray-300">
-            Admin
-          </Link>
+          <Link href="/admin" className="text-sm font-light tracking-[0.4em] uppercase text-gray-300">Admin</Link>
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors">
-              Boutique
-            </Link>
-            <button onClick={handleSignOut}
-              className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors">
-              Déconnexion
-            </button>
+            <Link href="/" className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors">Boutique</Link>
+            <button onClick={handleSignOut} className="text-gray-400 hover:text-white text-xs uppercase tracking-widest transition-colors">Déconnexion</button>
           </div>
         </div>
       </header>
@@ -124,32 +104,22 @@ export default function Header() {
         hidden ? '-translate-y-full' : 'translate-y-0'
       }`}>
         <div className="px-4 py-3 flex items-center justify-between">
-
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-1">
             <span className="text-sm font-light tracking-[0.3em] uppercase text-black dark:text-white">Caba</span>
-            <Image src="/logo_noir.png" alt="Logo" width={32} height={32}
-              className="h-7 w-auto dark:invert" priority />
+            <Image src="/logo_noir.png" alt="Logo" width={32} height={32} className="h-7 w-auto dark:invert" priority />
             <span className="text-sm font-light tracking-[0.3em] uppercase text-black dark:text-white -ml-1">Store</span>
           </Link>
 
-          {/* Avatar + flèche / Connexion */}
           {session ? (
             <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 rounded-full pl-1 pr-2.5 py-1"
-              >
-                {/* Avatar */}
+              <button onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 rounded-full pl-1 pr-2.5 py-1">
                 <div className="w-7 h-7 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
                   <span className="text-white dark:text-gray-900 text-xs font-semibold">
                     {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
                   </span>
                 </div>
-                {/* Flèche bas */}
-                <span className="text-gray-500 dark:text-gray-400">
-                  <ChevronDown open={userMenuOpen} />
-                </span>
+                <span className="text-gray-500 dark:text-gray-400"><ChevronDown open={userMenuOpen} /></span>
               </button>
 
               {userMenuOpen && (
@@ -162,24 +132,20 @@ export default function Header() {
                     {userMenuItems.map((item) => (
                       <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors uppercase tracking-widest">
-                        <span>{item.icon}</span>
-                        <span>{item.label}</span>
+                        <span>{item.icon}</span><span>{item.label}</span>
                       </Link>
                     ))}
                   </div>
                   <div className="border-t border-gray-100 dark:border-gray-800 py-1">
-                    <button onClick={handleSignOut}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
-                      <span>🚪</span>
-                      <span className="text-xs uppercase tracking-widest">Déconnexion</span>
+                    <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
+                      <span>🚪</span><span className="text-xs uppercase tracking-widest">Déconnexion</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <Link href="/connexion"
-              className="bg-black dark:bg-white text-white dark:text-black text-xs uppercase tracking-widest px-4 py-2 rounded-full">
+            <Link href="/connexion" className="bg-black dark:bg-white text-white dark:text-black text-xs uppercase tracking-widest px-4 py-2 rounded-full">
               Connexion
             </Link>
           )}
@@ -188,10 +154,19 @@ export default function Header() {
     )
   }
 
-  // ── Header Web ────────────────────────────────────────────
+  // ── Header Web — fixed + hide on scroll down ──────────────
   return (
     <>
-      <header className="bg-white dark:bg-gray-900 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+      {/* Spacer pour compenser le fixed (hauteur du header ~65px) */}
+      <div className="h-[65px]" />
+
+      <header className={`
+        bg-white dark:bg-gray-900
+        fixed top-0 left-0 right-0 z-50
+        border-b border-gray-200 dark:border-gray-800
+        transition-transform duration-300 ease-in-out
+        ${hidden ? '-translate-y-full' : 'translate-y-0'}
+      `}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
 
           <button className="md:hidden text-black dark:text-white" onClick={() => setMenuOpen(!menuOpen)}>
@@ -221,11 +196,8 @@ export default function Header() {
           <div className="flex items-center gap-3 shrink-0">
             {session ? (
               <div className="relative" ref={userMenuRef}>
-                {/* Avatar + flèche bas — version web */}
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full pl-1 pr-3 py-1 transition-colors duration-200"
-                >
+                <button onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full pl-1 pr-3 py-1 transition-colors duration-200">
                   <div className="w-7 h-7 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
                     <span className="text-white dark:text-gray-900 text-xs font-semibold">
                       {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
@@ -234,9 +206,7 @@ export default function Header() {
                   <span className="text-xs text-gray-700 dark:text-gray-300 font-medium hidden sm:block max-w-[80px] truncate">
                     {session.user?.name?.split(' ')[0]}
                   </span>
-                  <span className="text-gray-500 dark:text-gray-400">
-                    <ChevronDown open={userMenuOpen} />
-                  </span>
+                  <span className="text-gray-500 dark:text-gray-400"><ChevronDown open={userMenuOpen} /></span>
                 </button>
 
                 {userMenuOpen && (
@@ -298,9 +268,7 @@ export default function Header() {
               </Link>
             ))}
             {session ? (
-              <button onClick={handleSignOut} className="block text-red-500 text-xs uppercase tracking-[0.2em]">
-                Déconnexion
-              </button>
+              <button onClick={handleSignOut} className="block text-red-500 text-xs uppercase tracking-[0.2em]">Déconnexion</button>
             ) : (
               <Link href="/connexion" onClick={() => setMenuOpen(false)}
                 className="block text-gray-600 hover:text-black text-xs uppercase tracking-[0.2em]">
