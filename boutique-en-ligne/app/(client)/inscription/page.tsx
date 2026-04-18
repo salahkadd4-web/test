@@ -180,56 +180,7 @@ function InscriptionContent() {
 
   const handleGoogle = async () => {
     setLoadingGoogle(true)
-    try {
-      const { Capacitor } = await import('@capacitor/core')
-
-      if (Capacitor.isNativePlatform()) {
-        // ✅ Connexion native — dans l'app
-        const { SocialLogin } = await import('@capgo/capacitor-social-login')
-
-        await SocialLogin.initialize({
-          google: {
-            webClientId: process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
-          },
-        })
-
-        const result = await SocialLogin.login({
-          provider: 'google',
-          options: { scopes: ['email', 'profile'] },
-        })
-
-        const googleResult = result.result
-        if (!googleResult || !('idToken' in googleResult) || !googleResult.idToken) {
-          setError('Impossible de récupérer le token Google.')
-          return
-        }
-        const idToken = googleResult.idToken
-        if (!idToken) { setLoadingGoogle(false); return }
-
-        // Vérifier/créer le compte via notre route existante
-        const res = await fetch('/api/auth/google-native', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken }),
-        })
-        const data = await res.json()
-        if (!res.ok || !data.ok) { setError(data.error || 'Erreur Google'); setLoadingGoogle(false); return }
-
-        // Connecter la session
-        await signIn('credentials-google', { userId: data.userId, redirect: false })
-
-        // Aller à l'étape mot de passe (même flow que sur web)
-        router.push('/inscription?etape=google-password')
-
-      } else {
-        // Web normal
-        await signIn('google', { callbackUrl: '/inscription?etape=google-password' })
-      }
-    } catch {
-      setError('Connexion Google annulée.')
-    } finally {
-      setLoadingGoogle(false)
-    }
+    await signIn('google', { callbackUrl: '/inscription?etape=google-password' })
   }
 
   const handleGooglePassword = async (e: React.FormEvent) => {
