@@ -48,19 +48,72 @@ function ConnexionContent() {
 
   const handleGoogle = async () => {
     setLoadingGoogle(true)
+    setError('')
     try {
       const { Capacitor } = await import('@capacitor/core')
+
       if (Capacitor.isNativePlatform()) {
-        const { Browser } = await import('@capacitor/browser')
-        await Browser.open({
-          url: `https://test-rosy-omega-60.vercel.app/api/auth/signin/google?callbackUrl=${encodeURIComponent('https://test-rosy-omega-60.vercel.app/')}`,
-          windowName: '_self',
-          presentationStyle: 'popover',
+        // Connexion Google NATIVE — s'ouvre directement dans l'app
+        const { SocialLogin } = await import('@capgo/capacitor-social-login')
+
+        await SocialLogin.initialize({
+          google: {
+            webClientId: process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
+          },
         })
+
+        const result = await SocialLogin.login({
+          provider: 'google',
+          options: { scopes: ['email', 'profile'] },
+        })
+
+        // GoogleLoginResponse est une union (online | offline).
+        // On vérifie la présence de idToken pour distinguer le cas "online".
+        const googleResult = result.result
+        if (!googleResult || !('idToken' in googleResult) || !googleResult.idToken) {
+          setError('Impossible de récupérer le token Google.')
+          return
+        }
+
+        const idToken = googleResult.idToken
+
+        // Vérifier le token côté serveur et créer/récupérer le compte
+        const res = await fetch('/api/auth/google-native', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        })
+
+        const data = await res.json()
+
+        if (!res.ok || !data.ok) {
+          setError(data.error || 'Erreur lors de la connexion Google.')
+          return
+        }
+
+        // Créer la session NextAuth avec l'userId validé
+        const signInResult = await signIn('credentials-google', {
+          userId: data.userId,
+          redirect: false,
+        })
+
+        if (signInResult?.ok) {
+          router.push('/')
+          router.refresh()
+        } else {
+          setError('Erreur de session. Veuillez réessayer.')
+        }
+
       } else {
+        // Web normal — OAuth classique
         await signIn('google', { callbackUrl: 'https://test-rosy-omega-60.vercel.app/' })
       }
-    } catch {
+    } catch (err: any) {
+      // L'utilisateur a annulé → pas d'erreur affichée
+      if (err?.error !== 'popup_closed_by_user' && err?.message !== 'User cancelled') {
+        setError('Connexion Google annulée ou échouée.')
+      }
+    } finally {
       setLoadingGoogle(false)
     }
   }
@@ -77,7 +130,6 @@ function ConnexionContent() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col lg:flex-row transition-colors duration-300">
 
-      {/* ── Panneau gauche — desktop uniquement ── */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black dark:bg-gray-900 items-center justify-center p-12 border-r border-gray-800">
         <div className="absolute z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-50%,black_10%)]">
           <Image src="/logo_noir.png" alt="" width={750} height={750}
@@ -91,7 +143,6 @@ function ConnexionContent() {
         </div>
       </div>
 
-      {/* ── Formulaire ── */}
       <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto">
         <div className="w-full max-w-sm py-8">
 
@@ -169,7 +220,6 @@ function ConnexionContent() {
           </p>
         </div>
 
-        {/* ── Logo mobile — affiché sous le formulaire sur mobile uniquement ── */}
         <div className="lg:hidden mt-12 flex flex-col items-center gap-3 pb-8">
           <div className="w-16 h-px bg-gray-200 dark:bg-gray-800" />
           <Image src="/logo_noir.png" alt="Caba Store" width={80} height={80}

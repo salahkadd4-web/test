@@ -10,8 +10,10 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
   },
   plugins: {
-    Browser: {
-      presentationStyle: 'popover',
+    SocialLogin: {
+      providers: {
+        google: true,
+      },
     },
   },
 };

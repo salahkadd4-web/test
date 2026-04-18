@@ -21,7 +21,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   providers: [
+
+    // ── 1. Email / Téléphone + mot de passe ──────────────────────────────────
     Credentials({
+      id: 'credentials',
       name: 'Credentials',
       credentials: {
         identifiant: { label: 'Email ou téléphone', type: 'text' },
@@ -53,6 +56,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
 
+    // ── 2. Google natif (mobile Capacitor) ───────────────────────────────────
+    // Appelé après vérification du idToken côté serveur (/api/auth/google-native)
+    // Le client passe uniquement l'userId déjà validé.
+    Credentials({
+      id: 'credentials-google',
+      name: 'Google Native',
+      credentials: {
+        userId: { label: 'User ID', type: 'text' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.userId) return null
+        const user = await prisma.user.findUnique({
+          where: { id: credentials.userId as string },
+        })
+        if (!user) return null
+        return {
+          id:    user.id,
+          name:  `${user.prenom} ${user.nom}`,
+          email: user.email,
+          role:  user.role,
+          telephone: user.telephone ?? null,
+        }
+      },
+    }),
+
+    // ── 3. Google OAuth (web uniquement) ─────────────────────────────────────
     Google({
       clientId:     process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -62,8 +91,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn:  '/connexion',
     signOut: '/',
-    error:   '/connexion',  // ← erreur → page connexion
-    },
+    error:   '/connexion',
+  },
 
   session: {
     strategy: 'jwt',
@@ -71,7 +100,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== 'credentials') {
+      // Pour le provider Google web, créer le compte si besoin
+      if (account?.provider === 'google') {
         try {
           const existing = await prisma.user.findFirst({
             where: { email: user.email ?? '' },
@@ -102,7 +132,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = (user as any).role
         token.telephone = (user as any).telephone ?? null
       }
-      if (account?.provider !== 'credentials' && token.email) {
+      if (account?.provider === 'google' && token.email) {
         const dbUser = await prisma.user.findFirst({
           where: { email: token.email },
         })
@@ -124,7 +154,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     },
 
-    // ── Redirection après connexion/déconnexion ──────────
     async redirect({ url, baseUrl }) {
       const base = 'https://test-rosy-omega-60.vercel.app'
       if (url.includes('localhost')) return base
