@@ -64,7 +64,7 @@ function ConnexionContent() {
 
         await SocialLogin.initialize({
           google: {
-            webClientId: '502936788244-kjr3pb0b8196ru6p3gsb7c2c3oea6fp9.apps.googleusercontent.com',
+            webClientId: '502936788244-dqait91nm2t0stlg0moj4lua7mpfohfn.apps.googleusercontent.com',
           },
         })
 

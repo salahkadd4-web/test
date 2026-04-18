@@ -5,14 +5,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import com.getcapacitor.BridgeActivity;
-import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginHandle;
 import ee.forgr.capacitor.social.login.GoogleProvider;
 import ee.forgr.capacitor.social.login.ModifiedMainActivityForSocialLoginPlugin;
 import ee.forgr.capacitor.social.login.SocialLoginPlugin;
-import java.util.ArrayList;
 
 public class MainActivity extends BridgeActivity implements ModifiedMainActivityForSocialLoginPlugin {
+
+  @Override
+  public void IHaveModifiedTheMainActivityForTheUseWithSocialLoginPlugin() {
+    // Méthode requise par l'interface — ne rien mettre ici
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
       if (pluginHandle == null) return;
       SocialLoginPlugin plugin = (SocialLoginPlugin) pluginHandle.getInstance();
       if (plugin == null) return;
-      plugin.handleGoogleLoginIntent(requestCode, resultCode, data);
+      plugin.handleGoogleLoginIntent(requestCode, data);
     }
   }
 }
