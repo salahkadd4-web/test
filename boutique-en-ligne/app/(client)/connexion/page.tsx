@@ -53,12 +53,17 @@ function ConnexionContent() {
       const { Capacitor } = await import('@capacitor/core')
 
       if (Capacitor.isNativePlatform()) {
-        // Connexion Google NATIVE — s'ouvre directement dans l'app
-        const { SocialLogin } = await import('@capgo/capacitor-social-login')
+        // Import dynamique uniquement sur mobile — ignoré par Vercel
+        const SocialLoginModule = await import('@capgo/capacitor-social-login').catch(() => null)
+        if (!SocialLoginModule) {
+          setError('Plugin Google non disponible.')
+          return
+        }
+        const { SocialLogin } = SocialLoginModule
 
         await SocialLogin.initialize({
           google: {
-            webClientId: process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
+            webClientId: '502936788244-kjr3pb0b8196ru6p3gsb7c2c3oea6fp9.apps.googleusercontent.com',
           },
         })
 
@@ -67,8 +72,6 @@ function ConnexionContent() {
           options: { scopes: ['email', 'profile'] },
         })
 
-        // GoogleLoginResponse est une union (online | offline).
-        // On vérifie la présence de idToken pour distinguer le cas "online".
         const googleResult = result.result
         if (!googleResult || !('idToken' in googleResult) || !googleResult.idToken) {
           setError('Impossible de récupérer le token Google.')
@@ -77,7 +80,6 @@ function ConnexionContent() {
 
         const idToken = googleResult.idToken
 
-        // Vérifier le token côté serveur et créer/récupérer le compte
         const res = await fetch('/api/auth/google-native', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -85,13 +87,11 @@ function ConnexionContent() {
         })
 
         const data = await res.json()
-
         if (!res.ok || !data.ok) {
           setError(data.error || 'Erreur lors de la connexion Google.')
           return
         }
 
-        // Créer la session NextAuth avec l'userId validé
         const signInResult = await signIn('credentials-google', {
           userId: data.userId,
           redirect: false,
@@ -105,14 +105,14 @@ function ConnexionContent() {
         }
 
       } else {
-        // Web normal — OAuth classique
+        // Web normal
         await signIn('google', { callbackUrl: 'https://test-rosy-omega-60.vercel.app/' })
       }
-      } catch (err: any) {
-        setError(err?.message || err?.code || JSON.stringify(err))
-      } finally {
-        setLoadingGoogle(false)
-      }
+    } catch (err: any) {
+      setError(err?.message || err?.code || JSON.stringify(err))
+    } finally {
+      setLoadingGoogle(false)
+    }
   }
 
   const GoogleIcon = () => (
