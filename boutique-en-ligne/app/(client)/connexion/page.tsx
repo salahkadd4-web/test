@@ -54,6 +54,7 @@ function ConnexionContent() {
 
       if (Capacitor.isNativePlatform()) {
         // Import dynamique uniquement sur mobile — ignoré par Vercel
+        // @ts-ignore
         const SocialLoginModule = await import('@capgo/capacitor-social-login').catch(() => null)
         if (!SocialLoginModule) {
           setError('Plugin Google non disponible.')
