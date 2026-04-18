@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
-type Etape = 'identifiant' | 'infos' | 'otp' | 'google-password'
+// ── CORRECTION : 'google-password' supprimé — l'inscription Google ne demande plus de mot de passe
+type Etape = 'identifiant' | 'infos' | 'otp'
 
 const rules = [
   { id: 'length',  label: 'Au moins 8 caractères',         test: (p: string) => p.length >= 8 },
@@ -49,14 +50,14 @@ function GoogleIcon() {
 }
 
 function InscriptionContent() {
-  const router = useRouter()
+  const router       = useRouter()
   const searchParams = useSearchParams()
-  const [loading, setLoading] = useState(false)
+  const [loading,       setLoading]       = useState(false)
   const [loadingGoogle, setLoadingGoogle] = useState(false)
-  const [error, setError] = useState('')
-  const [methode, setMethode] = useState<'email' | 'telephone'>('email')
-  const [etape, setEtape] = useState<Etape>((searchParams.get('etape') as Etape) || 'identifiant')
-  const [code, setCode] = useState('')
+  const [error,         setError]         = useState('')
+  const [methode,       setMethode]       = useState<'email' | 'telephone'>('email')
+  const [etape,         setEtape]         = useState<Etape>('identifiant')
+  const [code,          setCode]          = useState('')
 
   // ── Vérification AJAX ───────────────────────────────
   const [identifiantStatus, setIdentifiantStatus] = useState<'idle' | 'checking' | 'ok' | 'exists' | 'invalid'>('idle')
@@ -67,19 +68,10 @@ function InscriptionContent() {
     motDePasse: '', confirmerMotDePasse: '', age: '', genre: '',
   })
 
-  const [googlePassword, setGooglePassword] = useState('')
-  const [googlePasswordConfirm, setGooglePasswordConfirm] = useState('')
-
-  useEffect(() => {
-    const e = searchParams.get('etape') as Etape
-    if (e) setEtape(e)
-  }, [searchParams])
-
   // ── Vérification identifiant en temps réel ──────────
   const checkIdentifiant = useCallback(async (value: string) => {
     if (!value.trim()) { setIdentifiantStatus('idle'); return }
 
-    // Validation format basique
     if (methode === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       setIdentifiantStatus('invalid'); return
     }
@@ -90,9 +82,9 @@ function InscriptionContent() {
     setIdentifiantStatus('checking')
     try {
       const res = await fetch('/api/auth/verifier-identifiant', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifiant: value.trim() }),
+        body:    JSON.stringify({ identifiant: value.trim() }),
       })
       const data = await res.json()
       setIdentifiantStatus(data.exists ? 'exists' : 'ok')
@@ -117,12 +109,9 @@ function InscriptionContent() {
     setError('')
   }
 
-  // Validation mot de passe
   const passwordValid = rules.every(r => r.test(form.motDePasse))
   const passwordMatch = form.motDePasse === form.confirmerMotDePasse && form.confirmerMotDePasse.length > 0
-
-  // Bouton "Suivant" cliquable seulement si tout est ok
-  const canProceed = identifiantStatus === 'ok' && passwordValid && passwordMatch
+  const canProceed    = identifiantStatus === 'ok' && passwordValid && passwordMatch
 
   // ── Étape 1 → Étape 2 ───────────────────────────────
   const handleNextStep = (e: React.FormEvent) => {
@@ -138,16 +127,16 @@ function InscriptionContent() {
     setLoading(true)
     try {
       const res = await fetch('/api/auth/inscription', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body:    JSON.stringify({
           etape: 1,
           nom: form.nom, prenom: form.prenom,
-          email:     methode === 'email'     ? form.email     : null,
-          telephone: methode === 'telephone' ? form.telephone : null,
+          email:      methode === 'email'     ? form.email     : null,
+          telephone:  methode === 'telephone' ? form.telephone : null,
           motDePasse: form.motDePasse,
-          age:   form.age   ? parseInt(form.age)   : null,
-          genre: form.genre || null,
+          age:        form.age   ? parseInt(form.age)   : null,
+          genre:      form.genre || null,
         }),
       })
       const data = await res.json()
@@ -163,9 +152,9 @@ function InscriptionContent() {
     setLoading(true)
     try {
       const res = await fetch('/api/auth/inscription', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body:    JSON.stringify({
           etape: 2,
           email:     methode === 'email'     ? form.email     : null,
           telephone: methode === 'telephone' ? form.telephone : null,
@@ -178,28 +167,63 @@ function InscriptionContent() {
     } catch { setError('Erreur serveur') } finally { setLoading(false) }
   }
 
+  // ── CORRECTION : Google redirige directement vers / après connexion ─────
+  // Plus de callbackUrl vers google-password — le compte est créé sans mot de passe
   const handleGoogle = async () => {
     setLoadingGoogle(true)
-    await signIn('google', { callbackUrl: '/inscription?etape=google-password' })
-  }
-
-  const handleGooglePassword = async (e: React.FormEvent) => {
-    e.preventDefault()
     setError('')
-    if (!rules.every(r => r.test(googlePassword))) { setError('Le mot de passe ne respecte pas toutes les conditions'); return }
-    if (googlePassword !== googlePasswordConfirm) { setError('Les mots de passe ne correspondent pas'); return }
-    setLoading(true)
     try {
-      const res = await fetch('/api/auth/inscription/google-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ motDePasse: googlePassword }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error); return }
-      router.push('/')
-      router.refresh()
-    } catch { setError('Erreur serveur') } finally { setLoading(false) }
+      const { Capacitor } = await import('@capacitor/core')
+
+      if (Capacitor.isNativePlatform()) {
+        // @ts-ignore
+        const SocialLoginModule = await import('@capgo/capacitor-social-login').catch(() => null)
+        if (!SocialLoginModule) { setError('Plugin Google non disponible.'); return }
+        const { SocialLogin } = SocialLoginModule
+
+        await SocialLogin.initialize({
+          google: {
+            webClientId: '502936788244-dqait91nm2t0stlg0moj4lua7mpfohfn.apps.googleusercontent.com',
+          },
+        })
+
+        const result = await SocialLogin.login({
+          provider: 'google',
+          options: { scopes: ['email', 'profile'] },
+        })
+
+        const googleResult = result.result
+        if (!googleResult || !('idToken' in googleResult) || !googleResult.idToken) {
+          setError('Impossible de récupérer le token Google.')
+          return
+        }
+
+        const res  = await fetch('/api/auth/google-native', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ idToken: googleResult.idToken }),
+        })
+        const data = await res.json()
+
+        if (!res.ok || !data.ok) { setError(data.error || 'Erreur connexion Google.'); return }
+
+        const signInResult = await signIn('credentials-google', {
+          userId:   data.userId,
+          redirect: false,
+        })
+
+        if (signInResult?.ok) { router.push('/'); router.refresh() }
+        else setError('Erreur de session. Veuillez réessayer.')
+
+      } else {
+        // Web — redirige vers / directement, pas vers google-password
+        await signIn('google', { callbackUrl: '/' })
+      }
+    } catch (err: any) {
+      setError(err?.message || err?.code || JSON.stringify(err))
+    } finally {
+      setLoadingGoogle(false)
+    }
   }
 
   const inputClass = "w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-3 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300"
@@ -207,22 +231,22 @@ function InscriptionContent() {
 
   // ── Statut identifiant ──────────────────────────────
   const IdentifiantFeedback = () => {
-    if (identifiantStatus === 'idle') return null
+    if (identifiantStatus === 'idle')     return null
     if (identifiantStatus === 'checking') return (
       <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
         <span className="animate-spin">⟳</span> Vérification...
       </p>
     )
-    if (identifiantStatus === 'ok') return (
+    if (identifiantStatus === 'ok')       return (
       <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Disponible</p>
     )
-    if (identifiantStatus === 'exists') return (
+    if (identifiantStatus === 'exists')   return (
       <p className="text-xs text-red-500 dark:text-red-400 mt-1">
         ✗ Ce {methode === 'email' ? 'email' : 'numéro'} est déjà utilisé —{' '}
         <Link href="/connexion" className="underline">Se connecter</Link>
       </p>
     )
-    if (identifiantStatus === 'invalid') return (
+    if (identifiantStatus === 'invalid')  return (
       <p className="text-xs text-orange-500 dark:text-orange-400 mt-1">
         Format invalide {methode === 'telephone' ? '(ex: 0612345678)' : '(ex: nom@email.com)'}
       </p>
@@ -258,7 +282,6 @@ function InscriptionContent() {
                 <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] text-xs mb-2">Nouveau Client</p>
                 <h2 className="text-3xl font-extralight text-black dark:text-white tracking-wide">Inscription</h2>
                 <div className="w-8 h-px bg-black dark:bg-white mt-4" />
-                {/* Indicateur étapes */}
                 <div className="flex items-center gap-2 mt-4">
                   <div className="w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs flex items-center justify-center font-bold">1</div>
                   <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
@@ -273,7 +296,7 @@ function InscriptionContent() {
                 </div>
               )}
 
-              {/* Google */}
+              {/* Google — redirige directement vers / */}
               <button onClick={handleGoogle} disabled={loadingGoogle || loading}
                 className="w-full flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-[0.15em] py-3.5 transition-colors disabled:opacity-50 mb-6">
                 {loadingGoogle ? <span className="text-gray-400">...</span> : <GoogleIcon />}
@@ -287,7 +310,6 @@ function InscriptionContent() {
               </div>
 
               <form onSubmit={handleNextStep} className="space-y-5">
-
                 {/* Méthode */}
                 <div>
                   <label className={labelClass}>S'inscrire avec</label>
@@ -338,7 +360,6 @@ function InscriptionContent() {
                   )}
                 </div>
 
-                {/* Bouton Suivant — désactivé si conditions non remplies */}
                 <button type="submit" disabled={!canProceed || loading}
                   className={`w-full text-xs uppercase tracking-[0.3em] py-4 transition-all duration-300 mt-2 ${
                     canProceed
@@ -348,14 +369,13 @@ function InscriptionContent() {
                   {loading ? 'Chargement...' : 'Suivant →'}
                 </button>
 
-                {/* Message d'aide si bouton désactivé */}
                 {!canProceed && (form.email || form.telephone) && (
                   <p className="text-xs text-center text-gray-400 dark:text-gray-600">
-                    {identifiantStatus === 'exists' ? 'Cet identifiant est déjà utilisé' :
-                     identifiantStatus === 'invalid' ? 'Format d\'identifiant invalide' :
+                    {identifiantStatus === 'exists'   ? 'Cet identifiant est déjà utilisé' :
+                     identifiantStatus === 'invalid'  ? "Format d'identifiant invalide" :
                      identifiantStatus === 'checking' ? 'Vérification en cours...' :
-                     !passwordValid ? 'Le mot de passe ne respecte pas les conditions' :
-                     !passwordMatch ? 'Les mots de passe ne correspondent pas' :
+                     !passwordValid                   ? 'Le mot de passe ne respecte pas les conditions' :
+                     !passwordMatch                   ? 'Les mots de passe ne correspondent pas' :
                      'Complétez tous les champs'}
                   </p>
                 )}
@@ -379,7 +399,6 @@ function InscriptionContent() {
                 <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] text-xs mb-2">Nouveau Client</p>
                 <h2 className="text-3xl font-extralight text-black dark:text-white tracking-wide">Vos infos</h2>
                 <div className="w-8 h-px bg-black dark:bg-white mt-4" />
-                {/* Indicateur étapes */}
                 <div className="flex items-center gap-2 mt-4">
                   <div className="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-bold">✓</div>
                   <div className="flex-1 h-px bg-black dark:bg-white" />
@@ -423,7 +442,6 @@ function InscriptionContent() {
                   </div>
                 </div>
 
-                {/* Résumé identifiant */}
                 <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3">
                   <p className="text-xs text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">Identifiant choisi</p>
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
@@ -481,47 +499,9 @@ function InscriptionContent() {
             </>
           )}
 
-          {/* ── Mot de passe Google ── */}
-          {etape === 'google-password' && (
-            <>
-              <div className="mb-8">
-                <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] text-xs mb-2">Dernière étape</p>
-                <h2 className="text-3xl font-extralight text-black dark:text-white tracking-wide">Choisir un mot de passe</h2>
-                <div className="w-8 h-px bg-black dark:bg-white mt-4" />
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                Créez un mot de passe pour vous connecter directement avec votre email si besoin.
-              </p>
-              {error && <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 mb-6">{error}</div>}
-              <form onSubmit={handleGooglePassword} className="space-y-5">
-                <div>
-                  <label className={labelClass}>Mot de Passe</label>
-                  <input type="password" value={googlePassword} onChange={(e) => { setGooglePassword(e.target.value); setError('') }} required className={inputClass} placeholder="Minimum 8 caractères" />
-                  <PasswordStrength password={googlePassword} />
-                </div>
-                <div>
-                  <label className={labelClass}>Confirmer</label>
-                  <input type="password" value={googlePasswordConfirm} onChange={(e) => { setGooglePasswordConfirm(e.target.value); setError('') }} required className={inputClass} placeholder="Répétez le mot de passe" />
-                  {googlePasswordConfirm && googlePassword !== googlePasswordConfirm && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">✗ Les mots de passe ne correspondent pas</p>
-                  )}
-                  {googlePasswordConfirm && googlePassword === googlePasswordConfirm && (
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Les mots de passe correspondent</p>
-                  )}
-                </div>
-                <button type="submit" disabled={loading}
-                  className="w-full bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100 text-white dark:text-black text-xs uppercase tracking-[0.3em] py-4 transition-colors disabled:opacity-50 mt-2">
-                  {loading ? 'Enregistrement...' : 'Confirmer et accéder à la boutique'}
-                </button>
-                <Link href="/" className="block w-full text-center text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">
-                  Ignorer pour l'instant →
-                </Link>
-              </form>
-            </>
-          )}
         </div>
 
-        {/* ── Logo mobile — sous le formulaire ── */}
+        {/* ── Logo mobile ── */}
         <div className="lg:hidden mt-8 flex flex-col items-center gap-3 pb-8">
           <div className="w-16 h-px bg-gray-200 dark:bg-gray-800" />
           <Image src="/logo_noir.png" alt="Caba Store" width={80} height={80}

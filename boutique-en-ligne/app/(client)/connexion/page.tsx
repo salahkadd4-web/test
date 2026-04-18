@@ -7,15 +7,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 function ConnexionContent() {
-  const router = useRouter()
+  const router       = useRouter()
   const searchParams = useSearchParams()
-  const inscription = searchParams.get('inscription')
-  const reset = searchParams.get('reset')
+  const inscription  = searchParams.get('inscription')
+  const reset        = searchParams.get('reset')
 
-  const [loading, setLoading] = useState(false)
+  const [loading,       setLoading]       = useState(false)
   const [loadingGoogle, setLoadingGoogle] = useState(false)
-  const [error, setError] = useState('')
-  const [form, setForm] = useState({ identifiant: '', motDePasse: '' })
+  const [error,         setError]         = useState('')
+  const [form,          setForm]          = useState({ identifiant: '', motDePasse: '' })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -29,18 +29,30 @@ function ConnexionContent() {
     try {
       const result = await signIn('credentials', {
         identifiant: form.identifiant,
-        motDePasse: form.motDePasse,
-        redirect: false,
+        motDePasse:  form.motDePasse,
+        redirect:    false,   // ← indispensable pour intercepter les erreurs
       })
-      if (result?.error) { setError('Identifiant ou mot de passe incorrect'); return }
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const res = await fetch('/api/auth/session')
-      const session = await res.json()
-      if (session?.user?.role === 'ADMIN') router.push('/admin')
-      else router.push('/')
-      router.refresh()
+
+      if (result?.error) {
+        // ── CORRECTION : message spécifique pour compte Google ────────────
+        if (result.error.includes('GOOGLE_ACCOUNT')) {
+          setError('Ce compte utilise la connexion Google. Connectez-vous avec le bouton Google.')
+        } else {
+          setError('Identifiant ou mot de passe incorrect.')
+        }
+        return
+      }
+
+      if (result?.ok) {
+        // Lire le rôle depuis la session pour rediriger correctement
+        const res     = await fetch('/api/auth/session')
+        const session = await res.json()
+        if (session?.user?.role === 'ADMIN') router.push('/admin')
+        else router.push('/')
+        router.refresh()
+      }
     } catch {
-      setError('Erreur serveur, veuillez réessayer')
+      setError('Erreur serveur, veuillez réessayer.')
     } finally {
       setLoading(false)
     }
@@ -53,13 +65,9 @@ function ConnexionContent() {
       const { Capacitor } = await import('@capacitor/core')
 
       if (Capacitor.isNativePlatform()) {
-        // Import dynamique uniquement sur mobile — ignoré par Vercel
         // @ts-ignore
         const SocialLoginModule = await import('@capgo/capacitor-social-login').catch(() => null)
-        if (!SocialLoginModule) {
-          setError('Plugin Google non disponible.')
-          return
-        }
+        if (!SocialLoginModule) { setError('Plugin Google non disponible.'); return }
         const { SocialLogin } = SocialLoginModule
 
         await SocialLogin.initialize({
@@ -79,35 +87,26 @@ function ConnexionContent() {
           return
         }
 
-        const idToken = googleResult.idToken
-
-        const res = await fetch('/api/auth/google-native', {
-          method: 'POST',
+        const res  = await fetch('/api/auth/google-native', {
+          method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken }),
+          body:    JSON.stringify({ idToken: googleResult.idToken }),
         })
-
         const data = await res.json()
-        if (!res.ok || !data.ok) {
-          setError(data.error || 'Erreur lors de la connexion Google.')
-          return
-        }
+
+        if (!res.ok || !data.ok) { setError(data.error || 'Erreur connexion Google.'); return }
 
         const signInResult = await signIn('credentials-google', {
-          userId: data.userId,
+          userId:   data.userId,
           redirect: false,
         })
 
-        if (signInResult?.ok) {
-          router.push('/')
-          router.refresh()
-        } else {
-          setError('Erreur de session. Veuillez réessayer.')
-        }
+        if (signInResult?.ok) { router.push('/'); router.refresh() }
+        else setError('Erreur de session. Veuillez réessayer.')
 
       } else {
-        // Web normal
-        await signIn('google', { callbackUrl: 'https://test-rosy-omega-60.vercel.app/' })
+        // Web — OAuth standard, NextAuth gère le redirect
+        await signIn('google', { callbackUrl: '/' })
       }
     } catch (err: any) {
       setError(err?.message || err?.code || JSON.stringify(err))

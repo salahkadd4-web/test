@@ -202,9 +202,11 @@ export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeo
 export const ResetTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
+  code: 'code',
   userId: 'userId',
   expiresAt: 'expiresAt',
   used: 'used',
+  verified: 'verified',
   createdAt: 'createdAt'
 } as const
 

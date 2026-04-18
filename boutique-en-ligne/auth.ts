@@ -4,18 +4,22 @@ import Google from 'next-auth/providers/google'
 import { prisma } from './lib/prisma'
 import bcrypt from 'bcryptjs'
 
+const isProd = process.env.NODE_ENV === 'production'
+const PROD_URL = 'https://test-rosy-omega-60.vercel.app'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,
-  useSecureCookies: false,
+
+  // ── Cookies adaptatifs : secure en prod (HTTPS Vercel), plain en dev (localhost) ──
+  useSecureCookies: isProd,
   cookies: {
     sessionToken: {
-      name: 'next-auth.session-token',
+      name: isProd ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
       options: {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: false, // ← important pour Capacitor
+        secure: isProd,
       },
     },
   },
@@ -32,8 +36,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.identifiant || !credentials?.motDePasse) return null
+
         const identifiant = credentials.identifiant as string
         const motDePasse  = credentials.motDePasse  as string
+
         const user = await prisma.user.findFirst({
           where: {
             OR: [
@@ -42,23 +48,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             ],
           },
         })
+
         if (!user) return null
-        if (!user.motDePasse) return null
+
+        // ── Compte Google sans mot de passe ────────────────────────────────
+        // Renvoie une erreur lisible au lieu de null silencieux
+        if (!user.motDePasse) {
+          throw new Error('GOOGLE_ACCOUNT')
+        }
+
         const passwordMatch = await bcrypt.compare(motDePasse, user.motDePasse)
         if (!passwordMatch) return null
+
         return {
-          id:    user.id,
-          name:  `${user.prenom} ${user.nom}`,
-          email: user.email,
-          role:  user.role,
+          id:        user.id,
+          name:      `${user.prenom} ${user.nom}`,
+          email:     user.email,
+          role:      user.role,
           telephone: user.telephone ?? null,
         }
       },
     }),
 
     // ── 2. Google natif (mobile Capacitor) ───────────────────────────────────
-    // Appelé après vérification du idToken côté serveur (/api/auth/google-native)
-    // Le client passe uniquement l'userId déjà validé.
     Credentials({
       id: 'credentials-google',
       name: 'Google Native',
@@ -67,15 +79,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.userId) return null
+
         const user = await prisma.user.findUnique({
           where: { id: credentials.userId as string },
         })
         if (!user) return null
+
         return {
-          id:    user.id,
-          name:  `${user.prenom} ${user.nom}`,
-          email: user.email,
-          role:  user.role,
+          id:        user.id,
+          name:      `${user.prenom} ${user.nom}`,
+          email:     user.email,
+          role:      user.role,
           telephone: user.telephone ?? null,
         }
       },
@@ -128,8 +142,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     async jwt({ token, user, account }) {
       if (user) {
-        token.id   = user.id!
-        token.role = (user as any).role
+        token.id        = user.id!
+        token.role      = (user as any).role
         token.telephone = (user as any).telephone ?? null
       }
       if (account?.provider === 'google' && token.email) {
@@ -137,8 +151,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: token.email },
         })
         if (dbUser) {
-          token.id   = dbUser.id
-          token.role = dbUser.role
+          token.id        = dbUser.id
+          token.role      = dbUser.role
           token.telephone = dbUser.telephone ?? null
         }
       }
@@ -154,11 +168,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     },
 
+    // ── Redirect adaptatif : localhost en dev, Vercel en prod ────────────────
     async redirect({ url, baseUrl }) {
-      const base = 'https://test-rosy-omega-60.vercel.app'
-      if (url.includes('localhost')) return base
+      const base = isProd ? PROD_URL : baseUrl
+
       if (url.startsWith('/')) return `${base}${url}`
       if (url.startsWith(base)) return url
+
+      // Si en prod et l'url pointe encore sur localhost, forcer Vercel
+      if (isProd && url.includes('localhost')) return base
+
       return base
     },
   },
