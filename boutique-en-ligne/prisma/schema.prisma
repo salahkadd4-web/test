@@ -126,13 +126,13 @@ model Message {
 
 model ResetToken {
   id        String   @id @default(cuid())
-  token     String   @unique   // ID interne aléatoire (jamais envoyé par email)
-  code      String             // Code 6 chiffres envoyé à l'utilisateur
+  token     String   @unique
   userId    String
   expiresAt DateTime
   used      Boolean  @default(false)
-  verified  Boolean  @default(false)
   createdAt DateTime @default(now())
+  verified  Boolean  @default(false)
+  code      String
   user      User     @relation(fields: [userId], references: [id])
 }
 

@@ -1,5 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import NextAuth from 'next-auth'
+import { authConfig } from './auth.config'
+import { NextResponse } from 'next/server'
+
+// Initialisation légère — seulement authConfig, sans Prisma
+const { auth } = NextAuth(authConfig)
 
 // Headers de sécurité appliqués à toutes les réponses
 function applySecurityHeaders(response: NextResponse): NextResponse {
@@ -12,12 +16,13 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   return response
 }
 
-export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+export default auth(function middleware(req) {
+  // En v5, la session est directement sur req.auth
+  const session    = req.auth
+  const isLoggedIn = !!session
+  const isAdmin    = session?.user?.role === 'ADMIN'
 
   const { pathname } = req.nextUrl
-  const isLoggedIn = !!token
-  const isAdmin    = token?.role === 'ADMIN'
 
   // ── Routes admin ──────────────────────────────────────
   if (pathname.startsWith('/admin')) {
@@ -56,7 +61,7 @@ export async function middleware(req: NextRequest) {
   // ── Appliquer les headers à toutes les réponses ───────
   const response = NextResponse.next()
   return applySecurityHeaders(response)
-}
+})
 
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|icons|manifest.json).*)'],

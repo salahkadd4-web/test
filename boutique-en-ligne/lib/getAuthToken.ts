@@ -1,12 +1,16 @@
-import { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import { auth } from '@/auth'
 
-// ── Centralisé et correct pour HTTP (dev) et HTTPS (Vercel) ──
-export async function getAuthToken(req: NextRequest) {
-  return getToken({
-    req,
-    secret: process.env.AUTH_SECRET,
-    // Pas de secureCookie ni cookieName forcé
-    // getToken gère automatiquement __Secure- sur HTTPS
-  })
+/**
+ * Helper v5 — utilise auth() au lieu de getToken()
+ * Retourne la session ou null si non connecté.
+ */
+export async function getAuthToken() {
+  const session = await auth()
+  if (!session?.user) return null
+  return session.user as {
+    id: string
+    email?: string | null
+    role: string
+    telephone?: string | null
+  }
 }

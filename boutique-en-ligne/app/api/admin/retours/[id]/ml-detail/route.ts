@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 import { analyzeReturn } from '@/lib/mlApi'
 
 const reasonMap: Record<string, string> = {
@@ -15,7 +15,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken()
     if (!token || token.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }

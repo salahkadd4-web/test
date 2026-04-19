@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 
 // PATCH — Modifier la quantité
 export async function PATCH(
@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { itemId } = await params
@@ -35,7 +35,7 @@ export async function DELETE(
   { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { itemId } = await params

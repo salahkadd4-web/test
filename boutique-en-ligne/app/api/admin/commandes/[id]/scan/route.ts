@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import { getAuthToken } from '@/lib/getAuthToken'
 import { prisma } from '@/lib/prisma'
 import { scanProduct } from '@/lib/scanApi'
 
@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const token = await getAuthToken()
     if (!token || token.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
