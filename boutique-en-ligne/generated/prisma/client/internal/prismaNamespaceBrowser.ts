@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  VendeurProfile: 'VendeurProfile',
+  VendeurDocument: 'VendeurDocument',
   Category: 'Category',
   Product: 'Product',
   Cart: 'Cart',
@@ -100,13 +102,45 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const VendeurProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  statut: 'statut',
+  nomBoutique: 'nomBoutique',
+  description: 'description',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VendeurProfileScalarFieldEnum = (typeof VendeurProfileScalarFieldEnum)[keyof typeof VendeurProfileScalarFieldEnum]
+
+
+export const VendeurDocumentScalarFieldEnum = {
+  id: 'id',
+  vendeurId: 'vendeurId',
+  type: 'type',
+  label: 'label',
+  description: 'description',
+  fichier: 'fichier',
+  statut: 'statut',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VendeurDocumentScalarFieldEnum = (typeof VendeurDocumentScalarFieldEnum)[keyof typeof VendeurDocumentScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   nom: 'nom',
   description: 'description',
   image: 'image',
+  statut: 'statut',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  vendeurId: 'vendeurId'
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
@@ -122,7 +156,8 @@ export const ProductScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   categoryId: 'categoryId',
-  actif: 'actif'
+  actif: 'actif',
+  vendeurId: 'vendeurId'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
@@ -202,12 +237,12 @@ export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeo
 export const ResetTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
-  code: 'code',
   userId: 'userId',
   expiresAt: 'expiresAt',
   used: 'used',
+  createdAt: 'createdAt',
   verified: 'verified',
-  createdAt: 'createdAt'
+  code: 'code'
 } as const
 
 export type ResetTokenScalarFieldEnum = (typeof ResetTokenScalarFieldEnum)[keyof typeof ResetTokenScalarFieldEnum]

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getAuthToken } from '@/lib/getAuthToken'
 
 async function checkAdmin(req: NextRequest) {
-  const token = await getAuthToken(req)
+  const token = await getAuthToken()
   return token?.role === 'ADMIN' ? token : null
 }
 
@@ -13,9 +13,21 @@ export async function GET(req: NextRequest) {
     const token = await checkAdmin(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
+    const { searchParams } = new URL(req.url)
+    const vendeurId = searchParams.get('vendeurId')
+    const adminOnly = searchParams.get('adminOnly') === 'true'
+
+    const where: any = {}
+    if (vendeurId)  where.vendeurId = vendeurId
+    if (adminOnly)  where.vendeurId = null
+
     const produits = await prisma.product.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
-      include: { category: true },
+      include: {
+        category: true,
+        vendeur: { select: { id: true, nomBoutique: true } },
+      },
     })
 
     return NextResponse.json(produits)

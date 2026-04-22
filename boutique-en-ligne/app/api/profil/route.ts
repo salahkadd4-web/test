@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 
 export async function GET(req: NextRequest) {
   try {
-    const token = await getAuthToken(req)
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const user = await prisma.user.findUnique({
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const token = await getAuthToken(req)
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { nom, prenom, telephone, age, genre, wilaya, motDePasse } = await req.json()

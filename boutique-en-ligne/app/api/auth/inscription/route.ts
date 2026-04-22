@@ -10,7 +10,6 @@ import {
 } from '@/lib/security'
 
 export async function POST(req: NextRequest) {
-  // ── Rate limiting — 5 tentatives / 15 min ────────────
   const limited = rateLimit(req, rateLimits.auth)
   if (limited) return limited
 
@@ -19,18 +18,23 @@ export async function POST(req: NextRequest) {
     const { etape, code } = body
 
     // Sanitisation
-    const nom       = sanitize(body.nom)
-    const prenom    = sanitize(body.prenom)
-    const email     = body.email    ? sanitize(body.email).toLowerCase()    : null
-    const telephone = body.telephone ? sanitize(body.telephone).replace(/\s/g, '') : null
-    const motDePasse = typeof body.motDePasse === 'string' ? body.motDePasse : ''
+    const nom         = sanitize(body.nom)
+    const prenom      = sanitize(body.prenom)
+    const email       = body.email     ? sanitize(body.email).toLowerCase()       : null
+    const telephone   = body.telephone ? sanitize(body.telephone).replace(/\s/g, '') : null
+    const motDePasse  = typeof body.motDePasse === 'string' ? body.motDePasse : ''
+    // Rôle choisi lors de l'inscription : CLIENT (défaut) ou VENDEUR
+    const roleChoisi  = body.role === 'VENDEUR' ? 'VENDEUR' : 'CLIENT'
+    // Nom de boutique — obligatoire pour les vendeurs
+    const nomBoutique = body.nomBoutique ? sanitize(body.nomBoutique) : null
 
-    // ── Étape 1 : Envoi du code ───────────────────────────
+    // ── Étape 1 : Envoi du code ──────────────────────────
     if (etape === 1 || !etape) {
-
-      // Validation champs obligatoires
       if (!nom || !prenom || !motDePasse) {
-        return NextResponse.json({ error: 'Nom, prénom et mot de passe sont obligatoires' }, { status: 400 })
+        return NextResponse.json(
+          { error: 'Nom, prénom et mot de passe sont obligatoires' },
+          { status: 400 }
+        )
       }
 
       if (nom.length > 50 || prenom.length > 50) {
@@ -38,28 +42,42 @@ export async function POST(req: NextRequest) {
       }
 
       if (!email && !telephone) {
-        return NextResponse.json({ error: 'Email ou téléphone est obligatoire' }, { status: 400 })
+        return NextResponse.json(
+          { error: 'Email ou téléphone est obligatoire' },
+          { status: 400 }
+        )
       }
 
-      // Validation mot de passe fort côté serveur
       if (!isStrongPassword(motDePasse)) {
         return NextResponse.json({
-          error: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial'
+          error: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial',
         }, { status: 400 })
       }
 
-      // Inscription par email
+      // Validation spécifique vendeur
+      if (roleChoisi === 'VENDEUR') {
+        if (!nomBoutique || nomBoutique.length < 2) {
+          return NextResponse.json(
+            { error: 'Le nom de la boutique est obligatoire pour les vendeurs (min. 2 caractères)' },
+            { status: 400 }
+          )
+        }
+        if (nomBoutique.length > 100) {
+          return NextResponse.json({ error: 'Nom de boutique trop long (100 caractères max)' }, { status: 400 })
+        }
+      }
+
+      // ── Inscription par email ──
       if (email) {
         if (!isValidEmail(email)) {
           return NextResponse.json({ error: 'Format email invalide' }, { status: 400 })
         }
-
         const existingEmail = await prisma.user.findUnique({ where: { email } })
         if (existingEmail) {
           return NextResponse.json({ error: 'Cet email est déjà utilisé' }, { status: 400 })
         }
 
-        const otpCode = crypto.randomInt(100000, 999999).toString()
+        const otpCode  = crypto.randomInt(100000, 999999).toString()
         const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
 
         await prisma.otpToken.deleteMany({ where: { identifiant: email } })
@@ -68,7 +86,7 @@ export async function POST(req: NextRequest) {
             identifiant: email,
             token: otpCode,
             expiresAt,
-            data: JSON.stringify({ nom, prenom, email, motDePasse }),
+            data: JSON.stringify({ nom, prenom, email, motDePasse, role: roleChoisi, nomBoutique }),
           },
         })
 
@@ -76,12 +94,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'Code envoyé par email', requireOTP: true })
       }
 
-      // Inscription par téléphone
+      // ── Inscription par téléphone ──
       if (telephone) {
         if (!isValidPhone(telephone)) {
           return NextResponse.json({ error: 'Numéro invalide. Format: 05XX XX XX XX' }, { status: 400 })
         }
-
         const existingPhone = await prisma.user.findUnique({ where: { telephone } })
         if (existingPhone) {
           return NextResponse.json({ error: 'Ce numéro est déjà utilisé' }, { status: 400 })
@@ -93,7 +110,7 @@ export async function POST(req: NextRequest) {
             identifiant: telephone,
             token: 'TWILIO_VERIFY',
             expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-            data: JSON.stringify({ nom, prenom, telephone, motDePasse }),
+            data: JSON.stringify({ nom, prenom, telephone, motDePasse, role: roleChoisi, nomBoutique }),
           },
         })
 
@@ -102,9 +119,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Étape 2 : Vérification OTP ────────────────────────
+    // ── Étape 2 : Vérification OTP + création compte ────
     if (etape === 2) {
-      // Rate limiting plus strict sur l'OTP
       const otpLimited = rateLimit(req, rateLimits.otp)
       if (otpLimited) return otpLimited
 
@@ -113,7 +129,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Code requis' }, { status: 400 })
       }
 
-      // Validation format code OTP (6 chiffres)
       if (!/^\d{6}$/.test(String(code))) {
         return NextResponse.json({ error: 'Code invalide' }, { status: 400 })
       }
@@ -127,7 +142,6 @@ export async function POST(req: NextRequest) {
       }
 
       if (email) {
-        // Comparaison en temps constant (évite timing attacks)
         const valid = crypto.timingSafeEqual(
           Buffer.from(otpToken.token),
           Buffer.from(String(code))
@@ -146,26 +160,42 @@ export async function POST(req: NextRequest) {
 
       const savedData = JSON.parse(otpToken.data)
 
-      // Re-validation du mot de passe avant création
       if (!isStrongPassword(savedData.motDePasse)) {
         return NextResponse.json({ error: 'Mot de passe invalide' }, { status: 400 })
       }
 
-      // Hash avec coût élevé (12)
       const hashedPassword = await bcrypt.hash(savedData.motDePasse, 12)
 
-      await prisma.user.create({
+      // Création du compte
+      const newUser = await prisma.user.create({
         data: {
           nom:        savedData.nom,
           prenom:     savedData.prenom,
-          email:      savedData.email      || null,
-          telephone:  savedData.telephone  || null,
+          email:      savedData.email     || null,
+          telephone:  savedData.telephone || null,
           motDePasse: hashedPassword,
+          role:       savedData.role || 'CLIENT',
         },
       })
 
+      // Si vendeur → créer le profil vendeur (bloqué par défaut : EN_ATTENTE)
+      if (savedData.role === 'VENDEUR') {
+        await prisma.vendeurProfile.create({
+          data: {
+            userId:      newUser.id,
+            statut:      'EN_ATTENTE',
+            nomBoutique: savedData.nomBoutique || null,
+          },
+        })
+      }
+
       await prisma.otpToken.delete({ where: { id: otpToken.id } })
-      return NextResponse.json({ message: 'Compte créé avec succès' }, { status: 201 })
+
+      const message = savedData.role === 'VENDEUR'
+        ? 'Compte vendeur créé. Il sera activé après validation par notre équipe.'
+        : 'Compte créé avec succès'
+
+      return NextResponse.json({ message, role: savedData.role }, { status: 201 })
     }
 
     return NextResponse.json({ error: 'Requête invalide' }, { status: 400 })

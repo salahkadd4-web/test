@@ -27,34 +27,34 @@ export type AggregateResetToken = {
 export type ResetTokenMinAggregateOutputType = {
   id: string | null
   token: string | null
-  code: string | null
   userId: string | null
   expiresAt: Date | null
   used: boolean | null
-  verified: boolean | null
   createdAt: Date | null
+  verified: boolean | null
+  code: string | null
 }
 
 export type ResetTokenMaxAggregateOutputType = {
   id: string | null
   token: string | null
-  code: string | null
   userId: string | null
   expiresAt: Date | null
   used: boolean | null
-  verified: boolean | null
   createdAt: Date | null
+  verified: boolean | null
+  code: string | null
 }
 
 export type ResetTokenCountAggregateOutputType = {
   id: number
   token: number
-  code: number
   userId: number
   expiresAt: number
   used: number
-  verified: number
   createdAt: number
+  verified: number
+  code: number
   _all: number
 }
 
@@ -62,34 +62,34 @@ export type ResetTokenCountAggregateOutputType = {
 export type ResetTokenMinAggregateInputType = {
   id?: true
   token?: true
-  code?: true
   userId?: true
   expiresAt?: true
   used?: true
-  verified?: true
   createdAt?: true
+  verified?: true
+  code?: true
 }
 
 export type ResetTokenMaxAggregateInputType = {
   id?: true
   token?: true
-  code?: true
   userId?: true
   expiresAt?: true
   used?: true
-  verified?: true
   createdAt?: true
+  verified?: true
+  code?: true
 }
 
 export type ResetTokenCountAggregateInputType = {
   id?: true
   token?: true
-  code?: true
   userId?: true
   expiresAt?: true
   used?: true
-  verified?: true
   createdAt?: true
+  verified?: true
+  code?: true
   _all?: true
 }
 
@@ -168,12 +168,12 @@ export type ResetTokenGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type ResetTokenGroupByOutputType = {
   id: string
   token: string
-  code: string
   userId: string
   expiresAt: Date
   used: boolean
-  verified: boolean
   createdAt: Date
+  verified: boolean
+  code: string
   _count: ResetTokenCountAggregateOutputType | null
   _min: ResetTokenMinAggregateOutputType | null
   _max: ResetTokenMaxAggregateOutputType | null
@@ -200,24 +200,24 @@ export type ResetTokenWhereInput = {
   NOT?: Prisma.ResetTokenWhereInput | Prisma.ResetTokenWhereInput[]
   id?: Prisma.StringFilter<"ResetToken"> | string
   token?: Prisma.StringFilter<"ResetToken"> | string
-  code?: Prisma.StringFilter<"ResetToken"> | string
   userId?: Prisma.StringFilter<"ResetToken"> | string
   expiresAt?: Prisma.DateTimeFilter<"ResetToken"> | Date | string
   used?: Prisma.BoolFilter<"ResetToken"> | boolean
-  verified?: Prisma.BoolFilter<"ResetToken"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ResetToken"> | Date | string
+  verified?: Prisma.BoolFilter<"ResetToken"> | boolean
+  code?: Prisma.StringFilter<"ResetToken"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type ResetTokenOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
-  code?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   used?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  verified?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -227,24 +227,24 @@ export type ResetTokenWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ResetTokenWhereInput | Prisma.ResetTokenWhereInput[]
   OR?: Prisma.ResetTokenWhereInput[]
   NOT?: Prisma.ResetTokenWhereInput | Prisma.ResetTokenWhereInput[]
-  code?: Prisma.StringFilter<"ResetToken"> | string
   userId?: Prisma.StringFilter<"ResetToken"> | string
   expiresAt?: Prisma.DateTimeFilter<"ResetToken"> | Date | string
   used?: Prisma.BoolFilter<"ResetToken"> | boolean
-  verified?: Prisma.BoolFilter<"ResetToken"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ResetToken"> | Date | string
+  verified?: Prisma.BoolFilter<"ResetToken"> | boolean
+  code?: Prisma.StringFilter<"ResetToken"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "token">
 
 export type ResetTokenOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
-  code?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   used?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  verified?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   _count?: Prisma.ResetTokenCountOrderByAggregateInput
   _max?: Prisma.ResetTokenMaxOrderByAggregateInput
   _min?: Prisma.ResetTokenMinOrderByAggregateInput
@@ -256,88 +256,88 @@ export type ResetTokenScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ResetTokenScalarWhereWithAggregatesInput | Prisma.ResetTokenScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ResetToken"> | string
   token?: Prisma.StringWithAggregatesFilter<"ResetToken"> | string
-  code?: Prisma.StringWithAggregatesFilter<"ResetToken"> | string
   userId?: Prisma.StringWithAggregatesFilter<"ResetToken"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"ResetToken"> | Date | string
   used?: Prisma.BoolWithAggregatesFilter<"ResetToken"> | boolean
-  verified?: Prisma.BoolWithAggregatesFilter<"ResetToken"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ResetToken"> | Date | string
+  verified?: Prisma.BoolWithAggregatesFilter<"ResetToken"> | boolean
+  code?: Prisma.StringWithAggregatesFilter<"ResetToken"> | string
 }
 
 export type ResetTokenCreateInput = {
   id?: string
   token: string
-  code: string
   expiresAt: Date | string
   used?: boolean
-  verified?: boolean
   createdAt?: Date | string
+  verified?: boolean
+  code: string
   user: Prisma.UserCreateNestedOneWithoutResetTokensInput
 }
 
 export type ResetTokenUncheckedCreateInput = {
   id?: string
   token: string
-  code: string
   userId: string
   expiresAt: Date | string
   used?: boolean
-  verified?: boolean
   createdAt?: Date | string
+  verified?: boolean
+  code: string
 }
 
 export type ResetTokenUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   user?: Prisma.UserUpdateOneRequiredWithoutResetTokensNestedInput
 }
 
 export type ResetTokenUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ResetTokenCreateManyInput = {
   id?: string
   token: string
-  code: string
   userId: string
   expiresAt: Date | string
   used?: boolean
-  verified?: boolean
   createdAt?: Date | string
+  verified?: boolean
+  code: string
 }
 
 export type ResetTokenUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ResetTokenUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ResetTokenListRelationFilter = {
@@ -353,34 +353,34 @@ export type ResetTokenOrderByRelationAggregateInput = {
 export type ResetTokenCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
-  code?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   used?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  verified?: Prisma.SortOrder
+  code?: Prisma.SortOrder
 }
 
 export type ResetTokenMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
-  code?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   used?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  verified?: Prisma.SortOrder
+  code?: Prisma.SortOrder
 }
 
 export type ResetTokenMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
-  code?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   used?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  verified?: Prisma.SortOrder
+  code?: Prisma.SortOrder
 }
 
 export type ResetTokenCreateNestedManyWithoutUserInput = {
@@ -428,21 +428,21 @@ export type ResetTokenUncheckedUpdateManyWithoutUserNestedInput = {
 export type ResetTokenCreateWithoutUserInput = {
   id?: string
   token: string
-  code: string
   expiresAt: Date | string
   used?: boolean
-  verified?: boolean
   createdAt?: Date | string
+  verified?: boolean
+  code: string
 }
 
 export type ResetTokenUncheckedCreateWithoutUserInput = {
   id?: string
   token: string
-  code: string
   expiresAt: Date | string
   used?: boolean
-  verified?: boolean
   createdAt?: Date | string
+  verified?: boolean
+  code: string
 }
 
 export type ResetTokenCreateOrConnectWithoutUserInput = {
@@ -477,52 +477,52 @@ export type ResetTokenScalarWhereInput = {
   NOT?: Prisma.ResetTokenScalarWhereInput | Prisma.ResetTokenScalarWhereInput[]
   id?: Prisma.StringFilter<"ResetToken"> | string
   token?: Prisma.StringFilter<"ResetToken"> | string
-  code?: Prisma.StringFilter<"ResetToken"> | string
   userId?: Prisma.StringFilter<"ResetToken"> | string
   expiresAt?: Prisma.DateTimeFilter<"ResetToken"> | Date | string
   used?: Prisma.BoolFilter<"ResetToken"> | boolean
-  verified?: Prisma.BoolFilter<"ResetToken"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ResetToken"> | Date | string
+  verified?: Prisma.BoolFilter<"ResetToken"> | boolean
+  code?: Prisma.StringFilter<"ResetToken"> | string
 }
 
 export type ResetTokenCreateManyUserInput = {
   id?: string
   token: string
-  code: string
   expiresAt: Date | string
   used?: boolean
-  verified?: boolean
   createdAt?: Date | string
+  verified?: boolean
+  code: string
 }
 
 export type ResetTokenUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ResetTokenUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ResetTokenUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -530,51 +530,51 @@ export type ResetTokenUncheckedUpdateManyWithoutUserInput = {
 export type ResetTokenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   token?: boolean
-  code?: boolean
   userId?: boolean
   expiresAt?: boolean
   used?: boolean
-  verified?: boolean
   createdAt?: boolean
+  verified?: boolean
+  code?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["resetToken"]>
 
 export type ResetTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   token?: boolean
-  code?: boolean
   userId?: boolean
   expiresAt?: boolean
   used?: boolean
-  verified?: boolean
   createdAt?: boolean
+  verified?: boolean
+  code?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["resetToken"]>
 
 export type ResetTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   token?: boolean
-  code?: boolean
   userId?: boolean
   expiresAt?: boolean
   used?: boolean
-  verified?: boolean
   createdAt?: boolean
+  verified?: boolean
+  code?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["resetToken"]>
 
 export type ResetTokenSelectScalar = {
   id?: boolean
   token?: boolean
-  code?: boolean
   userId?: boolean
   expiresAt?: boolean
   used?: boolean
-  verified?: boolean
   createdAt?: boolean
+  verified?: boolean
+  code?: boolean
 }
 
-export type ResetTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "code" | "userId" | "expiresAt" | "used" | "verified" | "createdAt", ExtArgs["result"]["resetToken"]>
+export type ResetTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "userId" | "expiresAt" | "used" | "createdAt" | "verified" | "code", ExtArgs["result"]["resetToken"]>
 export type ResetTokenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -593,12 +593,12 @@ export type $ResetTokenPayload<ExtArgs extends runtime.Types.Extensions.Internal
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     token: string
-    code: string
     userId: string
     expiresAt: Date
     used: boolean
-    verified: boolean
     createdAt: Date
+    verified: boolean
+    code: string
   }, ExtArgs["result"]["resetToken"]>
   composites: {}
 }
@@ -1025,12 +1025,12 @@ export interface Prisma__ResetTokenClient<T, Null = never, ExtArgs extends runti
 export interface ResetTokenFieldRefs {
   readonly id: Prisma.FieldRef<"ResetToken", 'String'>
   readonly token: Prisma.FieldRef<"ResetToken", 'String'>
-  readonly code: Prisma.FieldRef<"ResetToken", 'String'>
   readonly userId: Prisma.FieldRef<"ResetToken", 'String'>
   readonly expiresAt: Prisma.FieldRef<"ResetToken", 'DateTime'>
   readonly used: Prisma.FieldRef<"ResetToken", 'Boolean'>
-  readonly verified: Prisma.FieldRef<"ResetToken", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"ResetToken", 'DateTime'>
+  readonly verified: Prisma.FieldRef<"ResetToken", 'Boolean'>
+  readonly code: Prisma.FieldRef<"ResetToken", 'String'>
 }
     
 

@@ -385,6 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
+  VendeurProfile: 'VendeurProfile',
+  VendeurDocument: 'VendeurDocument',
   Category: 'Category',
   Product: 'Product',
   Cart: 'Cart',
@@ -411,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "category" | "product" | "cart" | "cartItem" | "favorite" | "order" | "orderItem" | "message" | "resetToken" | "otpToken" | "return"
+    modelProps: "user" | "vendeurProfile" | "vendeurDocument" | "category" | "product" | "cart" | "cartItem" | "favorite" | "order" | "orderItem" | "message" | "resetToken" | "otpToken" | "return"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -486,6 +488,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    VendeurProfile: {
+      payload: Prisma.$VendeurProfilePayload<ExtArgs>
+      fields: Prisma.VendeurProfileFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VendeurProfileFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VendeurProfileFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>
+        }
+        findFirst: {
+          args: Prisma.VendeurProfileFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VendeurProfileFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>
+        }
+        findMany: {
+          args: Prisma.VendeurProfileFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>[]
+        }
+        create: {
+          args: Prisma.VendeurProfileCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>
+        }
+        createMany: {
+          args: Prisma.VendeurProfileCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VendeurProfileCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>[]
+        }
+        delete: {
+          args: Prisma.VendeurProfileDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>
+        }
+        update: {
+          args: Prisma.VendeurProfileUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>
+        }
+        deleteMany: {
+          args: Prisma.VendeurProfileDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VendeurProfileUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VendeurProfileUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>[]
+        }
+        upsert: {
+          args: Prisma.VendeurProfileUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurProfilePayload>
+        }
+        aggregate: {
+          args: Prisma.VendeurProfileAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVendeurProfile>
+        }
+        groupBy: {
+          args: Prisma.VendeurProfileGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VendeurProfileGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VendeurProfileCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VendeurProfileCountAggregateOutputType> | number
+        }
+      }
+    }
+    VendeurDocument: {
+      payload: Prisma.$VendeurDocumentPayload<ExtArgs>
+      fields: Prisma.VendeurDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VendeurDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VendeurDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.VendeurDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VendeurDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.VendeurDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.VendeurDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.VendeurDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VendeurDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.VendeurDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>
+        }
+        update: {
+          args: Prisma.VendeurDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.VendeurDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VendeurDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VendeurDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.VendeurDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendeurDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.VendeurDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVendeurDocument>
+        }
+        groupBy: {
+          args: Prisma.VendeurDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VendeurDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VendeurDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VendeurDocumentCountAggregateOutputType> | number
         }
       }
     }
@@ -1361,13 +1511,45 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const VendeurProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  statut: 'statut',
+  nomBoutique: 'nomBoutique',
+  description: 'description',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VendeurProfileScalarFieldEnum = (typeof VendeurProfileScalarFieldEnum)[keyof typeof VendeurProfileScalarFieldEnum]
+
+
+export const VendeurDocumentScalarFieldEnum = {
+  id: 'id',
+  vendeurId: 'vendeurId',
+  type: 'type',
+  label: 'label',
+  description: 'description',
+  fichier: 'fichier',
+  statut: 'statut',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VendeurDocumentScalarFieldEnum = (typeof VendeurDocumentScalarFieldEnum)[keyof typeof VendeurDocumentScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   nom: 'nom',
   description: 'description',
   image: 'image',
+  statut: 'statut',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  vendeurId: 'vendeurId'
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
@@ -1383,7 +1565,8 @@ export const ProductScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   categoryId: 'categoryId',
-  actif: 'actif'
+  actif: 'actif',
+  vendeurId: 'vendeurId'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
@@ -1463,12 +1646,12 @@ export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeo
 export const ResetTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
-  code: 'code',
   userId: 'userId',
   expiresAt: 'expiresAt',
   used: 'used',
+  createdAt: 'createdAt',
   verified: 'verified',
-  createdAt: 'createdAt'
+  code: 'code'
 } as const
 
 export type ResetTokenScalarFieldEnum = (typeof ResetTokenScalarFieldEnum)[keyof typeof ResetTokenScalarFieldEnum]
@@ -1603,6 +1786,48 @@ export type EnumGenreFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
  * Reference to a field of type 'Genre[]'
  */
 export type ListEnumGenreFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Genre[]'>
+    
+
+
+/**
+ * Reference to a field of type 'VendeurStatut'
+ */
+export type EnumVendeurStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VendeurStatut'>
+    
+
+
+/**
+ * Reference to a field of type 'VendeurStatut[]'
+ */
+export type ListEnumVendeurStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VendeurStatut[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentStatut'
+ */
+export type EnumDocumentStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentStatut'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentStatut[]'
+ */
+export type ListEnumDocumentStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentStatut[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CategoryStatut'
+ */
+export type EnumCategoryStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CategoryStatut'>
+    
+
+
+/**
+ * Reference to a field of type 'CategoryStatut[]'
+ */
+export type ListEnumCategoryStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CategoryStatut[]'>
     
 
 
@@ -1764,6 +1989,8 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
+  vendeurProfile?: Prisma.VendeurProfileOmit
+  vendeurDocument?: Prisma.VendeurDocumentOmit
   category?: Prisma.CategoryOmit
   product?: Prisma.ProductOmit
   cart?: Prisma.CartOmit

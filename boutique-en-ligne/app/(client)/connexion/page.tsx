@@ -30,16 +30,16 @@ function ConnexionContent() {
       const result = await signIn('credentials', {
         identifiant: form.identifiant,
         motDePasse:  form.motDePasse,
-        redirect:    false,   // ← indispensable pour intercepter les erreurs
+        redirect:    false,
       })
 
       if (result?.error) {
-        // ── CORRECTION : message spécifique pour compte Google ────────────
+        // ── Compte Google ──────────────────────────────────────────────────
         if (result.error.includes('GOOGLE_ACCOUNT')) {
           setError('Ce compte utilise la connexion Google. Connectez-vous avec le bouton Google.')
-        } else {
-          setError('Identifiant ou mot de passe incorrect.')
+          return
         }
+        setError('Identifiant ou mot de passe incorrect.')
         return
       }
 
@@ -47,8 +47,11 @@ function ConnexionContent() {
         // Lire le rôle depuis la session pour rediriger correctement
         const res     = await fetch('/api/auth/session')
         const session = await res.json()
-        if (session?.user?.role === 'ADMIN') router.push('/admin')
+
+        if (session?.user?.role === 'ADMIN')   router.push('/admin')
+        else if (session?.user?.role === 'VENDEUR') router.push('/vendeur')   // ← NOUVEAU
         else router.push('/')
+
         router.refresh()
       }
     } catch {
@@ -105,7 +108,6 @@ function ConnexionContent() {
         else setError('Erreur de session. Veuillez réessayer.')
 
       } else {
-        // Web — OAuth standard, NextAuth gère le redirect
         await signIn('google', { callbackUrl: '/' })
       }
     } catch (err: any) {
@@ -159,6 +161,7 @@ function ConnexionContent() {
               Mot de passe mis à jour avec succès.
             </div>
           )}
+
           {error && (
             <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 mb-6 tracking-wide">
               {error}

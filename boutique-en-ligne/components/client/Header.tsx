@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useIsMobile, useHideOnScroll } from '@/app/hooks/useIsMobile'
 import SearchBar from '@/components/client/SearchBar'
@@ -12,35 +12,33 @@ const APP_URL = 'https://test-rosy-omega-60.vercel.app'
 
 function ChevronDown({ open }: { open: boolean }) {
   return (
-    <svg
-      width="12" height="12" viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" strokeWidth="2.5"
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
       strokeLinecap="round" strokeLinejoin="round"
-      className={`transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'}`}
-    >
+      className={`transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'}`}>
       <polyline points="6 9 12 15 18 9" />
     </svg>
   )
 }
 
 const userMenuItems = [
-  { href: '/profil',    label: 'Mon Profil',    icon: '👤' },
-  { href: '/favoris',   label: 'Mes Favoris',   icon: '🤍' },
-  { href: '/panier',    label: 'Mon Panier',     icon: '🛒' },
-  { href: '/commandes', label: 'Mes Commandes',  icon: '📦' },
-  { href: '/retours',   label: 'Mes Retours',    icon: '🔄' },
-  { href: '/messages',  label: 'Messages',       icon: '💬' },
+  { href: '/profil',    label: 'Mon Profil',   icon: '👤' },
+  { href: '/favoris',   label: 'Mes Favoris',  icon: '🤍' },
+  { href: '/panier',    label: 'Mon Panier',    icon: '🛒' },
+  { href: '/commandes', label: 'Mes Commandes', icon: '📦' },
+  { href: '/retours',   label: 'Mes Retours',   icon: '🔄' },
 ]
 
 export default function Header() {
+  // ── TOUS les hooks doivent être appelés avant tout return conditionnel ──
   const { data: session } = useSession()
-  const router = useRouter()
+  const router            = useRouter()
+  const pathname          = usePathname()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [search, setSearch] = useState('')
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [search, setSearch]             = useState('')
+  const [menuOpen, setMenuOpen]         = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
-  const isMobile = useIsMobile()
-  const hidden = useHideOnScroll()
+  const isMobile    = useIsMobile()
+  const hidden      = useHideOnScroll()
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -51,6 +49,11 @@ export default function Header() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // ── Masquer sur les pages /vendeur (le layout vendeur a son propre header) ──
+  if (pathname?.startsWith('/vendeur')) return null
+
+  const isVendeur = session?.user?.role === 'VENDEUR'
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,15 +68,13 @@ export default function Header() {
       const { Capacitor } = await import('@capacitor/core')
       if (Capacitor.isNativePlatform()) {
         const { Browser } = await import('@capacitor/browser')
-        const googleUrl = `${APP_URL}/api/auth/signin/google?callbackUrl=${encodeURIComponent(APP_URL + '/')}`
-        await Browser.open({ url: googleUrl, windowName: '_self', presentationStyle: 'fullscreen', toolbarColor: '#000000' })
+        const url = `${APP_URL}/api/auth/signin/google?callbackUrl=${encodeURIComponent(APP_URL + '/')}`
+        await Browser.open({ url, windowName: '_self', presentationStyle: 'fullscreen', toolbarColor: '#000000' })
       } else {
         const { signIn } = await import('next-auth/react')
         await signIn('google', { callbackUrl: `${APP_URL}/` })
       }
-    } catch (err) {
-      console.error('Erreur Google:', err)
-    }
+    } catch (err) { console.error('Erreur Google:', err) }
   }
 
   const handleSignOut = () => {
@@ -82,7 +83,7 @@ export default function Header() {
     setMenuOpen(false)
   }
 
-  // ── Header Admin ──────────────────────────────────────────
+  // ── Header Admin ───────────────────────────────────────────────────────────
   if (session?.user?.role === 'ADMIN') {
     return (
       <header className="bg-black text-white sticky top-0 z-50 border-b border-gray-800">
@@ -97,72 +98,89 @@ export default function Header() {
     )
   }
 
-  // ── Header Mobile ─────────────────────────────────────────
+  // ── Header Mobile ──────────────────────────────────────────────────────────
   if (isMobile) {
     return (
       <header className={`bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-50 border-b border-gray-200 dark:border-gray-800 transition-transform duration-300 ${
         hidden ? '-translate-y-full' : 'translate-y-0'
       }`}>
         <div className="px-4 py-3 flex items-center justify-between">
+
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-1">
             <span className="text-sm font-light tracking-[0.3em] uppercase text-black dark:text-white">Caba</span>
             <Image src="/logo_noir.png" alt="Logo" width={32} height={32} className="h-7 w-auto dark:invert" priority />
             <span className="text-sm font-light tracking-[0.3em] uppercase text-black dark:text-white -ml-1">Store</span>
           </Link>
 
-          {session ? (
-            <div className="relative" ref={userMenuRef}>
-              <button onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 rounded-full pl-1 pr-2.5 py-1">
-                <div className="w-7 h-7 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
-                  <span className="text-white dark:text-gray-900 text-xs font-semibold">
-                    {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
-                  </span>
-                </div>
-                <span className="text-gray-500 dark:text-gray-400"><ChevronDown open={userMenuOpen} /></span>
-              </button>
+          <div className="flex items-center gap-2">
+            {/* Bouton Espace Vendeur → retour côté vendeur */}
+            {isVendeur && (
+              <Link href="/vendeur"
+                className="flex items-center gap-1 text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-full font-medium active:scale-95 transition-all">
+                <span>🏪</span>
+                <span>Vendeur</span>
+              </Link>
+            )}
 
-              {userMenuOpen && (
-                <div className="absolute right-0 top-12 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden z-50">
-                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{session.user?.name}</p>
-                    <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
+            {session ? (
+              <div className="relative" ref={userMenuRef}>
+                <button onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 rounded-full pl-1 pr-2.5 py-1">
+                  <div className="w-7 h-7 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
+                    <span className="text-white dark:text-gray-900 text-xs font-semibold">
+                      {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
+                    </span>
                   </div>
-                  <div className="py-1">
-                    {userMenuItems.map((item) => (
-                      <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors uppercase tracking-widest">
-                        <span>{item.icon}</span><span>{item.label}</span>
-                      </Link>
-                    ))}
+                  <span className="text-gray-500 dark:text-gray-400"><ChevronDown open={userMenuOpen} /></span>
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-12 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                      <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{session.user?.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
+                    </div>
+                    <div className="py-1">
+                      {userMenuItems.map((item) => (
+                        <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors uppercase tracking-widest">
+                          <span>{item.icon}</span><span>{item.label}</span>
+                        </Link>
+                      ))}
+                      {isVendeur && (
+                        <Link href="/vendeur" onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors uppercase tracking-widest font-medium">
+                          <span>🏪</span><span>Espace Vendeur</span>
+                        </Link>
+                      )}
+                    </div>
+                    <div className="border-t border-gray-100 dark:border-gray-800 py-1">
+                      <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
+                        <span>🚪</span><span className="text-xs uppercase tracking-widest">Déconnexion</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="border-t border-gray-100 dark:border-gray-800 py-1">
-                    <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
-                      <span>🚪</span><span className="text-xs uppercase tracking-widest">Déconnexion</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link href="/connexion" className="bg-black dark:bg-white text-white dark:text-black text-xs uppercase tracking-widest px-4 py-2 rounded-full">
-              Connexion
-            </Link>
-          )}
+                )}
+              </div>
+            ) : (
+              <Link href="/connexion" className="bg-black dark:bg-white text-white dark:text-black text-xs uppercase tracking-widest px-4 py-2 rounded-full">
+                Connexion
+              </Link>
+            )}
+          </div>
         </div>
       </header>
     )
   }
 
-  // ── Header Web — fixed + hide on scroll down ──────────────
+  // ── Header Web — fixed + hide on scroll ───────────────────────────────────
   return (
     <>
-      {/* Spacer pour compenser le fixed (hauteur du header ~65px) */}
       <div className="h-[65px]" />
 
       <header className={`
-        bg-white dark:bg-gray-900
-        fixed top-0 left-0 right-0 z-50
+        bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-50
         border-b border-gray-200 dark:border-gray-800
         transition-transform duration-300 ease-in-out
         ${hidden ? '-translate-y-full' : 'translate-y-0'}
@@ -176,17 +194,16 @@ export default function Header() {
           <Link href="/" className="shrink-0">
             <span className="flex items-center gap-x-2 text-lg font-light tracking-[0.4em] uppercase text-black dark:text-white">
               <span>Caba</span>
-              <Image src="/logo_noir.png" alt="Caba Store Logo" width={50} height={50}
-                className="h-8 w-auto block dark:invert" priority />
+              <Image src="/logo_noir.png" alt="Caba Store Logo" width={50} height={50} className="h-8 w-auto block dark:invert" priority />
               <span className="-ml-1">Store</span>
             </span>
           </Link>
 
           <div className="flex items-center gap-6 flex-1">
             <nav className="hidden md:flex items-center gap-6 shrink-0">
-              <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors duration-300">Accueil</Link>
-              <Link href="/categories" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors duration-300">Catégories</Link>
-              <Link href="/produits" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors duration-300">Produits</Link>
+              <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Accueil</Link>
+              <Link href="/categories" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Catégories</Link>
+              <Link href="/produits" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Produits</Link>
             </nav>
             <div className="flex-1 max-w-sm hidden md:flex items-center">
               <SearchBar />
@@ -194,10 +211,19 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
+            {/* Bouton Espace Vendeur visible en desktop */}
+            {isVendeur && (
+              <Link href="/vendeur"
+                className="hidden md:flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-3 py-2 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-all">
+                <span>🏪</span>
+                <span className="uppercase tracking-widest">Espace Vendeur</span>
+              </Link>
+            )}
+
             {session ? (
               <div className="relative" ref={userMenuRef}>
                 <button onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full pl-1 pr-3 py-1 transition-colors duration-200">
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full pl-1 pr-3 py-1 transition-colors">
                   <div className="w-7 h-7 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
                     <span className="text-white dark:text-gray-900 text-xs font-semibold">
                       {session.user?.name?.charAt(0)?.toUpperCase() || '?'}
@@ -223,6 +249,13 @@ export default function Header() {
                           <span className="text-xs uppercase tracking-[0.15em]">{item.label}</span>
                         </Link>
                       ))}
+                      {isVendeur && (
+                        <Link href="/vendeur" onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors">
+                          <span>🏪</span>
+                          <span className="text-xs uppercase tracking-[0.15em] font-medium">Espace Vendeur</span>
+                        </Link>
+                      )}
                     </div>
                     <div className="border-t border-gray-100 dark:border-gray-800 py-1">
                       <button onClick={handleSignOut}
@@ -236,14 +269,14 @@ export default function Header() {
               </div>
             ) : (
               <>
-                <Link href="/connexion" className="text-gray-500 dark:text-gray-400 hover:text-black text-xs uppercase tracking-[0.2em] transition-colors duration-300">Connexion</Link>
-                <Link href="/inscription" className="bg-black dark:bg-white dark:text-black text-white text-xs uppercase tracking-[0.2em] px-5 py-2.5 transition-colors duration-300">S'inscrire</Link>
+                <Link href="/connexion" className="text-gray-500 dark:text-gray-400 hover:text-black text-xs uppercase tracking-[0.2em] transition-colors">Connexion</Link>
+                <Link href="/inscription" className="bg-black dark:bg-white dark:text-black text-white text-xs uppercase tracking-[0.2em] px-5 py-2.5 transition-colors">S'inscrire</Link>
               </>
             )}
           </div>
         </div>
 
-        {/* Menu mobile hamburger */}
+        {/* Menu hamburger mobile */}
         {menuOpen && (
           <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-6 py-6 space-y-4">
             <form onSubmit={handleSearch} className="relative mb-4">
@@ -267,13 +300,17 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+            {isVendeur && (
+              <Link href="/vendeur" onClick={() => setMenuOpen(false)}
+                className="block text-emerald-600 dark:text-emerald-400 text-xs uppercase tracking-[0.2em] font-medium">
+                🏪 Espace Vendeur
+              </Link>
+            )}
             {session ? (
               <button onClick={handleSignOut} className="block text-red-500 text-xs uppercase tracking-[0.2em]">Déconnexion</button>
             ) : (
               <Link href="/connexion" onClick={() => setMenuOpen(false)}
-                className="block text-gray-600 hover:text-black text-xs uppercase tracking-[0.2em]">
-                Connexion
-              </Link>
+                className="block text-gray-600 hover:text-black text-xs uppercase tracking-[0.2em]">Connexion</Link>
             )}
           </div>
         )}

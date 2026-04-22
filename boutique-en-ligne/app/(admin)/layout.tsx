@@ -3,15 +3,18 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+
 export const dynamic = 'force-dynamic'
 
 const navItems = [
   { href: '/admin',            label: 'Tableau de bord', icon: '📊' },
-  { href: '/admin/produits',   label: 'Produits',         icon: '📦' },
-  { href: '/admin/categories', label: 'Catégories',       icon: '🏷️' },
-  { href: '/admin/clients',    label: 'Clients',          icon: '👥' },
-  { href: '/admin/commandes',  label: 'Commandes',        icon: '🛒' },
-  { href: '/admin/retours',    label: 'Retours',          icon: '🔄' },
+  { href: '/admin/produits',   label: 'Produits',        icon: '📦' },
+  { href: '/admin/categories', label: 'Catégories',      icon: '🏷️' },
+  { href: '/admin/clients',    label: 'Clients',         icon: '👥' },
+  { href: '/admin/vendeurs',   label: 'Vendeurs',        icon: '🏪' },  // ← NOUVEAU
+  { href: '/admin/commandes',  label: 'Commandes',       icon: '🛒' },
+  { href: '/admin/retours',    label: 'Retours',         icon: '🔄' },
+  { href: '/admin/stats',      label: 'Statistiques',    icon: '📈' },  // ← NOUVEAU
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +24,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-950 transition-colors duration-300">
 
-      {/* ── Sidebar desktop + overlay mobile ─────────── */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
@@ -38,7 +40,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
       `}>
-        {/* Logo sidebar */}
         <div className="p-5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <h1 className="text-base font-bold text-purple-600 dark:text-purple-400">⚙️ Admin Panel</h1>
           <button
@@ -49,7 +50,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100%-64px)]">
           {navItems.map((item) => {
             const isActive = pathname === item.href
@@ -72,10 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
       </aside>
 
-      {/* ── Contenu principal ─────────────────────────── */}
       <div className="lg:ml-64 flex flex-col min-h-screen">
-
-        {/* Topbar mobile */}
         <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -88,7 +85,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
           </button>
 
-          {/* Titre de la page courante */}
           <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 lg:hidden">
             {navItems.find(i => i.href === pathname)?.label || 'Admin'}
           </p>
@@ -100,7 +96,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-x-hidden">
           {children}
         </main>

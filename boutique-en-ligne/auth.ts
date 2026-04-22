@@ -13,7 +13,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   providers: [
 
-    // ── 1. Email / Téléphone + mot de passe ──────────────────────────────────
+    // ── 1. Email / Téléphone + mot de passe ────────────────────────────────
     Credentials({
       id: 'credentials',
       name: 'Credentials',
@@ -34,6 +34,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               { telephone: identifiant },
             ],
           },
+          include: { vendeurProfile: true },
         })
 
         if (!user) return null
@@ -45,17 +46,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const passwordMatch = await bcrypt.compare(motDePasse, user.motDePasse)
         if (!passwordMatch) return null
 
+        // ── Statut vendeur : on laisse TOUJOURS passer la connexion ──
+        // VendeurGuard (Server Component) affiche la page adaptée selon le statut :
+        //   EN_ATTENTE      → page "en cours de validation"
+        //   SUSPENDU        → page "compte suspendu"
+        //   PIECES_REQUISES → page d'upload des documents
+        //   APPROUVE        → dashboard normal
+
         return {
-          id:        user.id,
-          name:      `${user.prenom} ${user.nom}`,
-          email:     user.email,
-          role:      user.role,
-          telephone: user.telephone ?? null,
+          id:              user.id,
+          name:            `${user.prenom} ${user.nom}`,
+          email:           user.email,
+          role:            user.role,
+          telephone:       user.telephone ?? null,
+          vendeurStatut:   user.vendeurProfile?.statut ?? null,
         }
       },
     }),
 
-    // ── 2. Google natif (mobile Capacitor) ───────────────────────────────────
+    // ── 2. Google natif (mobile Capacitor) ──────────────────────────────────
     Credentials({
       id: 'credentials-google',
       name: 'Google Native',
@@ -67,20 +76,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const user = await prisma.user.findUnique({
           where: { id: credentials.userId as string },
+          include: { vendeurProfile: true },
         })
         if (!user) return null
 
         return {
-          id:        user.id,
-          name:      `${user.prenom} ${user.nom}`,
-          email:     user.email,
-          role:      user.role,
-          telephone: user.telephone ?? null,
+          id:            user.id,
+          name:          `${user.prenom} ${user.nom}`,
+          email:         user.email,
+          role:          user.role,
+          telephone:     user.telephone ?? null,
+          vendeurStatut: user.vendeurProfile?.statut ?? null,
         }
       },
     }),
 
-    // ── 3. Google OAuth (web uniquement) ─────────────────────────────────────
+    // ── 3. Google OAuth (web uniquement) ────────────────────────────────────
     Google({
       clientId:     process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -116,18 +127,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     async jwt({ token, user, account }) {
       if (user) {
-        token.id        = user.id!
-        token.role      = (user as any).role
-        token.telephone = (user as any).telephone ?? null
+        token.id            = user.id!
+        token.role          = (user as any).role
+        token.telephone     = (user as any).telephone ?? null
+        token.vendeurStatut = (user as any).vendeurStatut ?? null
       }
       if (account?.provider === 'google' && token.email) {
         const dbUser = await prisma.user.findFirst({
           where: { email: token.email },
+          include: { vendeurProfile: true },
         })
         if (dbUser) {
-          token.id        = dbUser.id
-          token.role      = dbUser.role
-          token.telephone = dbUser.telephone ?? null
+          token.id            = dbUser.id
+          token.role          = dbUser.role
+          token.telephone     = dbUser.telephone ?? null
+          token.vendeurStatut = dbUser.vendeurProfile?.statut ?? null
         }
       }
       return token
@@ -135,9 +149,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     async session({ session, token }) {
       if (token) {
-        session.user.id   = token.id   as string
-        session.user.role = token.role as string
-        ;(session.user as any).telephone = token.telephone ?? null
+        session.user.id            = token.id   as string
+        session.user.role          = token.role as string
+        ;(session.user as any).telephone     = token.telephone     ?? null
+        ;(session.user as any).vendeurStatut = token.vendeurStatut ?? null
       }
       return session
     },

@@ -1,526 +1,545 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
-// ── CORRECTION : 'google-password' supprimé — l'inscription Google ne demande plus de mot de passe
-type Etape = 'identifiant' | 'infos' | 'otp'
+// ─────────────────────────────────────────────────────────────────────────────
+// Page d'inscription — design cohérent avec la page connexion (luxe minimaliste)
+// Principes IHM appliqués :
+//   • Loi de Hick  → 2 rôles seulement, présentés en premier pour cadrer le flow
+//   • Loi de Fitts → zones tactiles larges, bouton principal pleine largeur
+//   • Visibilité du système → stepper, états loading/error/success explicites
+//   • Divulgation progressive → étape 1 = formulaire, étape 2 = OTP uniquement
+//   • Prévention des erreurs → bouton désactivé si champs manquants
+//   • Cohérence → même split-screen, même typographie, même palette que /connexion
+// ─────────────────────────────────────────────────────────────────────────────
 
-const rules = [
-  { id: 'length',  label: 'Au moins 8 caractères',         test: (p: string) => p.length >= 8 },
-  { id: 'upper',   label: 'Au moins une lettre majuscule', test: (p: string) => /[A-Z]/.test(p) },
-  { id: 'lower',   label: 'Au moins une lettre minuscule', test: (p: string) => /[a-z]/.test(p) },
-  { id: 'number',  label: 'Au moins un chiffre',           test: (p: string) => /[0-9]/.test(p) },
-  { id: 'special', label: 'Au moins un caractère spécial', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
-]
+export default function InscriptionPage() {
+  const router = useRouter()
 
-function PasswordStrength({ password }: { password: string }) {
-  if (!password) return null
-  return (
-    <div className="mt-3 space-y-1.5">
-      {rules.map((rule) => {
-        const ok = rule.test(password)
-        return (
-          <div key={rule.id} className="flex items-center gap-2">
-            <span className={`text-xs ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'}`}>
-              {ok ? '✓' : '○'}
-            </span>
-            <span className={`text-xs ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}`}>
-              {rule.label}
-            </span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function GoogleIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24">
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-    </svg>
-  )
-}
-
-function InscriptionContent() {
-  const router       = useRouter()
-  const searchParams = useSearchParams()
-  const [loading,       setLoading]       = useState(false)
-  const [loadingGoogle, setLoadingGoogle] = useState(false)
-  const [error,         setError]         = useState('')
-  const [methode,       setMethode]       = useState<'email' | 'telephone'>('email')
-  const [etape,         setEtape]         = useState<Etape>('identifiant')
-  const [code,          setCode]          = useState('')
-
-  // ── Vérification AJAX ───────────────────────────────
-  const [identifiantStatus, setIdentifiantStatus] = useState<'idle' | 'checking' | 'ok' | 'exists' | 'invalid'>('idle')
-  const [checkTimer, setCheckTimer] = useState<NodeJS.Timeout | null>(null)
-
+  const [etape, setEtape]                     = useState<1 | 2>(1)
+  const [role, setRole]                       = useState<'CLIENT' | 'VENDEUR'>('CLIENT')
+  const [identifiantType, setIdentifiantType] = useState<'email' | 'telephone'>('email')
   const [form, setForm] = useState({
     nom: '', prenom: '', email: '', telephone: '',
-    motDePasse: '', confirmerMotDePasse: '', age: '', genre: '',
+    motDePasse: '', nomBoutique: '',
   })
+  const [code, setCode]       = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [showPwd, setShowPwd] = useState(false)
 
-  // ── Vérification identifiant en temps réel ──────────
-  const checkIdentifiant = useCallback(async (value: string) => {
-    if (!value.trim()) { setIdentifiantStatus('idle'); return }
+  // ── AJAX — vérification disponibilité identifiant ─────────────────────────
+  // Même pattern que /recuperer-mot-de-passe mais inversé :
+  //   found    → ❌ "Déjà utilisé"  (rouge)
+  //   notfound → ✅ "Disponible"    (vert)
+  const [checkingId, setCheckingId] = useState(false)
+  const [idStatus, setIdStatus]     = useState<'idle' | 'available' | 'taken'>('idle')
+  const debounceRef                 = useRef<NodeJS.Timeout | null>(null)
 
-    if (methode === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      setIdentifiantStatus('invalid'); return
+  useEffect(() => {
+    const identifiant = identifiantType === 'email' ? form.email : form.telephone
+    if (!identifiant.trim() || (identifiantType === 'email' && !identifiant.includes('@'))) {
+      setIdStatus('idle')
+      return
     }
-    if (methode === 'telephone' && !/^(05|06|07)\d{8}$/.test(value.replace(/\s/g, ''))) {
-      setIdentifiantStatus('invalid'); return
-    }
-
-    setIdentifiantStatus('checking')
-    try {
-      const res = await fetch('/api/auth/verifier-identifiant', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ identifiant: value.trim() }),
-      })
-      const data = await res.json()
-      setIdentifiantStatus(data.exists ? 'exists' : 'ok')
-    } catch {
-      setIdentifiantStatus('idle')
-    }
-  }, [methode])
-
-  const handleIdentifiantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    const field = methode === 'email' ? 'email' : 'telephone'
-    setForm(f => ({ ...f, [field]: value }))
-    setIdentifiantStatus('idle')
-    setError('')
-    if (checkTimer) clearTimeout(checkTimer)
-    const timer = setTimeout(() => checkIdentifiant(value), 600)
-    setCheckTimer(timer)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }))
-    setError('')
-  }
-
-  const passwordValid = rules.every(r => r.test(form.motDePasse))
-  const passwordMatch = form.motDePasse === form.confirmerMotDePasse && form.confirmerMotDePasse.length > 0
-  const canProceed    = identifiantStatus === 'ok' && passwordValid && passwordMatch
-
-  // ── Étape 1 → Étape 2 ───────────────────────────────
-  const handleNextStep = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!canProceed) return
-    setEtape('infos')
-  }
-
-  // ── Soumission finale ────────────────────────────────
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const res = await fetch('/api/auth/inscription', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          etape: 1,
-          nom: form.nom, prenom: form.prenom,
-          email:      methode === 'email'     ? form.email     : null,
-          telephone:  methode === 'telephone' ? form.telephone : null,
-          motDePasse: form.motDePasse,
-          age:        form.age   ? parseInt(form.age)   : null,
-          genre:      form.genre || null,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error); return }
-      if (data.requireOTP) setEtape('otp')
-      else router.push('/connexion?inscription=success')
-    } catch { setError('Erreur serveur') } finally { setLoading(false) }
-  }
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const res = await fetch('/api/auth/inscription', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          etape: 2,
-          email:     methode === 'email'     ? form.email     : null,
-          telephone: methode === 'telephone' ? form.telephone : null,
-          code,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error); return }
-      router.push('/connexion?inscription=success')
-    } catch { setError('Erreur serveur') } finally { setLoading(false) }
-  }
-
-  // ── CORRECTION : Google redirige directement vers / après connexion ─────
-  // Plus de callbackUrl vers google-password — le compte est créé sans mot de passe
-  const handleGoogle = async () => {
-    setLoadingGoogle(true)
-    setError('')
-    try {
-      const { Capacitor } = await import('@capacitor/core')
-
-      if (Capacitor.isNativePlatform()) {
-        // @ts-ignore
-        const SocialLoginModule = await import('@capgo/capacitor-social-login').catch(() => null)
-        if (!SocialLoginModule) { setError('Plugin Google non disponible.'); return }
-        const { SocialLogin } = SocialLoginModule
-
-        await SocialLogin.initialize({
-          google: {
-            webClientId: '502936788244-dqait91nm2t0stlg0moj4lua7mpfohfn.apps.googleusercontent.com',
-          },
-        })
-
-        const result = await SocialLogin.login({
-          provider: 'google',
-          options: { scopes: ['email', 'profile'] },
-        })
-
-        const googleResult = result.result
-        if (!googleResult || !('idToken' in googleResult) || !googleResult.idToken) {
-          setError('Impossible de récupérer le token Google.')
-          return
-        }
-
-        const res  = await fetch('/api/auth/google-native', {
+    setIdStatus('idle')
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      setCheckingId(true)
+      try {
+        const res  = await fetch('/api/auth/verifier-identifiant', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ idToken: googleResult.idToken }),
+          body:    JSON.stringify({ identifiant: identifiant.trim() }),
         })
         const data = await res.json()
-
-        if (!res.ok || !data.ok) { setError(data.error || 'Erreur connexion Google.'); return }
-
-        const signInResult = await signIn('credentials-google', {
-          userId:   data.userId,
-          redirect: false,
-        })
-
-        if (signInResult?.ok) { router.push('/'); router.refresh() }
-        else setError('Erreur de session. Veuillez réessayer.')
-
-      } else {
-        // Web — redirige vers / directement, pas vers google-password
-        await signIn('google', { callbackUrl: '/' })
+        // Inversé par rapport à recuperer-mot-de-passe :
+        // exists=true → compte déjà pris → rouge
+        // exists=false → disponible → vert
+        setIdStatus(data.exists ? 'taken' : 'available')
+      } catch {
+        setIdStatus('idle')
+      } finally {
+        setCheckingId(false)
       }
-    } catch (err: any) {
-      setError(err?.message || err?.code || JSON.stringify(err))
+    }, 600)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [form.email, form.telephone, identifiantType])
+
+  const handleChange = (k: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  const canSubmitEtape1 =
+    form.nom &&
+    form.prenom &&
+    form.motDePasse &&
+    (identifiantType === 'email' ? form.email : form.telephone) &&
+    (role === 'VENDEUR' ? form.nomBoutique : true) &&
+    idStatus === 'available'
+
+  // ── Étape 1 ────────────────────────────────────────────────────────────────
+  const handleEtape1 = async () => {
+    setLoading(true); setError(null)
+    try {
+      const body: Record<string, string> = {
+        etape: '1',
+        nom: form.nom, prenom: form.prenom,
+        motDePasse: form.motDePasse,
+        role,
+      }
+      if (identifiantType === 'email')     body.email     = form.email
+      if (identifiantType === 'telephone') body.telephone = form.telephone
+      if (role === 'VENDEUR')              body.nomBoutique = form.nomBoutique
+
+      const res  = await fetch('/api/auth/inscription', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setEtape(2)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur inconnue')
     } finally {
-      setLoadingGoogle(false)
+      setLoading(false)
     }
   }
 
-  const inputClass = "w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-3 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300"
-  const labelClass = "block text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-2"
+  // ── Étape 2 ────────────────────────────────────────────────────────────────
+  const handleEtape2 = async () => {
+    setLoading(true); setError(null)
+    try {
+      const body: Record<string, string> = { etape: '2', code, role }
+      if (identifiantType === 'email')     body.email     = form.email
+      if (identifiantType === 'telephone') body.telephone = form.telephone
 
-  // ── Statut identifiant ──────────────────────────────
-  const IdentifiantFeedback = () => {
-    if (identifiantStatus === 'idle')     return null
-    if (identifiantStatus === 'checking') return (
-      <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-        <span className="animate-spin">⟳</span> Vérification...
-      </p>
-    )
-    if (identifiantStatus === 'ok')       return (
-      <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Disponible</p>
-    )
-    if (identifiantStatus === 'exists')   return (
-      <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-        ✗ Ce {methode === 'email' ? 'email' : 'numéro'} est déjà utilisé —{' '}
-        <Link href="/connexion" className="underline">Se connecter</Link>
-      </p>
-    )
-    if (identifiantStatus === 'invalid')  return (
-      <p className="text-xs text-orange-500 dark:text-orange-400 mt-1">
-        Format invalide {methode === 'telephone' ? '(ex: 0612345678)' : '(ex: nom@email.com)'}
-      </p>
-    )
-    return null
+      const res  = await fetch('/api/auth/inscription', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+
+      setSuccess(data.message)
+      setTimeout(() => router.push('/connexion?inscription=success'), 2500)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur inconnue')
+    } finally {
+      setLoading(false)
+    }
   }
+
+  // ── Stepper ────────────────────────────────────────────────────────────────
+  const Stepper = () => (
+    <div className="flex items-center gap-3 mb-10">
+      {[1, 2].map((s) => (
+        <div key={s} className="flex items-center gap-3">
+          <div className={`flex items-center justify-center w-6 h-6 text-xs font-light transition-colors duration-300 ${
+            etape === s
+              ? 'bg-black dark:bg-white text-white dark:text-black'
+              : s < etape
+              ? 'border border-black dark:border-white text-black dark:text-white'
+              : 'border border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-600'
+          }`}>
+            {s < etape ? '✓' : s}
+          </div>
+          <span className={`text-xs uppercase tracking-[0.2em] hidden sm:block transition-colors duration-300 ${
+            etape === s
+              ? 'text-black dark:text-white'
+              : 'text-gray-400 dark:text-gray-600'
+          }`}>
+            {s === 1 ? 'Informations' : 'Confirmation'}
+          </span>
+          {s < 2 && <div className="w-8 h-px bg-gray-200 dark:bg-gray-800" />}
+        </div>
+      ))}
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col lg:flex-row transition-colors duration-300">
 
-      {/* ── Panneau gauche desktop ── */}
+      {/* ── Panneau gauche (décoration) ────────────────────────────────────── */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black dark:bg-gray-900 items-center justify-center p-12 border-r border-gray-800">
         <div className="absolute z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-50%,black_10%)]">
-          <Image src="/logo_noir.png" alt="" width={750} height={750}
-            className="object-contain invert opacity-30 scale-150" priority />
+          <Image
+            src="/logo_noir.png"
+            alt=""
+            width={750}
+            height={750}
+            className="object-contain invert opacity-30 scale-150"
+            priority
+          />
         </div>
         <div className="relative z-10 text-center text-white">
           <div className="w-12 h-px bg-gray-600 mx-auto my-6" />
-          <p className="text-white font-light text-sm tracking-wider">L'excellence à portée de main</p>
+          <p className="text-white font-light text-sm tracking-wider drop-shadow-md">
+            L'excellence à portée de main
+          </p>
         </div>
       </div>
 
-      {/* ── Formulaire ── */}
+      {/* ── Panneau droit (formulaire) ─────────────────────────────────────── */}
       <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto">
         <div className="w-full max-w-sm py-8">
 
-          {/* ══════════════════════════════════════════════
-              ÉTAPE 1 — Identifiant + Mot de passe
-          ══════════════════════════════════════════════ */}
-          {etape === 'identifiant' && (
-            <>
-              <div className="mb-8">
-                <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] text-xs mb-2">Nouveau Client</p>
-                <h2 className="text-3xl font-extralight text-black dark:text-white tracking-wide">Inscription</h2>
-                <div className="w-8 h-px bg-black dark:bg-white mt-4" />
-                <div className="flex items-center gap-2 mt-4">
-                  <div className="w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs flex items-center justify-center font-bold">1</div>
-                  <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-                  <div className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 text-gray-400 text-xs flex items-center justify-center">2</div>
-                </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Identifiant & mot de passe</p>
-              </div>
+          {/* En-tête */}
+          <div className="mb-8">
+            <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] text-xs mb-2">
+              Nouveau compte
+            </p>
+            <h2 className="text-3xl font-extralight text-black dark:text-white tracking-wide">
+              Inscription
+            </h2>
+            <div className="w-8 h-px bg-black dark:bg-white mt-4" />
+          </div>
 
-              {error && (
-                <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 mb-6">
-                  {error}
+          {/* ── Succès ─────────────────────────────────────────────────────── */}
+          {success ? (
+            <div className="py-8 text-center space-y-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                {role === 'VENDEUR' ? 'Boutique créée' : 'Compte créé'}
+              </p>
+              <p className="text-sm font-light text-black dark:text-white">
+                {success}
+              </p>
+              {role === 'VENDEUR' && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 px-4 py-3 tracking-wide">
+                  Votre compte sera activé après validation par notre équipe.
+                </p>
+              )}
+              <p className="text-xs text-gray-400 dark:text-gray-600 tracking-wide mt-4">
+                Redirection vers la connexion...
+              </p>
+            </div>
+          ) : (
+            <>
+              <Stepper />
+
+              {/* ── ÉTAPE 1 ─────────────────────────────────────────────── */}
+              {etape === 1 && (
+                <div className="space-y-7">
+
+                  {/* Choix du rôle — Loi de Hick : 2 options max présentées en premier */}
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-4">
+                      Je m'inscris en tant que
+                    </p>
+                    <div className="flex gap-0 border border-gray-200 dark:border-gray-800">
+                      {(['CLIENT', 'VENDEUR'] as const).map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => setRole(r)}
+                          className={`flex-1 py-3.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                            role === r
+                              ? 'bg-black dark:bg-white text-white dark:text-black'
+                              : 'bg-white dark:bg-gray-950 text-gray-400 dark:text-gray-600 hover:text-black dark:hover:text-white'
+                          }`}
+                        >
+                          {r === 'CLIENT' ? 'Client' : 'Vendeur'}
+                        </button>
+                      ))}
+                    </div>
+                    {role === 'VENDEUR' && (
+                      <p className="mt-3 text-xs text-gray-400 dark:text-gray-500 tracking-wide border-l-2 border-gray-300 dark:border-gray-700 pl-3">
+                        Votre compte sera bloqué jusqu'à validation par notre équipe.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Nom & Prénom */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-2">
+                        Nom *
+                      </label>
+                      <input
+                        type="text"
+                        value={form.nom}
+                        onChange={handleChange('nom')}
+                        placeholder="Dupont"
+                        className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-2.5 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300 placeholder-gray-300 dark:placeholder-gray-700"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-2">
+                        Prénom *
+                      </label>
+                      <input
+                        type="text"
+                        value={form.prenom}
+                        onChange={handleChange('prenom')}
+                        placeholder="Ahmed"
+                        className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-2.5 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300 placeholder-gray-300 dark:placeholder-gray-700"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Nom boutique — divulgation progressive */}
+                  {role === 'VENDEUR' && (
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-2">
+                        Nom de la boutique *
+                      </label>
+                      <input
+                        type="text"
+                        value={form.nomBoutique}
+                        onChange={handleChange('nomBoutique')}
+                        placeholder="Ma Super Boutique"
+                        className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-2.5 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300 placeholder-gray-300 dark:placeholder-gray-700"
+                      />
+                    </div>
+                  )}
+
+                  {/* Toggle Email / Téléphone */}
+                  <div>
+                    <div className="flex items-center gap-4 mb-3">
+                      {(['email', 'telephone'] as const).map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => { setIdentifiantType(t); setIdStatus('idle') }}
+                          className={`text-xs uppercase tracking-[0.2em] pb-1 transition-colors duration-200 ${
+                            identifiantType === t
+                              ? 'text-black dark:text-white border-b border-black dark:border-white'
+                              : 'text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-400'
+                          }`}
+                        >
+                          {t === 'email' ? 'Email' : 'Téléphone'}
+                        </button>
+                      ))}
+                    </div>
+                    {identifiantType === 'email' ? (
+                      <div className="relative">
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={e => { handleChange('email')(e); setIdStatus('idle') }}
+                          placeholder="exemple@email.com"
+                          className={`w-full border-b outline-none py-2.5 pr-7 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300 placeholder-gray-300 dark:placeholder-gray-700 ${
+                            idStatus === 'available' ? 'border-green-500 dark:border-green-400' :
+                            idStatus === 'taken'     ? 'border-red-400 dark:border-red-500' :
+                            'border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white'
+                          }`}
+                        />
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                          {checkingId && (
+                            <svg className="animate-spin w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                          )}
+                          {!checkingId && idStatus === 'available' && <span className="text-green-500 text-sm font-bold">✓</span>}
+                          {!checkingId && idStatus === 'taken'     && <span className="text-red-400 text-sm font-bold">✗</span>}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="tel"
+                          value={form.telephone}
+                          onChange={e => { handleChange('telephone')(e); setIdStatus('idle') }}
+                          placeholder="05 XX XX XX XX"
+                          className={`w-full border-b outline-none py-2.5 pr-7 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300 placeholder-gray-300 dark:placeholder-gray-700 ${
+                            idStatus === 'available' ? 'border-green-500 dark:border-green-400' :
+                            idStatus === 'taken'     ? 'border-red-400 dark:border-red-500' :
+                            'border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white'
+                          }`}
+                        />
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                          {checkingId && (
+                            <svg className="animate-spin w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                          )}
+                          {!checkingId && idStatus === 'available' && <span className="text-green-500 text-sm font-bold">✓</span>}
+                          {!checkingId && idStatus === 'taken'     && <span className="text-red-400 text-sm font-bold">✗</span>}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Message sous le champ */}
+                    {idStatus === 'available' && (
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1.5">
+                        ✓ {identifiantType === 'email' ? 'Email' : 'Numéro'} disponible
+                      </p>
+                    )}
+                    {idStatus === 'taken' && (
+                      <p className="text-xs text-red-500 dark:text-red-400 mt-1.5">
+                        ✗ {identifiantType === 'email' ? 'Cet email est déjà associé à un compte' : 'Ce numéro est déjà utilisé'} —{' '}
+                        <Link href="/connexion" className="underline underline-offset-2">Se connecter ?</Link>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Mot de passe */}
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-2">
+                      Mot de passe *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPwd ? 'text' : 'password'}
+                        value={form.motDePasse}
+                        onChange={handleChange('motDePasse')}
+                        placeholder="8+ car., maj., chiffre, symbole"
+                        className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-2.5 pr-8 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300 placeholder-gray-300 dark:placeholder-gray-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd((v) => !v)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-600 hover:text-black dark:hover:text-white transition-colors uppercase tracking-widest"
+                        aria-label={showPwd ? 'Masquer' : 'Afficher'}
+                      >
+                        {showPwd ? 'Cacher' : 'Voir'}
+                      </button>
+                    </div>
+                    {/* Conditions temps réel */}
+                    {form.motDePasse.length > 0 && (() => {
+                      const pwd = form.motDePasse
+                      const conditions = [
+                        { ok: pwd.length >= 8,          label: '8 caractères minimum' },
+                        { ok: /[A-Z]/.test(pwd),        label: 'Une lettre majuscule' },
+                        { ok: /[0-9]/.test(pwd),        label: 'Un chiffre' },
+                        { ok: /[^A-Za-z0-9]/.test(pwd), label: 'Un symbole (!@#$%...)' },
+                      ]
+                      return (
+                        <div className="mt-3 space-y-1.5">
+                          {conditions.map(({ ok, label }) => (
+                            <p key={label} className={`text-xs flex items-center gap-2 transition-colors duration-200 ${
+                              ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'
+                            }`}>
+                              <span className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold transition-all duration-200 ${
+                                ok
+                                  ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
+                                  : 'border border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-700'
+                              }`}>
+                                {ok ? '✓' : ''}
+                              </span>
+                              {label}
+                            </p>
+                          ))}
+                        </div>
+                      )
+                    })()}
+                  </div>
+
+                  {/* Erreur */}
+                  {error && (
+                    <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 tracking-wide">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* CTA principal — Fitts : pleine largeur, hauteur généreuse */}
+                  <button
+                    onClick={handleEtape1}
+                    disabled={loading || !canSubmitEtape1}
+                    className="w-full bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100 text-white dark:text-black text-xs uppercase tracking-[0.3em] py-4 transition-colors duration-300 disabled:opacity-40 mt-2"
+                  >
+                    {loading ? 'Envoi en cours...' : 'Recevoir le code'}
+                  </button>
+
+                  <p className="text-center text-xs text-gray-400 dark:text-gray-500 tracking-wide">
+                    Déjà un compte ?{' '}
+                    <Link
+                      href="/connexion"
+                      className="text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 underline underline-offset-4 transition-colors"
+                    >
+                      Se connecter
+                    </Link>
+                  </p>
                 </div>
               )}
 
-              {/* Google — redirige directement vers / */}
-              <button onClick={handleGoogle} disabled={loadingGoogle || loading}
-                className="w-full flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-[0.15em] py-3.5 transition-colors disabled:opacity-50 mb-6">
-                {loadingGoogle ? <span className="text-gray-400">...</span> : <GoogleIcon />}
-                S'inscrire avec Google
-              </button>
+              {/* ── ÉTAPE 2 — OTP ───────────────────────────────────────── */}
+              {etape === 2 && (
+                <div className="space-y-7">
 
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
-                <span className="text-xs text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em]">ou</span>
-                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
-              </div>
-
-              <form onSubmit={handleNextStep} className="space-y-5">
-                {/* Méthode */}
-                <div>
-                  <label className={labelClass}>S'inscrire avec</label>
-                  <div className="flex border border-gray-200 dark:border-gray-700 mb-4">
-                    <button type="button" onClick={() => { setMethode('email'); setIdentifiantStatus('idle'); setForm(f => ({ ...f, telephone: '' })) }}
-                      className={`flex-1 py-2.5 text-xs uppercase tracking-[0.2em] transition-colors ${methode === 'email' ? 'bg-black dark:bg-white text-white dark:text-black' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'}`}>
-                      Email
-                    </button>
-                    <button type="button" onClick={() => { setMethode('telephone'); setIdentifiantStatus('idle'); setForm(f => ({ ...f, email: '' })) }}
-                      className={`flex-1 py-2.5 text-xs uppercase tracking-[0.2em] transition-colors ${methode === 'telephone' ? 'bg-black dark:bg-white text-white dark:text-black' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'}`}>
-                      Téléphone
-                    </button>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-1">
+                      Code envoyé à
+                    </p>
+                    <p className="text-sm text-black dark:text-white font-light">
+                      {identifiantType === 'email' ? form.email : form.telephone}
+                    </p>
                   </div>
 
-                  {methode === 'email' ? (
-                    <div>
-                      <input type="email" value={form.email} onChange={handleIdentifiantChange} required
-                        className={inputClass} placeholder="votre@email.com" />
-                      <IdentifiantFeedback />
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-4">
+                      Code de confirmation *
+                    </label>
+                    {/* Input OTP centré, mono, pleine largeur — Fitts */}
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      maxLength={6}
+                      placeholder="• • • • • •"
+                      className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-3 text-center text-2xl font-mono tracking-[0.5em] text-gray-800 dark:text-gray-100 bg-transparent transition-colors duration-300 placeholder-gray-300 dark:placeholder-gray-700"
+                    />
+                    {/* Indicateur visuel de progression */}
+                    <div className="flex gap-1.5 mt-2 justify-center">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-0.5 flex-1 transition-colors duration-200 ${
+                            i < code.length
+                              ? 'bg-black dark:bg-white'
+                              : 'bg-gray-200 dark:bg-gray-800'
+                          }`}
+                        />
+                      ))}
                     </div>
-                  ) : (
-                    <div>
-                      <input type="tel" value={form.telephone} onChange={handleIdentifiantChange} required
-                        className={inputClass} placeholder="0612345678" />
-                      <IdentifiantFeedback />
+                  </div>
+
+                  {error && (
+                    <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 tracking-wide">
+                      {error}
                     </div>
                   )}
-                </div>
 
-                {/* Mot de passe */}
-                <div>
-                  <label className={labelClass}>Mot de Passe</label>
-                  <input type="password" name="motDePasse" value={form.motDePasse}
-                    onChange={handleChange} required className={inputClass} placeholder="Minimum 8 caractères" />
-                  <PasswordStrength password={form.motDePasse} />
-                </div>
+                  <button
+                    onClick={handleEtape2}
+                    disabled={loading || code.length !== 6}
+                    className="w-full bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100 text-white dark:text-black text-xs uppercase tracking-[0.3em] py-4 transition-colors duration-300 disabled:opacity-40"
+                  >
+                    {loading ? 'Vérification...' : 'Confirmer mon compte'}
+                  </button>
 
-                {/* Confirmer */}
-                <div>
-                  <label className={labelClass}>Confirmer</label>
-                  <input type="password" name="confirmerMotDePasse" value={form.confirmerMotDePasse}
-                    onChange={handleChange} required className={inputClass} placeholder="Répétez le mot de passe" />
-                  {form.confirmerMotDePasse && !passwordMatch && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">✗ Les mots de passe ne correspondent pas</p>
-                  )}
-                  {form.confirmerMotDePasse && passwordMatch && (
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Les mots de passe correspondent</p>
-                  )}
-                </div>
-
-                <button type="submit" disabled={!canProceed || loading}
-                  className={`w-full text-xs uppercase tracking-[0.3em] py-4 transition-all duration-300 mt-2 ${
-                    canProceed
-                      ? 'bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100 text-white dark:text-black cursor-pointer'
-                      : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                  }`}>
-                  {loading ? 'Chargement...' : 'Suivant →'}
-                </button>
-
-                {!canProceed && (form.email || form.telephone) && (
-                  <p className="text-xs text-center text-gray-400 dark:text-gray-600">
-                    {identifiantStatus === 'exists'   ? 'Cet identifiant est déjà utilisé' :
-                     identifiantStatus === 'invalid'  ? "Format d'identifiant invalide" :
-                     identifiantStatus === 'checking' ? 'Vérification en cours...' :
-                     !passwordValid                   ? 'Le mot de passe ne respecte pas les conditions' :
-                     !passwordMatch                   ? 'Les mots de passe ne correspondent pas' :
-                     'Complétez tous les champs'}
-                  </p>
-                )}
-              </form>
-
-              <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-8">
-                Déjà client ?{' '}
-                <Link href="/connexion" className="text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 underline underline-offset-4">
-                  Se connecter
-                </Link>
-              </p>
-            </>
-          )}
-
-          {/* ══════════════════════════════════════════════
-              ÉTAPE 2 — Informations personnelles
-          ══════════════════════════════════════════════ */}
-          {etape === 'infos' && (
-            <>
-              <div className="mb-8">
-                <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] text-xs mb-2">Nouveau Client</p>
-                <h2 className="text-3xl font-extralight text-black dark:text-white tracking-wide">Vos infos</h2>
-                <div className="w-8 h-px bg-black dark:bg-white mt-4" />
-                <div className="flex items-center gap-2 mt-4">
-                  <div className="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-bold">✓</div>
-                  <div className="flex-1 h-px bg-black dark:bg-white" />
-                  <div className="w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs flex items-center justify-center font-bold">2</div>
-                </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Informations personnelles</p>
-              </div>
-
-              {error && (
-                <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 mb-6">
-                  {error}
+                  <button
+                    onClick={() => { setEtape(1); setCode(''); setError(null) }}
+                    className="w-full text-xs text-gray-400 dark:text-gray-600 hover:text-black dark:hover:text-white uppercase tracking-[0.2em] transition-colors py-2"
+                  >
+                    ← Modifier mes informations
+                  </button>
                 </div>
               )}
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Nom</label>
-                    <input type="text" name="nom" value={form.nom} onChange={handleChange} required className={inputClass} placeholder="Nom" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Prénom</label>
-                    <input type="text" name="prenom" value={form.prenom} onChange={handleChange} required className={inputClass} placeholder="Prénom" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Âge</label>
-                    <input type="number" name="age" value={form.age} onChange={handleChange} min="10" max="100"
-                      className={inputClass} placeholder="Ex: 25" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Genre</label>
-                    <select name="genre" value={form.genre} onChange={handleChange}
-                      className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-3 text-sm text-gray-800 dark:text-gray-100 bg-transparent transition-colors">
-                      <option value="">Non précisé</option>
-                      <option value="HOMME">Homme</option>
-                      <option value="FEMME">Femme</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3">
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">Identifiant choisi</p>
-                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                    {methode === 'email' ? form.email : form.telephone}
-                  </p>
-                </div>
-
-                <div className="flex gap-3">
-                  <button type="button" onClick={() => setEtape('identifiant')}
-                    className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-[0.2em] py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900">
-                    ← Retour
-                  </button>
-                  <button type="submit" disabled={loading || !form.nom || !form.prenom}
-                    className="flex-2 flex-grow bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100 text-white dark:text-black text-xs uppercase tracking-[0.3em] py-4 transition-colors disabled:opacity-50">
-                    {loading ? 'Envoi...' : methode === 'telephone' ? 'Code SMS' : 'Code Email'}
-                  </button>
-                </div>
-              </form>
             </>
           )}
-
-          {/* ── OTP ── */}
-          {etape === 'otp' && (
-            <>
-              <div className="mb-10">
-                <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] text-xs mb-2">Vérification</p>
-                <h2 className="text-3xl font-extralight text-black dark:text-white tracking-wide">
-                  {methode === 'email' ? 'Code Email' : 'Code SMS'}
-                </h2>
-                <div className="w-8 h-px bg-black dark:bg-white mt-4" />
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                Un code a été envoyé {methode === 'email' ? 'à' : 'au'}{' '}
-                <span className="text-black dark:text-white font-medium">
-                  {methode === 'email' ? form.email : form.telephone}
-                </span>
-              </p>
-              {error && <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 mb-6">{error}</div>}
-              <form onSubmit={handleVerifyOTP} className="space-y-6">
-                <div>
-                  <label className={labelClass}>Code de Vérification</label>
-                  <input type="text" value={code} onChange={(e) => { setCode(e.target.value); setError('') }} required maxLength={6}
-                    className="w-full border-b border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white outline-none py-3 text-2xl text-center tracking-[0.5em] text-gray-800 dark:text-gray-100 bg-transparent transition-colors"
-                    placeholder="000000" />
-                </div>
-                <button type="submit" disabled={loading || code.length < 6}
-                  className="w-full bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100 text-white dark:text-black text-xs uppercase tracking-[0.3em] py-4 transition-colors disabled:opacity-50">
-                  {loading ? 'Vérification...' : 'Confirmer'}
-                </button>
-                <button type="button" onClick={() => { setEtape('infos'); setError(''); setCode('') }}
-                  className="w-full text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">
-                  ← Retour
-                </button>
-              </form>
-            </>
-          )}
-
         </div>
 
-        {/* ── Logo mobile ── */}
-        <div className="lg:hidden mt-8 flex flex-col items-center gap-3 pb-8">
+        {/* Logo mobile (cohérence avec connexion) */}
+        <div className="lg:hidden mt-12 flex flex-col items-center gap-3 pb-8">
           <div className="w-16 h-px bg-gray-200 dark:bg-gray-800" />
-          <Image src="/logo_noir.png" alt="Caba Store" width={80} height={80}
-            className="object-contain dark:invert opacity-30" />
-          <p className="text-xs text-gray-300 dark:text-gray-700 uppercase tracking-[0.3em]">Caba Store</p>
+          <Image
+            src="/logo_noir.png"
+            alt="Caba Store"
+            width={80}
+            height={80}
+            className="object-contain dark:invert opacity-30"
+          />
+          <p className="text-xs text-gray-300 dark:text-gray-700 uppercase tracking-[0.3em]">
+            Caba Store
+          </p>
         </div>
       </div>
     </div>
-  )
-}
-
-export default function InscriptionPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
-        <p className="text-gray-500 dark:text-gray-400">Chargement...</p>
-      </div>
-    }>
-      <InscriptionContent />
-    </Suspense>
   )
 }

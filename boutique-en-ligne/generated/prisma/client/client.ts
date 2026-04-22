@@ -47,6 +47,16 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model VendeurProfile
+ * 
+ */
+export type VendeurProfile = Prisma.VendeurProfileModel
+/**
+ * Model VendeurDocument
+ * 
+ */
+export type VendeurDocument = Prisma.VendeurDocumentModel
+/**
  * Model Category
  * 
  */

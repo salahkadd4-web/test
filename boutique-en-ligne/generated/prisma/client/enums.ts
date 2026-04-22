@@ -11,7 +11,8 @@
 
 export const Role = {
   CLIENT: 'CLIENT',
-  ADMIN: 'ADMIN'
+  ADMIN: 'ADMIN',
+  VENDEUR: 'VENDEUR'
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]
@@ -55,3 +56,31 @@ export const ReturnReason = {
 } as const
 
 export type ReturnReason = (typeof ReturnReason)[keyof typeof ReturnReason]
+
+
+export const VendeurStatut = {
+  EN_ATTENTE: 'EN_ATTENTE',
+  APPROUVE: 'APPROUVE',
+  SUSPENDU: 'SUSPENDU',
+  PIECES_REQUISES: 'PIECES_REQUISES'
+} as const
+
+export type VendeurStatut = (typeof VendeurStatut)[keyof typeof VendeurStatut]
+
+
+export const DocumentStatut = {
+  EN_ATTENTE: 'EN_ATTENTE',
+  ACCEPTE: 'ACCEPTE',
+  REFUSE: 'REFUSE'
+} as const
+
+export type DocumentStatut = (typeof DocumentStatut)[keyof typeof DocumentStatut]
+
+
+export const CategoryStatut = {
+  EN_ATTENTE: 'EN_ATTENTE',
+  APPROUVEE: 'APPROUVEE',
+  REFUSEE: 'REFUSEE'
+} as const
+
+export type CategoryStatut = (typeof CategoryStatut)[keyof typeof CategoryStatut]

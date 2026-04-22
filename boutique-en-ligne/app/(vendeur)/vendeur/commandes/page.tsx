@@ -1,0 +1,324 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
+interface OrderItem {
+  id: string; quantite: number; prix: number
+  product: { id: string; nom: string; images: string[] }
+}
+interface Order {
+  id: string; statut: string; adresse: string
+  createdAt: string; totalVendeur: number
+  user: { id: string; nom: string; prenom: string; email: string | null; telephone: string | null }
+  items: OrderItem[]
+}
+
+const STATUTS = ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 'EXPEDIEE', 'LIVREE', 'ANNULEE']
+
+const statutConfig: Record<string, { label: string; color: string; emoji: string }> = {
+  EN_ATTENTE:     { label: 'En attente',     emoji: '⏳', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300' },
+  CONFIRMEE:      { label: 'Confirmée',      emoji: '✅', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' },
+  EN_PREPARATION: { label: 'En préparation', emoji: '🔧', color: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300' },
+  EXPEDIEE:       { label: 'Expédiée',       emoji: '🚚', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' },
+  LIVREE:         { label: 'Livrée',         emoji: '📦', color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300' },
+  ANNULEE:        { label: 'Annulée',        emoji: '❌', color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300' },
+}
+
+const ORDRE_STATUTS = ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 'EXPEDIEE', 'LIVREE']
+
+export default function VendeurCommandesPage() {
+  const [commandes,    setCommandes]    = useState<Order[]>([])
+  const [loading,      setLoading]      = useState(true)
+  const [statut,       setStatut]       = useState('')
+  const [search,       setSearch]       = useState('')
+  const [filterCategory, setFilterCategory] = useState('')
+  const [categories,   setCategories]   = useState<{id:string;nom:string}[]>([])
+  const [selected,     setSelected]     = useState<Order | null>(null)
+  const [updatingId,   setUpdatingId]   = useState<string | null>(null)
+  const [toast,        setToast]        = useState<string | null>(null)
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  const fetchData = async () => {
+    setLoading(true)
+    const params = new URLSearchParams()
+    if (statut)          params.set('statut',     statut)
+    if (search)          params.set('search',     search)
+    if (filterCategory)  params.set('categoryId', filterCategory)
+    const res = await fetch(`/api/vendeur/commandes?${params}`)
+    if (res.ok) setCommandes(await res.json())
+    setLoading(false)
+  }
+
+  const fetchCategories = async () => {
+    const res = await fetch('/api/vendeur/categories')
+    if (res.ok) { const d = await res.json(); setCategories(d.approuvees || []) }
+  }
+
+  useEffect(() => { fetchCategories() }, [])
+  useEffect(() => { fetchData() }, [statut, filterCategory])
+
+  const handleSearch = (e: React.FormEvent) => { e.preventDefault(); fetchData() }
+
+  // ── Changer le statut d'une commande ─────────────────────
+  const handleStatutChange = async (commandeId: string, newStatut: string) => {
+    setUpdatingId(commandeId)
+    try {
+      const res = await fetch(`/api/vendeur/commandes/${commandeId}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ statut: newStatut }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        showToast(`❌ ${d.error || 'Erreur'}`)
+        return
+      }
+      // Mettre à jour localement
+      setCommandes(prev => prev.map(c => c.id === commandeId ? { ...c, statut: newStatut } : c))
+      if (selected?.id === commandeId) setSelected(prev => prev ? { ...prev, statut: newStatut } : null)
+      showToast(`✅ Statut mis à jour : ${statutConfig[newStatut]?.label}`)
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const getStatutSuivant = (s: string) => {
+    const idx = ORDRE_STATUTS.indexOf(s)
+    if (idx === -1 || idx >= ORDRE_STATUTS.length - 1) return null
+    return ORDRE_STATUTS[idx + 1]
+  }
+
+  return (
+    <div>
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-5 py-3 rounded-2xl shadow-xl text-sm font-medium">
+          {toast}
+        </div>
+      )}
+
+      <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Mes Commandes</h1>
+
+      {/* Filtres */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher par client ou ID..."
+            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          />
+          <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-xl">
+            🔍
+          </button>
+        </form>
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        >
+          <option value="">🏷️ Toutes les catégories</option>
+          {categories.map(c => (
+            <option key={c.id} value={c.id}>{c.nom}</option>
+          ))}
+        </select>
+        <select
+          value={statut}
+          onChange={(e) => setStatut(e.target.value)}
+          className="border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        >
+          <option value="">Tous les statuts</option>
+          {STATUTS.map((s) => (
+            <option key={s} value={s}>{statutConfig[s]?.emoji} {statutConfig[s]?.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-gray-400">Chargement...</div>
+      ) : commandes.length === 0 ? (
+        <div className="text-center py-12 text-gray-400">Aucune commande trouvée</div>
+      ) : (
+        <div className="space-y-3">
+          {commandes.map((cmd) => {
+            const sc      = statutConfig[cmd.statut] || { label: cmd.statut, color: '', emoji: '' }
+            const suivant = getStatutSuivant(cmd.statut)
+            return (
+              <div
+                key={cmd.id}
+                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4"
+              >
+                {/* Ligne principale */}
+                <div
+                  className="flex items-start justify-between gap-3 cursor-pointer"
+                  onClick={() => setSelected(cmd)}
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-mono text-gray-400 mb-1">#{cmd.id.slice(-8).toUpperCase()}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                      {cmd.user.prenom} {cmd.user.nom}
+                    </p>
+                    {/* ── Téléphone visible directement dans la liste ── */}
+                    {cmd.user.telephone && (
+                      <a
+                        href={`tel:${cmd.user.telephone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 mt-0.5"
+                      >
+                        📞 {cmd.user.telephone}
+                      </a>
+                    )}
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {new Date(cmd.createdAt).toLocaleDateString('fr-DZ', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium mb-1 ${sc.color}`}>
+                      {sc.emoji} {sc.label}
+                    </span>
+                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      {cmd.totalVendeur.toLocaleString('fr-DZ')} DA
+                    </p>
+                  </div>
+                </div>
+
+                {/* Produits */}
+                <div className="mt-2 flex flex-wrap gap-1 mb-3">
+                  {cmd.items.map((item) => (
+                    <span key={item.id} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
+                      {item.product.nom} ×{item.quantite}
+                    </span>
+                  ))}
+                </div>
+
+                {/* ── Boutons changement statut ── */}
+                {cmd.statut !== 'LIVREE' && cmd.statut !== 'ANNULEE' && (
+                  <div className="flex gap-2 flex-wrap pt-2 border-t border-gray-100 dark:border-gray-800">
+                    {suivant && (
+                      <button
+                        onClick={() => handleStatutChange(cmd.id, suivant)}
+                        disabled={updatingId === cmd.id}
+                        className="flex-1 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-50"
+                      >
+                        {updatingId === cmd.id ? '...' : `${statutConfig[suivant].emoji} → ${statutConfig[suivant].label}`}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleStatutChange(cmd.id, 'ANNULEE')}
+                      disabled={updatingId === cmd.id}
+                      className="bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 border border-red-200 dark:border-red-800 px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-50"
+                    >
+                      ❌ Annuler
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── Modal détail commande ── */}
+      {selected && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setSelected(null) }}
+        >
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-gray-900 flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">
+                Commande #{selected.id.slice(-8).toUpperCase()}
+              </h2>
+              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl">✕</button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {/* Statut actuel */}
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${statutConfig[selected.statut]?.color}`}>
+                  {statutConfig[selected.statut]?.emoji} {statutConfig[selected.statut]?.label}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {new Date(selected.createdAt).toLocaleDateString('fr-DZ', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+
+              {/* Client */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">👤 Client</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                  {selected.user.prenom} {selected.user.nom}
+                </p>
+                {selected.user.telephone && (
+                  <a
+                    href={`tel:${selected.user.telephone}`}
+                    className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 mt-1 font-medium"
+                  >
+                    📞 {selected.user.telephone}
+                  </a>
+                )}
+                {selected.user.email && (
+                  <p className="text-xs text-gray-500 mt-0.5">{selected.user.email}</p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">📍 {selected.adresse}</p>
+              </div>
+
+              {/* Produits */}
+              <div>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Vos produits dans cette commande</p>
+                <div className="space-y-2">
+                  {selected.items.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-2">
+                      {item.product.images[0] && (
+                        <img src={item.product.images[0]} alt={item.product.nom} className="w-10 h-10 object-cover rounded-lg shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{item.product.nom}</p>
+                        <p className="text-xs text-gray-400">×{item.quantite} — {item.prix.toLocaleString('fr-DZ')} DA/u</p>
+                      </div>
+                      <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                        {(item.prix * item.quantite).toLocaleString('fr-DZ')} DA
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Total (vos produits)</p>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  {selected.totalVendeur.toLocaleString('fr-DZ')} DA
+                </p>
+              </div>
+
+              {/* ── Changer le statut depuis le modal ── */}
+              {selected.statut !== 'LIVREE' && selected.statut !== 'ANNULEE' && (
+                <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">🔄 Changer le statut</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {STATUTS.filter(s => s !== selected.statut).map(s => (
+                      <button
+                        key={s}
+                        onClick={() => handleStatutChange(selected.id, s)}
+                        disabled={updatingId === selected.id}
+                        className="px-3 py-2 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition disabled:opacity-50"
+                      >
+                        {statutConfig[s].emoji} {statutConfig[s].label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

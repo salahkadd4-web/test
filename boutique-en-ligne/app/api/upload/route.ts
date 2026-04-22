@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
   if (limited) return limited
 
   try {
-    const token = await getAuthToken(req)
-    if (!token || token.role !== 'ADMIN') {
+    const token = await getAuthToken()
+    if (!token || !['ADMIN', 'VENDEUR'].includes(token.role)) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getAuthToken } from '@/lib/getAuthToken'
 
 async function checkAdmin(req: NextRequest) {
-  const token = await getAuthToken(req)
+  const token = await getAuthToken()
   return token?.role === 'ADMIN' ? token : null
 }
 

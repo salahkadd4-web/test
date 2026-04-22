@@ -1,0 +1,55 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
+
+// GET /api/vendeur/commandes?statut=&search=
+export async function GET(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'VENDEUR') {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  }
+
+  const vendeur = await prisma.vendeurProfile.findUnique({
+    where: { userId: session.user.id },
+  })
+  if (!vendeur || vendeur.statut !== 'APPROUVE') {
+    return NextResponse.json({ error: 'Compte non approuvé' }, { status: 403 })
+  }
+
+  const { searchParams } = new URL(req.url)
+  const statut = searchParams.get('statut')
+  const search = searchParams.get('search') || ''
+
+  // Commandes qui contiennent au moins un produit du vendeur
+  const commandeWhere: any = {
+    items: { some: { product: { vendeurId: vendeur.id } } },
+  }
+  if (statut) commandeWhere.statut = statut
+  if (search) {
+    commandeWhere.OR = [
+      { id: { contains: search, mode: 'insensitive' } },
+      { user: { nom:    { contains: search, mode: 'insensitive' } } },
+      { user: { prenom: { contains: search, mode: 'insensitive' } } },
+    ]
+  }
+
+  const commandes = await prisma.order.findMany({
+    where: commandeWhere,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: { select: { id: true, nom: true, prenom: true, email: true, telephone: true } },
+      items: {
+        where:   { product: { vendeurId: vendeur.id } },
+        include: { product: { select: { id: true, nom: true, images: true } } },
+      },
+    },
+  })
+
+  // Calculer le total vendeur pour chaque commande (uniquement ses produits)
+  const commandesAvecTotal = commandes.map((cmd) => ({
+    ...cmd,
+    totalVendeur: cmd.items.reduce((sum, item) => sum + item.prix * item.quantite, 0),
+  }))
+
+  return NextResponse.json(commandesAvecTotal)
+}

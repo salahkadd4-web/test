@@ -18,7 +18,7 @@ const genreMap: Record<string, string> = {
 
 export async function GET(req: NextRequest) {
   try {
-    const token = await getAuthToken(req)
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const retours = await prisma.return.findMany({
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await getAuthToken(req)
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { orderId, productId, returnReason, description } = await req.json()

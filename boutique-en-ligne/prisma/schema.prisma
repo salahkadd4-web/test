@@ -7,53 +7,149 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─────────────────────────────────────────────
+//  ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  CLIENT
+  ADMIN
+  VENDEUR
+}
+
+enum Genre {
+  HOMME
+  FEMME
+}
+
+enum OrderStatus {
+  EN_ATTENTE
+  CONFIRMEE
+  EN_PREPARATION
+  EXPEDIEE
+  LIVREE
+  ANNULEE
+}
+
+enum ReturnStatus {
+  EN_ATTENTE
+  APPROUVE
+  REFUSE
+  REMBOURSE
+}
+
+enum ReturnReason {
+  DEFECTUEUX
+  MAUVAIS_ARTICLE
+  CHANGEMENT_AVIS
+  NON_CONFORME
+}
+
+enum VendeurStatut {
+  EN_ATTENTE       // Compte créé, en attente de validation admin
+  APPROUVE         // Compte approuvé et actif
+  SUSPENDU         // Compte suspendu par l'admin
+  PIECES_REQUISES  // Admin demande des pièces jointes supplémentaires
+}
+
+enum DocumentStatut {
+  EN_ATTENTE  // Document soumis, en attente de validation
+  ACCEPTE     // Document accepté par l'admin
+  REFUSE      // Document refusé par l'admin
+}
+
+enum CategoryStatut {
+  EN_ATTENTE  // Proposée par vendeur, en attente de validation admin
+  APPROUVEE   // Approuvée par l'admin
+  REFUSEE     // Refusée par l'admin
+}
+
+// ─────────────────────────────────────────────
+//  MODELS
+// ─────────────────────────────────────────────
+
 model User {
-  id          String       @id @default(cuid())
-  nom         String
-  prenom      String
-  email       String?      @unique
-  telephone   String?      @unique
-  motDePasse  String?
-  role        Role         @default(CLIENT)
-  avatar      String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  age         Int?
-  genre       Genre?
-  wilaya      String?
-  cart        Cart?
-  favorites   Favorite[]
-  messages    Message[]
-  orders      Order[]
-  resetTokens ResetToken[]
-  returns     Return[]
+  id             String          @id @default(cuid())
+  nom            String
+  prenom         String
+  email          String?         @unique
+  telephone      String?         @unique
+  motDePasse     String?
+  role           Role            @default(CLIENT)
+  avatar         String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  age            Int?
+  genre          Genre?
+  wilaya         String?
+  cart           Cart?
+  favorites      Favorite[]
+  messages       Message[]
+  orders         Order[]
+  resetTokens    ResetToken[]
+  returns        Return[]
+  vendeurProfile VendeurProfile?
+}
+
+model VendeurProfile {
+  id          String          @id @default(cuid())
+  userId      String          @unique
+  statut      VendeurStatut   @default(EN_ATTENTE)
+  nomBoutique String?
+  description String?
+  adminNote   String?         // Note interne de l'admin (motif suspension, etc.)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id])
+  documents   VendeurDocument[]
+  products    Product[]
+  categories  Category[]
+}
+
+model VendeurDocument {
+  id          String          @id @default(cuid())
+  vendeurId   String          // référence vers VendeurProfile.id
+  type        String          // clé interne : "carte_nationale", "registre_commerce", etc.
+  label       String          // libellé affiché au vendeur
+  description String?         // instructions de l'admin
+  fichier     String?         // URL Cloudinary / S3 du fichier uploadé
+  statut      DocumentStatut  @default(EN_ATTENTE)
+  adminNote   String?         // note de refus ou commentaire de l'admin
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  vendeur     VendeurProfile  @relation(fields: [vendeurId], references: [id])
 }
 
 model Category {
-  id          String    @id @default(cuid())
-  nom         String    @unique
+  id          String          @id @default(cuid())
+  nom         String          @unique
   description String?
   image       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  statut      CategoryStatut  @default(APPROUVEE)  // APPROUVEE pour catégories admin
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  vendeurId   String?         // null = catégorie créée par admin
+  vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
   products    Product[]
 }
 
 model Product {
-  id          String      @id @default(cuid())
+  id          String          @id @default(cuid())
   nom         String
   description String?
   prix        Float
-  stock       Int         @default(0)
+  stock       Int             @default(0)
   images      String[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   categoryId  String
-  actif       Boolean     @default(true)
+  actif       Boolean         @default(true)
+  vendeurId   String?         // null = produit admin
   cartItems   CartItem[]
   favorites   Favorite[]
   orderItems  OrderItem[]
-  category    Category    @relation(fields: [categoryId], references: [id])
+  category    Category        @relation(fields: [categoryId], references: [id])
+  vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
   returns     Return[]
 }
 
@@ -163,37 +259,4 @@ model Return {
   order            Order        @relation(fields: [orderId], references: [id])
   product          Product      @relation(fields: [productId], references: [id])
   user             User         @relation(fields: [userId], references: [id])
-}
-
-enum Role {
-  CLIENT
-  ADMIN
-}
-
-enum Genre {
-  HOMME
-  FEMME
-}
-
-enum OrderStatus {
-  EN_ATTENTE
-  CONFIRMEE
-  EN_PREPARATION
-  EXPEDIEE
-  LIVREE
-  ANNULEE
-}
-
-enum ReturnStatus {
-  EN_ATTENTE
-  APPROUVE
-  REFUSE
-  REMBOURSE
-}
-
-enum ReturnReason {
-  DEFECTUEUX
-  MAUVAIS_ARTICLE
-  CHANGEMENT_AVIS
-  NON_CONFORME
 }

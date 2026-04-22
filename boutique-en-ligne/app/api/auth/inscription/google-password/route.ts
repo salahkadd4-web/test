@@ -13,7 +13,7 @@ const rules = [
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await getAuthToken(req)
+    const token = await getAuthToken()
     if (!token?.email) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }

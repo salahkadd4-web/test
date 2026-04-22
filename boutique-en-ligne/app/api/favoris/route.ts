@@ -4,7 +4,7 @@ import { getAuthToken } from '@/lib/getAuthToken'
 
 export async function GET(req: NextRequest) {
   try {
-    const token = await getAuthToken(req)
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const favoris = await prisma.favorite.findMany({
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await getAuthToken(req)
+    const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { produitId } = await req.json()
