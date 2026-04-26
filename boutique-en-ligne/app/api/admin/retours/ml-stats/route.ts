@@ -1,23 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAuthToken } from '@/lib/getAuthToken'
+// app/api/admin/retours/ml-stats/route.ts — CabaStore v2
+//
+// Le serveur FastAPI expose /health (pas /api/v1/stats)
+// Header : X-Internal-Key (pas x-api-key)
 
-export async function GET(req: NextRequest) {
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthToken }              from '@/lib/getAuthToken'
+
+export async function GET(_req: NextRequest) {
   try {
     const token = await getAuthToken()
     if (!token || token.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const res = await fetch(
-      (process.env.ML_API_URL || 'http://localhost:8000') + '/api/v1/stats',
-      { headers: { 'x-api-key': process.env.ML_API_KEY || '' } }
-    )
+    const mlUrl = (process.env.ML_API_URL || 'http://localhost:8000').replace(/\/$/, '')
+    const mlKey = process.env.ML_API_KEY || 'dev-internal-key'
 
-    if (!res.ok) return NextResponse.json({ error: 'API ML indisponible' }, { status: 503 })
+    const res = await fetch(`${mlUrl}/health`, {
+      headers: { 'X-Internal-Key': mlKey },
+      signal:  AbortSignal.timeout(5000),
+    })
 
-    const stats = await res.json()
-    return NextResponse.json(stats)
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: 'API ML indisponible', ml_status: 'offline' },
+        { status: 503 }
+      )
+    }
+
+    const health = await res.json()
+
+    // Adapter au format attendu par le dashboard admin
+    return NextResponse.json({
+      total_decisions:  0,
+      avg_confidence:   0,
+      total_alerts:     0,
+      fraud_rate_pct:   0,
+      ml_status:        health.status === 'ok' ? 'online' : 'offline',
+      models_loaded:    health.models_loaded    ?? {},
+      artifacts_loaded: health.artifacts_loaded ?? {},
+      seuil_risque:     health.seuil_risque     ?? 60,
+    })
   } catch {
-    return NextResponse.json({ error: 'API ML indisponible' }, { status: 503 })
+    return NextResponse.json(
+      { error: 'API ML indisponible', ml_status: 'offline' },
+      { status: 503 }
+    )
   }
 }

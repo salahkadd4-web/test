@@ -1,15 +1,23 @@
-// app/api/retours/flowmerce-webhook/route.ts — CabaStore
+// app/api/retours/flowmerce-webhook/route.ts — CabaStore v2
 //
 // Reçoit les mises à jour de statut depuis Flowmerce
-// Appelé par Flowmerce quand un vendeur/admin valide ou refuse un claim
+// Appelé par Flowmerce quand un vendeur prend une décision DANS Flowmerce
 //
-// Sécurité : header X-Webhook-Secret doit correspondre à FLOWMERCE_WEBHOOK_SECRET
+// Body attendu :
+// {
+//   returnId:   string    ← ID du Return dans CabaStore
+//   claimId:    string    ← ID du Claim dans Flowmerce
+//   status:     'APPROVED' | 'REJECTED' | 'IN_PROGRESS'
+//   resolution: 'Refund' | 'Exchange' | 'Repair' | 'Reject' | null
+//   source:     'flowmerce'
+// }
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { FLOWMERCE_WEBHOOK_SECRET } from '@/lib/flowmerceApi'
+import { prisma }                    from '@/lib/prisma'
+import { FLOWMERCE_WEBHOOK_SECRET }  from '@/lib/flowmerceApi'
 
-const STATUS_MAP: Record<string, 'EN_ATTENTE' | 'APPROUVE' | 'REFUSE'> = {
+// Mapping statut Flowmerce → ReturnStatus CabaStore
+const STATUS_MAP: Record<string, string> = {
   APPROVED:    'APPROUVE',
   REJECTED:    'REFUSE',
   IN_PROGRESS: 'EN_ATTENTE',
@@ -18,60 +26,67 @@ const STATUS_MAP: Record<string, 'EN_ATTENTE' | 'APPROUVE' | 'REFUSE'> = {
 
 export async function POST(req: NextRequest) {
   try {
-    // ── Vérification du secret ────────────────────────────────────────────
-    const receivedSecret = req.headers.get('x-webhook-secret')
-    if (!receivedSecret || receivedSecret !== FLOWMERCE_WEBHOOK_SECRET) {
-      console.warn('[Flowmerce Webhook] Secret invalide reçu')
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    // ── 1. Vérifier le secret webhook ────────────────────────────────────
+    const secret = req.headers.get('x-webhook-secret') || ''
+    if (FLOWMERCE_WEBHOOK_SECRET && secret !== FLOWMERCE_WEBHOOK_SECRET) {
+      console.warn('[Webhook] Secret invalide reçu:', secret?.slice(0, 8))
+      return NextResponse.json({ error: 'Secret invalide' }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { returnId, claimId, status, resolution, note } = body
-
-    if (!returnId || !status) {
-      return NextResponse.json({ error: 'Données manquantes (returnId, status)' }, { status: 400 })
+    // ── 2. Parser le body ─────────────────────────────────────────────────
+    let body: Record<string, unknown>
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
     }
 
-    const newStatus = STATUS_MAP[status]
-    if (!newStatus) {
-      return NextResponse.json({ error: `Statut inconnu : ${status}` }, { status: 400 })
+    const { returnId, claimId, status, resolution, source } = body as {
+      returnId:   string | undefined
+      claimId:    string | undefined
+      status:     string | undefined
+      resolution: string | undefined
+      source:     string | undefined
     }
 
-    // ── Retrouver le retour par flowmerceClaimId ou returnId ──────────────
-    const retour = await prisma.return.findFirst({
-      where: {
-        OR: [
-          { id: returnId },
-          { flowmerceClaimId: claimId || '' },
-        ],
-      },
-    })
+    console.log(`[Webhook Flowmerce] returnId=${returnId} status=${status} resolution=${resolution}`)
 
+    if (!returnId) {
+      return NextResponse.json({ error: 'returnId manquant' }, { status: 400 })
+    }
+
+    // ── 3. Récupérer le retour ────────────────────────────────────────────
+    const retour = await prisma.return.findUnique({ where: { id: returnId } })
     if (!retour) {
-      console.warn(`[Flowmerce Webhook] Retour introuvable pour returnId=${returnId}`)
-      return NextResponse.json({ error: 'Retour introuvable' }, { status: 404 })
+      // Idempotent : pas d'erreur si déjà supprimé
+      return NextResponse.json({ ok: true, skipped: 'return not found' })
     }
 
-    // ── Mettre à jour le statut ───────────────────────────────────────────
+    // Ne pas écraser une décision déjà prise dans CabaStore
+    // (le webhook Flowmerce est reçu UNIQUEMENT quand Flowmerce prend l'initiative,
+    //  pas quand CabaStore a déjà synchronisé avec _from_external: true)
+    if (retour.returnStatus !== 'EN_ATTENTE') {
+      return NextResponse.json({ ok: true, skipped: 'already processed in CabaStore' })
+    }
+
+    // ── 4. Mettre à jour en base ──────────────────────────────────────────
+    const newStatus = status ? (STATUS_MAP[status] ?? 'EN_ATTENTE') : 'EN_ATTENTE'
+
     await prisma.return.update({
-      where: { id: retour.id },
+      where: { id: returnId },
       data: {
-        returnStatus:     newStatus,
-        mlDecision:       resolution || retour.mlDecision,
-        mlDecisionLabel:
-          resolution === 'Refund'   ? 'Remboursement accordé (Flowmerce)'
-          : resolution === 'Exchange' ? 'Échange accordé (Flowmerce)'
-          : resolution === 'Repair'   ? 'Réparation accordée (Flowmerce)'
-          : resolution === 'Reject'   ? 'Retour refusé (Flowmerce)'
-          : retour.mlDecisionLabel,
-        flowmerceSynced:  true,
+        returnStatus:    newStatus as any,
+        finalDecision:   resolution || null,
+        flowmerceSynced: true,
+        flowmerceClaimId: claimId || retour.flowmerceClaimId,
       },
     })
 
-    console.log(`[Flowmerce Webhook] Retour ${retour.id} → ${newStatus} (depuis claim ${claimId})`)
-    return NextResponse.json({ ok: true, returnId: retour.id, newStatus })
-  } catch (error) {
-    console.error('[Flowmerce Webhook] Erreur:', error)
+    console.log(`[Webhook Flowmerce] ✓ Retour ${returnId} → ${newStatus} / ${resolution}`)
+
+    return NextResponse.json({ ok: true, returnId, newStatus, resolution })
+  } catch (err) {
+    console.error('[Webhook Flowmerce] Erreur:', err)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
