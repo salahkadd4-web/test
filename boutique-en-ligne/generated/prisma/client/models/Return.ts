@@ -29,11 +29,13 @@ export type AggregateReturn = {
 export type ReturnAvgAggregateOutputType = {
   daysToReturn: number | null
   mlConfidence: number | null
+  fraudScore: number | null
 }
 
 export type ReturnSumAggregateOutputType = {
   daysToReturn: number | null
   mlConfidence: number | null
+  fraudScore: number | null
 }
 
 export type ReturnMinAggregateOutputType = {
@@ -49,6 +51,11 @@ export type ReturnMinAggregateOutputType = {
   mlConfidence: number | null
   mlResponsibility: string | null
   mlDecisionLabel: string | null
+  finalDecision: string | null
+  finalNote: string | null
+  fraudScore: number | null
+  flowmerceClaimId: string | null
+  flowmerceSynced: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +73,11 @@ export type ReturnMaxAggregateOutputType = {
   mlConfidence: number | null
   mlResponsibility: string | null
   mlDecisionLabel: string | null
+  finalDecision: string | null
+  finalNote: string | null
+  fraudScore: number | null
+  flowmerceClaimId: string | null
+  flowmerceSynced: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -83,6 +95,12 @@ export type ReturnCountAggregateOutputType = {
   mlConfidence: number
   mlResponsibility: number
   mlDecisionLabel: number
+  mlProbabilities: number
+  finalDecision: number
+  finalNote: number
+  fraudScore: number
+  flowmerceClaimId: number
+  flowmerceSynced: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -92,11 +110,13 @@ export type ReturnCountAggregateOutputType = {
 export type ReturnAvgAggregateInputType = {
   daysToReturn?: true
   mlConfidence?: true
+  fraudScore?: true
 }
 
 export type ReturnSumAggregateInputType = {
   daysToReturn?: true
   mlConfidence?: true
+  fraudScore?: true
 }
 
 export type ReturnMinAggregateInputType = {
@@ -112,6 +132,11 @@ export type ReturnMinAggregateInputType = {
   mlConfidence?: true
   mlResponsibility?: true
   mlDecisionLabel?: true
+  finalDecision?: true
+  finalNote?: true
+  fraudScore?: true
+  flowmerceClaimId?: true
+  flowmerceSynced?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -129,6 +154,11 @@ export type ReturnMaxAggregateInputType = {
   mlConfidence?: true
   mlResponsibility?: true
   mlDecisionLabel?: true
+  finalDecision?: true
+  finalNote?: true
+  fraudScore?: true
+  flowmerceClaimId?: true
+  flowmerceSynced?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -146,6 +176,12 @@ export type ReturnCountAggregateInputType = {
   mlConfidence?: true
   mlResponsibility?: true
   mlDecisionLabel?: true
+  mlProbabilities?: true
+  finalDecision?: true
+  finalNote?: true
+  fraudScore?: true
+  flowmerceClaimId?: true
+  flowmerceSynced?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -250,6 +286,12 @@ export type ReturnGroupByOutputType = {
   mlConfidence: number | null
   mlResponsibility: string | null
   mlDecisionLabel: string | null
+  mlProbabilities: runtime.JsonValue | null
+  finalDecision: string | null
+  finalNote: string | null
+  fraudScore: number | null
+  flowmerceClaimId: string | null
+  flowmerceSynced: boolean
   createdAt: Date
   updatedAt: Date
   _count: ReturnCountAggregateOutputType | null
@@ -290,6 +332,12 @@ export type ReturnWhereInput = {
   mlConfidence?: Prisma.FloatNullableFilter<"Return"> | number | null
   mlResponsibility?: Prisma.StringNullableFilter<"Return"> | string | null
   mlDecisionLabel?: Prisma.StringNullableFilter<"Return"> | string | null
+  mlProbabilities?: Prisma.JsonNullableFilter<"Return">
+  finalDecision?: Prisma.StringNullableFilter<"Return"> | string | null
+  finalNote?: Prisma.StringNullableFilter<"Return"> | string | null
+  fraudScore?: Prisma.FloatNullableFilter<"Return"> | number | null
+  flowmerceClaimId?: Prisma.StringNullableFilter<"Return"> | string | null
+  flowmerceSynced?: Prisma.BoolFilter<"Return"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
@@ -310,6 +358,12 @@ export type ReturnOrderByWithRelationInput = {
   mlConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
   mlResponsibility?: Prisma.SortOrderInput | Prisma.SortOrder
   mlDecisionLabel?: Prisma.SortOrderInput | Prisma.SortOrder
+  mlProbabilities?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalDecision?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  fraudScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowmerceClaimId?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowmerceSynced?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
@@ -333,6 +387,12 @@ export type ReturnWhereUniqueInput = Prisma.AtLeast<{
   mlConfidence?: Prisma.FloatNullableFilter<"Return"> | number | null
   mlResponsibility?: Prisma.StringNullableFilter<"Return"> | string | null
   mlDecisionLabel?: Prisma.StringNullableFilter<"Return"> | string | null
+  mlProbabilities?: Prisma.JsonNullableFilter<"Return">
+  finalDecision?: Prisma.StringNullableFilter<"Return"> | string | null
+  finalNote?: Prisma.StringNullableFilter<"Return"> | string | null
+  fraudScore?: Prisma.FloatNullableFilter<"Return"> | number | null
+  flowmerceClaimId?: Prisma.StringNullableFilter<"Return"> | string | null
+  flowmerceSynced?: Prisma.BoolFilter<"Return"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
@@ -353,6 +413,12 @@ export type ReturnOrderByWithAggregationInput = {
   mlConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
   mlResponsibility?: Prisma.SortOrderInput | Prisma.SortOrder
   mlDecisionLabel?: Prisma.SortOrderInput | Prisma.SortOrder
+  mlProbabilities?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalDecision?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  fraudScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowmerceClaimId?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowmerceSynced?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ReturnCountOrderByAggregateInput
@@ -378,6 +444,12 @@ export type ReturnScalarWhereWithAggregatesInput = {
   mlConfidence?: Prisma.FloatNullableWithAggregatesFilter<"Return"> | number | null
   mlResponsibility?: Prisma.StringNullableWithAggregatesFilter<"Return"> | string | null
   mlDecisionLabel?: Prisma.StringNullableWithAggregatesFilter<"Return"> | string | null
+  mlProbabilities?: Prisma.JsonNullableWithAggregatesFilter<"Return">
+  finalDecision?: Prisma.StringNullableWithAggregatesFilter<"Return"> | string | null
+  finalNote?: Prisma.StringNullableWithAggregatesFilter<"Return"> | string | null
+  fraudScore?: Prisma.FloatNullableWithAggregatesFilter<"Return"> | number | null
+  flowmerceClaimId?: Prisma.StringNullableWithAggregatesFilter<"Return"> | string | null
+  flowmerceSynced?: Prisma.BoolWithAggregatesFilter<"Return"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Return"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Return"> | Date | string
 }
@@ -392,6 +464,12 @@ export type ReturnCreateInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutReturnsInput
@@ -412,6 +490,12 @@ export type ReturnUncheckedCreateInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -426,6 +510,12 @@ export type ReturnUpdateInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutReturnsNestedInput
@@ -446,6 +536,12 @@ export type ReturnUncheckedUpdateInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -463,6 +559,12 @@ export type ReturnCreateManyInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -477,6 +579,12 @@ export type ReturnUpdateManyMutationInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -494,6 +602,12 @@ export type ReturnUncheckedUpdateManyInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -521,6 +635,12 @@ export type ReturnCountOrderByAggregateInput = {
   mlConfidence?: Prisma.SortOrder
   mlResponsibility?: Prisma.SortOrder
   mlDecisionLabel?: Prisma.SortOrder
+  mlProbabilities?: Prisma.SortOrder
+  finalDecision?: Prisma.SortOrder
+  finalNote?: Prisma.SortOrder
+  fraudScore?: Prisma.SortOrder
+  flowmerceClaimId?: Prisma.SortOrder
+  flowmerceSynced?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -528,6 +648,7 @@ export type ReturnCountOrderByAggregateInput = {
 export type ReturnAvgOrderByAggregateInput = {
   daysToReturn?: Prisma.SortOrder
   mlConfidence?: Prisma.SortOrder
+  fraudScore?: Prisma.SortOrder
 }
 
 export type ReturnMaxOrderByAggregateInput = {
@@ -543,6 +664,11 @@ export type ReturnMaxOrderByAggregateInput = {
   mlConfidence?: Prisma.SortOrder
   mlResponsibility?: Prisma.SortOrder
   mlDecisionLabel?: Prisma.SortOrder
+  finalDecision?: Prisma.SortOrder
+  finalNote?: Prisma.SortOrder
+  fraudScore?: Prisma.SortOrder
+  flowmerceClaimId?: Prisma.SortOrder
+  flowmerceSynced?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -560,6 +686,11 @@ export type ReturnMinOrderByAggregateInput = {
   mlConfidence?: Prisma.SortOrder
   mlResponsibility?: Prisma.SortOrder
   mlDecisionLabel?: Prisma.SortOrder
+  finalDecision?: Prisma.SortOrder
+  finalNote?: Prisma.SortOrder
+  fraudScore?: Prisma.SortOrder
+  flowmerceClaimId?: Prisma.SortOrder
+  flowmerceSynced?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -567,6 +698,7 @@ export type ReturnMinOrderByAggregateInput = {
 export type ReturnSumOrderByAggregateInput = {
   daysToReturn?: Prisma.SortOrder
   mlConfidence?: Prisma.SortOrder
+  fraudScore?: Prisma.SortOrder
 }
 
 export type ReturnCreateNestedManyWithoutUserInput = {
@@ -721,6 +853,12 @@ export type ReturnCreateWithoutUserInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutReturnsInput
@@ -739,6 +877,12 @@ export type ReturnUncheckedCreateWithoutUserInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -785,6 +929,12 @@ export type ReturnScalarWhereInput = {
   mlConfidence?: Prisma.FloatNullableFilter<"Return"> | number | null
   mlResponsibility?: Prisma.StringNullableFilter<"Return"> | string | null
   mlDecisionLabel?: Prisma.StringNullableFilter<"Return"> | string | null
+  mlProbabilities?: Prisma.JsonNullableFilter<"Return">
+  finalDecision?: Prisma.StringNullableFilter<"Return"> | string | null
+  finalNote?: Prisma.StringNullableFilter<"Return"> | string | null
+  fraudScore?: Prisma.FloatNullableFilter<"Return"> | number | null
+  flowmerceClaimId?: Prisma.StringNullableFilter<"Return"> | string | null
+  flowmerceSynced?: Prisma.BoolFilter<"Return"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Return"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Return"> | Date | string
 }
@@ -799,6 +949,12 @@ export type ReturnCreateWithoutProductInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutReturnsInput
@@ -817,6 +973,12 @@ export type ReturnUncheckedCreateWithoutProductInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -857,6 +1019,12 @@ export type ReturnCreateWithoutOrderInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   product: Prisma.ProductCreateNestedOneWithoutReturnsInput
@@ -875,6 +1043,12 @@ export type ReturnUncheckedCreateWithoutOrderInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -917,6 +1091,12 @@ export type ReturnCreateManyUserInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -931,6 +1111,12 @@ export type ReturnUpdateWithoutUserInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutReturnsNestedInput
@@ -949,6 +1135,12 @@ export type ReturnUncheckedUpdateWithoutUserInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -965,6 +1157,12 @@ export type ReturnUncheckedUpdateManyWithoutUserInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -981,6 +1179,12 @@ export type ReturnCreateManyProductInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -995,6 +1199,12 @@ export type ReturnUpdateWithoutProductInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutReturnsNestedInput
@@ -1013,6 +1223,12 @@ export type ReturnUncheckedUpdateWithoutProductInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1029,6 +1245,12 @@ export type ReturnUncheckedUpdateManyWithoutProductInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1045,6 +1267,12 @@ export type ReturnCreateManyOrderInput = {
   mlConfidence?: number | null
   mlResponsibility?: string | null
   mlDecisionLabel?: string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: string | null
+  finalNote?: string | null
+  fraudScore?: number | null
+  flowmerceClaimId?: string | null
+  flowmerceSynced?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1059,6 +1287,12 @@ export type ReturnUpdateWithoutOrderInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   product?: Prisma.ProductUpdateOneRequiredWithoutReturnsNestedInput
@@ -1077,6 +1311,12 @@ export type ReturnUncheckedUpdateWithoutOrderInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1093,6 +1333,12 @@ export type ReturnUncheckedUpdateManyWithoutOrderInput = {
   mlConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mlResponsibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mlDecisionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mlProbabilities?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  finalDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fraudScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  flowmerceClaimId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowmerceSynced?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1112,6 +1358,12 @@ export type ReturnSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   mlConfidence?: boolean
   mlResponsibility?: boolean
   mlDecisionLabel?: boolean
+  mlProbabilities?: boolean
+  finalDecision?: boolean
+  finalNote?: boolean
+  fraudScore?: boolean
+  flowmerceClaimId?: boolean
+  flowmerceSynced?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
@@ -1132,6 +1384,12 @@ export type ReturnSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   mlConfidence?: boolean
   mlResponsibility?: boolean
   mlDecisionLabel?: boolean
+  mlProbabilities?: boolean
+  finalDecision?: boolean
+  finalNote?: boolean
+  fraudScore?: boolean
+  flowmerceClaimId?: boolean
+  flowmerceSynced?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
@@ -1152,6 +1410,12 @@ export type ReturnSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   mlConfidence?: boolean
   mlResponsibility?: boolean
   mlDecisionLabel?: boolean
+  mlProbabilities?: boolean
+  finalDecision?: boolean
+  finalNote?: boolean
+  fraudScore?: boolean
+  flowmerceClaimId?: boolean
+  flowmerceSynced?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
@@ -1172,11 +1436,17 @@ export type ReturnSelectScalar = {
   mlConfidence?: boolean
   mlResponsibility?: boolean
   mlDecisionLabel?: boolean
+  mlProbabilities?: boolean
+  finalDecision?: boolean
+  finalNote?: boolean
+  fraudScore?: boolean
+  flowmerceClaimId?: boolean
+  flowmerceSynced?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ReturnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "userId" | "productId" | "returnReason" | "returnStatus" | "daysToReturn" | "description" | "mlDecision" | "mlConfidence" | "mlResponsibility" | "mlDecisionLabel" | "createdAt" | "updatedAt", ExtArgs["result"]["return"]>
+export type ReturnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "userId" | "productId" | "returnReason" | "returnStatus" | "daysToReturn" | "description" | "mlDecision" | "mlConfidence" | "mlResponsibility" | "mlDecisionLabel" | "mlProbabilities" | "finalDecision" | "finalNote" | "fraudScore" | "flowmerceClaimId" | "flowmerceSynced" | "createdAt" | "updatedAt", ExtArgs["result"]["return"]>
 export type ReturnInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -1213,6 +1483,12 @@ export type $ReturnPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     mlConfidence: number | null
     mlResponsibility: string | null
     mlDecisionLabel: string | null
+    mlProbabilities: runtime.JsonValue | null
+    finalDecision: string | null
+    finalNote: string | null
+    fraudScore: number | null
+    flowmerceClaimId: string | null
+    flowmerceSynced: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["return"]>
@@ -1653,6 +1929,12 @@ export interface ReturnFieldRefs {
   readonly mlConfidence: Prisma.FieldRef<"Return", 'Float'>
   readonly mlResponsibility: Prisma.FieldRef<"Return", 'String'>
   readonly mlDecisionLabel: Prisma.FieldRef<"Return", 'String'>
+  readonly mlProbabilities: Prisma.FieldRef<"Return", 'Json'>
+  readonly finalDecision: Prisma.FieldRef<"Return", 'String'>
+  readonly finalNote: Prisma.FieldRef<"Return", 'String'>
+  readonly fraudScore: Prisma.FieldRef<"Return", 'Float'>
+  readonly flowmerceClaimId: Prisma.FieldRef<"Return", 'String'>
+  readonly flowmerceSynced: Prisma.FieldRef<"Return", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Return", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Return", 'DateTime'>
 }

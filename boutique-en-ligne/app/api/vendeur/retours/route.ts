@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/vendeur/retours?statut=&search=
 export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user || session.user.role !== 'VENDEUR') {
@@ -17,17 +16,25 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const statut = searchParams.get('statut')
-  const search = searchParams.get('search') || ''
+  const statut     = searchParams.get('statut')
+  const search     = searchParams.get('search') || ''
+  const categoryId = searchParams.get('categoryId')
 
-  const where: any = {
-    product: { vendeurId: vendeur.id },
-  }
+  const where: any = { product: { vendeurId: vendeur.id } }
+
   if (statut) where.returnStatus = statut
+
+  if (categoryId) {
+    where.product = { ...where.product, categoryId }
+  }
+
   if (search) {
     where.OR = [
-      { product: { nom: { contains: search, mode: 'insensitive' } } },
-      { user:    { nom: { contains: search, mode: 'insensitive' } } },
+      { product: { nom:   { contains: search, mode: 'insensitive' } } },
+      { user:    { nom:   { contains: search, mode: 'insensitive' } } },
+      { user:    { prenom:    { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
+      { user:    { email:     { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
+      { user:    { telephone: { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
     ]
   }
 
@@ -36,7 +43,7 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: 'desc' },
     include: {
       product: { select: { id: true, nom: true, images: true } },
-      user:    { select: { id: true, nom: true, prenom: true, email: true } },
+      user:    { select: { id: true, nom: true, prenom: true, email: true, telephone: true } },
       order:   { select: { id: true, statut: true, createdAt: true } },
     },
   })

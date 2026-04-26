@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/admin/vendeurs?statut=EN_ATTENTE&search=...
 export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user || session.user.role !== 'ADMIN') {
@@ -15,12 +14,14 @@ export async function GET(req: NextRequest) {
 
   const where: any = {}
   if (statut) where.statut = statut
+
   if (search) {
     where.OR = [
       { nomBoutique: { contains: search, mode: 'insensitive' } },
-      { user: { nom:    { contains: search, mode: 'insensitive' } } },
-      { user: { prenom: { contains: search, mode: 'insensitive' } } },
-      { user: { email:  { contains: search, mode: 'insensitive' } } },
+      { user: { nom:       { contains: search, mode: 'insensitive' } } },
+      { user: { prenom:    { contains: search, mode: 'insensitive' } } },
+      { user: { email:     { contains: search, mode: 'insensitive' } } },
+      { user: { telephone: { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
     ]
   }
 
@@ -32,25 +33,17 @@ export async function GET(req: NextRequest) {
         select: { id: true, nom: true, prenom: true, email: true, telephone: true, createdAt: true },
       },
       documents: true,
-      _count: {
-        select: { products: true, categories: true },
-      },
+      _count: { select: { products: true, categories: true } },
     },
   })
 
-  // Statistiques rapides par vendeur
   const vendeursAvecStats = await Promise.all(
     vendeurs.map(async (v) => {
       const [totalCommandes, chiffreAffaire] = await Promise.all([
-        prisma.orderItem.count({
-          where: { product: { vendeurId: v.id } },
-        }),
+        prisma.orderItem.count({ where: { product: { vendeurId: v.id } } }),
         prisma.orderItem.aggregate({
           _sum: { prix: true },
-          where: {
-            product: { vendeurId: v.id },
-            order: { statut: 'LIVREE' },
-          },
+          where: { product: { vendeurId: v.id }, order: { statut: 'LIVREE' } },
         }),
       ])
       return {

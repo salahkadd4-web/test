@@ -58,6 +58,11 @@ export type CartItem = Prisma.CartItemModel
  */
 export type Favorite = Prisma.FavoriteModel
 /**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
+/**
  * Model Order
  * 
  */
@@ -67,11 +72,6 @@ export type Order = Prisma.OrderModel
  * 
  */
 export type OrderItem = Prisma.OrderItemModel
-/**
- * Model Message
- * 
- */
-export type Message = Prisma.MessageModel
 /**
  * Model ResetToken
  * 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 interface OrderItem {
   id: string; quantite: number; prix: number
@@ -26,32 +26,57 @@ const statutConfig: Record<string, { label: string; color: string; emoji: string
 
 const ORDRE_STATUTS = ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 'EXPEDIEE', 'LIVREE']
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+  return debounced
+}
+
 export default function VendeurCommandesPage() {
-  const [commandes,    setCommandes]    = useState<Order[]>([])
-  const [loading,      setLoading]      = useState(true)
-  const [statut,       setStatut]       = useState('')
-  const [search,       setSearch]       = useState('')
+  const [commandes,      setCommandes]      = useState<Order[]>([])
+  const [loading,        setLoading]        = useState(true)
+  const [searching,      setSearching]      = useState(false)
+  const [statut,         setStatut]         = useState('')
+  const [search,         setSearch]         = useState('')
   const [filterCategory, setFilterCategory] = useState('')
-  const [categories,   setCategories]   = useState<{id:string;nom:string}[]>([])
-  const [selected,     setSelected]     = useState<Order | null>(null)
-  const [updatingId,   setUpdatingId]   = useState<string | null>(null)
-  const [toast,        setToast]        = useState<string | null>(null)
+  const [categories,     setCategories]     = useState<{ id: string; nom: string }[]>([])
+  const [selected,       setSelected]       = useState<Order | null>(null)
+  const [updatingId,     setUpdatingId]     = useState<string | null>(null)
+  const [toast,          setToast]          = useState<string | null>(null)
+
+  const debouncedSearch = useDebounce(search, 350)
+  const abortRef        = useRef<AbortController | null>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
     setTimeout(() => setToast(null), 3000)
   }
 
-  const fetchData = async () => {
-    setLoading(true)
-    const params = new URLSearchParams()
-    if (statut)          params.set('statut',     statut)
-    if (search)          params.set('search',     search)
-    if (filterCategory)  params.set('categoryId', filterCategory)
-    const res = await fetch(`/api/vendeur/commandes?${params}`)
-    if (res.ok) setCommandes(await res.json())
-    setLoading(false)
-  }
+  const fetchData = useCallback(async (isDebounce = false) => {
+    if (abortRef.current) abortRef.current.abort()
+    abortRef.current = new AbortController()
+
+    isDebounce ? setSearching(true) : setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (statut)          params.set('statut',     statut)
+      if (debouncedSearch) params.set('search',     debouncedSearch)
+      if (filterCategory)  params.set('categoryId', filterCategory)
+
+      const res = await fetch(`/api/vendeur/commandes?${params}`, {
+        signal: abortRef.current.signal,
+      })
+      if (res.ok) setCommandes(await res.json())
+    } catch (e: any) {
+      if (e.name !== 'AbortError') console.error(e)
+    } finally {
+      setLoading(false)
+      setSearching(false)
+    }
+  }, [statut, debouncedSearch, filterCategory])
 
   const fetchCategories = async () => {
     const res = await fetch('/api/vendeur/categories')
@@ -59,11 +84,8 @@ export default function VendeurCommandesPage() {
   }
 
   useEffect(() => { fetchCategories() }, [])
-  useEffect(() => { fetchData() }, [statut, filterCategory])
+  useEffect(() => { fetchData(!!debouncedSearch) }, [fetchData])
 
-  const handleSearch = (e: React.FormEvent) => { e.preventDefault(); fetchData() }
-
-  // ── Changer le statut d'une commande ─────────────────────
   const handleStatutChange = async (commandeId: string, newStatut: string) => {
     setUpdatingId(commandeId)
     try {
@@ -77,7 +99,6 @@ export default function VendeurCommandesPage() {
         showToast(`❌ ${d.error || 'Erreur'}`)
         return
       }
-      // Mettre à jour localement
       setCommandes(prev => prev.map(c => c.id === commandeId ? { ...c, statut: newStatut } : c))
       if (selected?.id === commandeId) setSelected(prev => prev ? { ...prev, statut: newStatut } : null)
       showToast(`✅ Statut mis à jour : ${statutConfig[newStatut]?.label}`)
@@ -103,20 +124,36 @@ export default function VendeurCommandesPage() {
 
       <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Mes Commandes</h1>
 
-      {/* Filtres */}
+      {/* ── Filtres ── */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+
+        {/* Recherche AJAX */}
+        <div className="relative flex-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
+            {searching ? (
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+            ) : '🔍'}
+          </span>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher par client ou ID..."
-            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            placeholder="Nom, email, téléphone, #ID..."
+            className="w-full pl-9 pr-8 border border-gray-200 dark:border-gray-700 rounded-xl py-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
           />
-          <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-xl">
-            🔍
-          </button>
-        </form>
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
@@ -127,6 +164,7 @@ export default function VendeurCommandesPage() {
             <option key={c.id} value={c.id}>{c.nom}</option>
           ))}
         </select>
+
         <select
           value={statut}
           onChange={(e) => setStatut(e.target.value)}
@@ -139,31 +177,26 @@ export default function VendeurCommandesPage() {
         </select>
       </div>
 
+      {/* ── Liste ── */}
       {loading ? (
         <div className="text-center py-12 text-gray-400">Chargement...</div>
       ) : commandes.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">Aucune commande trouvée</div>
+        <div className="text-center py-12 text-gray-400">
+          {search ? `Aucun résultat pour "${search}"` : 'Aucune commande trouvée'}
+        </div>
       ) : (
         <div className="space-y-3">
           {commandes.map((cmd) => {
             const sc      = statutConfig[cmd.statut] || { label: cmd.statut, color: '', emoji: '' }
             const suivant = getStatutSuivant(cmd.statut)
             return (
-              <div
-                key={cmd.id}
-                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4"
-              >
-                {/* Ligne principale */}
-                <div
-                  className="flex items-start justify-between gap-3 cursor-pointer"
-                  onClick={() => setSelected(cmd)}
-                >
+              <div key={cmd.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4">
+                <div className="flex items-start justify-between gap-3 cursor-pointer" onClick={() => setSelected(cmd)}>
                   <div className="min-w-0">
                     <p className="text-xs font-mono text-gray-400 mb-1">#{cmd.id.slice(-8).toUpperCase()}</p>
                     <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                       {cmd.user.prenom} {cmd.user.nom}
                     </p>
-                    {/* ── Téléphone visible directement dans la liste ── */}
                     {cmd.user.telephone && (
                       <a
                         href={`tel:${cmd.user.telephone}`}
@@ -187,7 +220,6 @@ export default function VendeurCommandesPage() {
                   </div>
                 </div>
 
-                {/* Produits */}
                 <div className="mt-2 flex flex-wrap gap-1 mb-3">
                   {cmd.items.map((item) => (
                     <span key={item.id} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
@@ -196,7 +228,6 @@ export default function VendeurCommandesPage() {
                   ))}
                 </div>
 
-                {/* ── Boutons changement statut ── */}
                 {cmd.statut !== 'LIVREE' && cmd.statut !== 'ANNULEE' && (
                   <div className="flex gap-2 flex-wrap pt-2 border-t border-gray-100 dark:border-gray-800">
                     {suivant && (
@@ -238,7 +269,6 @@ export default function VendeurCommandesPage() {
             </div>
 
             <div className="p-5 space-y-4">
-              {/* Statut actuel */}
               <div className="flex items-center gap-2">
                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${statutConfig[selected.statut]?.color}`}>
                   {statutConfig[selected.statut]?.emoji} {statutConfig[selected.statut]?.label}
@@ -248,29 +278,22 @@ export default function VendeurCommandesPage() {
                 </span>
               </div>
 
-              {/* Client */}
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
                 <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">👤 Client</p>
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
                   {selected.user.prenom} {selected.user.nom}
                 </p>
                 {selected.user.telephone && (
-                  <a
-                    href={`tel:${selected.user.telephone}`}
-                    className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 mt-1 font-medium"
-                  >
+                  <a href={`tel:${selected.user.telephone}`} className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 mt-1 font-medium">
                     📞 {selected.user.telephone}
                   </a>
                 )}
-                {selected.user.email && (
-                  <p className="text-xs text-gray-500 mt-0.5">{selected.user.email}</p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">📍 {selected.adresse}</p>
+                {selected.user.email && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{selected.user.email}</p>}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📍 {selected.adresse}</p>
               </div>
 
-              {/* Produits */}
               <div>
-                <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Vos produits dans cette commande</p>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Vos produits</p>
                 <div className="space-y-2">
                   {selected.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-2">
@@ -279,7 +302,7 @@ export default function VendeurCommandesPage() {
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{item.product.nom}</p>
-                        <p className="text-xs text-gray-400">×{item.quantite} — {item.prix.toLocaleString('fr-DZ')} DA/u</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">×{item.quantite} — {item.prix.toLocaleString('fr-DZ')} DA/u</p>
                       </div>
                       <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
                         {(item.prix * item.quantite).toLocaleString('fr-DZ')} DA
@@ -289,7 +312,6 @@ export default function VendeurCommandesPage() {
                 </div>
               </div>
 
-              {/* Total */}
               <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Total (vos produits)</p>
                 <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
@@ -297,7 +319,6 @@ export default function VendeurCommandesPage() {
                 </p>
               </div>
 
-              {/* ── Changer le statut depuis le modal ── */}
               {selected.statut !== 'LIVREE' && selected.statut !== 'ANNULEE' && (
                 <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">🔄 Changer le statut</p>

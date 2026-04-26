@@ -1,6 +1,12 @@
+// ═══════════════════════════════════════════════════════════════
+//  Caba Store — prisma/schema.prisma
+//  Corrigé : generator prisma-client (Prisma 7), Message ajouté
+// ═══════════════════════════════════════════════════════════════
+
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma/client"
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma/client"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -46,22 +52,22 @@ enum ReturnReason {
 }
 
 enum VendeurStatut {
-  EN_ATTENTE       // Compte créé, en attente de validation admin
-  APPROUVE         // Compte approuvé et actif
-  SUSPENDU         // Compte suspendu par l'admin
-  PIECES_REQUISES  // Admin demande des pièces jointes supplémentaires
+  EN_ATTENTE
+  APPROUVE
+  SUSPENDU
+  PIECES_REQUISES
 }
 
 enum DocumentStatut {
-  EN_ATTENTE  // Document soumis, en attente de validation
-  ACCEPTE     // Document accepté par l'admin
-  REFUSE      // Document refusé par l'admin
+  EN_ATTENTE
+  ACCEPTE
+  REFUSE
 }
 
 enum CategoryStatut {
-  EN_ATTENTE  // Proposée par vendeur, en attente de validation admin
-  APPROUVEE   // Approuvée par l'admin
-  REFUSEE     // Refusée par l'admin
+  EN_ATTENTE
+  APPROUVEE
+  REFUSEE
 }
 
 // ─────────────────────────────────────────────
@@ -92,43 +98,43 @@ model User {
 }
 
 model VendeurProfile {
-  id          String          @id @default(cuid())
-  userId      String          @unique
-  statut      VendeurStatut   @default(EN_ATTENTE)
+  id          String            @id @default(cuid())
+  userId      String            @unique
+  statut      VendeurStatut     @default(EN_ATTENTE)
   nomBoutique String?
   description String?
-  adminNote   String?         // Note interne de l'admin (motif suspension, etc.)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  user        User            @relation(fields: [userId], references: [id])
+  adminNote   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User              @relation(fields: [userId], references: [id])
   documents   VendeurDocument[]
   products    Product[]
   categories  Category[]
 }
 
 model VendeurDocument {
-  id          String          @id @default(cuid())
-  vendeurId   String          // référence vers VendeurProfile.id
-  type        String          // clé interne : "carte_nationale", "registre_commerce", etc.
-  label       String          // libellé affiché au vendeur
-  description String?         // instructions de l'admin
-  fichier     String?         // URL Cloudinary / S3 du fichier uploadé
-  statut      DocumentStatut  @default(EN_ATTENTE)
-  adminNote   String?         // note de refus ou commentaire de l'admin
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  vendeur     VendeurProfile  @relation(fields: [vendeurId], references: [id])
+  id          String         @id @default(cuid())
+  vendeurId   String
+  type        String
+  label       String
+  description String?
+  fichier     String?
+  statut      DocumentStatut @default(EN_ATTENTE)
+  adminNote   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  vendeur     VendeurProfile @relation(fields: [vendeurId], references: [id])
 }
 
 model Category {
-  id          String          @id @default(cuid())
-  nom         String          @unique
+  id          String         @id @default(cuid())
+  nom         String         @unique
   description String?
   image       String?
-  statut      CategoryStatut  @default(APPROUVEE)  // APPROUVEE pour catégories admin
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  vendeurId   String?         // null = catégorie créée par admin
+  statut      CategoryStatut @default(APPROUVEE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  vendeurId   String?
   vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
   products    Product[]
 }
@@ -144,7 +150,7 @@ model Product {
   updatedAt   DateTime        @updatedAt
   categoryId  String
   actif       Boolean         @default(true)
-  vendeurId   String?         // null = produit admin
+  vendeurId   String?
   cartItems   CartItem[]
   favorites   Favorite[]
   orderItems  OrderItem[]
@@ -182,6 +188,15 @@ model Favorite {
   @@unique([userId, productId])
 }
 
+model Message {
+  id        String   @id @default(cuid())
+  userId    String
+  contenu   String
+  lu        Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
 model Order {
   id                   String      @id @default(cuid())
   statut               OrderStatus @default(EN_ATTENTE)
@@ -210,16 +225,6 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
 }
 
-model Message {
-  id        String   @id @default(cuid())
-  contenu   String
-  lu        Boolean  @default(false)
-  createdAt DateTime @default(now())
-  userId    String
-  isAdmin   Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id])
-}
-
 model ResetToken {
   id        String   @id @default(cuid())
   token     String   @unique
@@ -241,6 +246,7 @@ model OtpToken {
   createdAt   DateTime @default(now())
 }
 
+// ── Return — enrichi pour l'intégration Flowmerce ────────────────────────
 model Return {
   id               String       @id @default(cuid())
   orderId          String
@@ -254,9 +260,23 @@ model Return {
   mlConfidence     Float?
   mlResponsibility String?
   mlDecisionLabel  String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  order            Order        @relation(fields: [orderId], references: [id])
-  product          Product      @relation(fields: [productId], references: [id])
-  user             User         @relation(fields: [userId], references: [id])
+  mlProbabilities  Json?
+
+  // ── Décision finale humaine ────────────────────────────────────────────
+  finalDecision    String?
+  finalNote        String?
+
+  fraudScore       Float?
+
+  // ── Intégration Flowmerce ─────────────────────────────────────────────
+  flowmerceClaimId String?
+  flowmerceSynced  Boolean  @default(false)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  order            Order    @relation(fields: [orderId], references: [id])
+  product          Product  @relation(fields: [productId], references: [id])
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@index([flowmerceClaimId])
 }

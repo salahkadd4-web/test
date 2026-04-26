@@ -59,9 +59,9 @@ export const ModelName = {
   Cart: 'Cart',
   CartItem: 'CartItem',
   Favorite: 'Favorite',
+  Message: 'Message',
   Order: 'Order',
   OrderItem: 'OrderItem',
-  Message: 'Message',
   ResetToken: 'ResetToken',
   OtpToken: 'OtpToken',
   Return: 'Return'
@@ -193,6 +193,17 @@ export const FavoriteScalarFieldEnum = {
 export type FavoriteScalarFieldEnum = (typeof FavoriteScalarFieldEnum)[keyof typeof FavoriteScalarFieldEnum]
 
 
+export const MessageScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  contenu: 'contenu',
+  lu: 'lu',
+  createdAt: 'createdAt'
+} as const
+
+export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
 export const OrderScalarFieldEnum = {
   id: 'id',
   statut: 'statut',
@@ -220,18 +231,6 @@ export const OrderItemScalarFieldEnum = {
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
-
-
-export const MessageScalarFieldEnum = {
-  id: 'id',
-  contenu: 'contenu',
-  lu: 'lu',
-  createdAt: 'createdAt',
-  userId: 'userId',
-  isAdmin: 'isAdmin'
-} as const
-
-export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
 export const ResetTokenScalarFieldEnum = {
@@ -273,6 +272,12 @@ export const ReturnScalarFieldEnum = {
   mlConfidence: 'mlConfidence',
   mlResponsibility: 'mlResponsibility',
   mlDecisionLabel: 'mlDecisionLabel',
+  mlProbabilities: 'mlProbabilities',
+  finalDecision: 'finalDecision',
+  finalNote: 'finalNote',
+  fraudScore: 'fraudScore',
+  flowmerceClaimId: 'flowmerceClaimId',
+  flowmerceSynced: 'flowmerceSynced',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -286,6 +291,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -302,4 +315,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

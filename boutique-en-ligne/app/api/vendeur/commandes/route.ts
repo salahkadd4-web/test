@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/vendeur/commandes?statut=&search=
 export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user || session.user.role !== 'VENDEUR') {
@@ -17,19 +16,29 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const statut = searchParams.get('statut')
-  const search = searchParams.get('search') || ''
+  const statut     = searchParams.get('statut')
+  const search     = searchParams.get('search') || ''
+  const categoryId = searchParams.get('categoryId')
 
-  // Commandes qui contiennent au moins un produit du vendeur
   const commandeWhere: any = {
     items: { some: { product: { vendeurId: vendeur.id } } },
   }
+
   if (statut) commandeWhere.statut = statut
+
+  if (categoryId) {
+    commandeWhere.items = {
+      some: { product: { vendeurId: vendeur.id, categoryId } },
+    }
+  }
+
   if (search) {
     commandeWhere.OR = [
-      { id: { contains: search, mode: 'insensitive' } },
-      { user: { nom:    { contains: search, mode: 'insensitive' } } },
-      { user: { prenom: { contains: search, mode: 'insensitive' } } },
+      { id:   { contains: search, mode: 'insensitive' } },
+      { user: { nom:       { contains: search, mode: 'insensitive' } } },
+      { user: { prenom:    { contains: search, mode: 'insensitive' } } },
+      { user: { email:     { contains: search, mode: 'insensitive' } } },
+      { user: { telephone: { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
     ]
   }
 
@@ -45,7 +54,6 @@ export async function GET(req: NextRequest) {
     },
   })
 
-  // Calculer le total vendeur pour chaque commande (uniquement ses produits)
   const commandesAvecTotal = commandes.map((cmd) => ({
     ...cmd,
     totalVendeur: cmd.items.reduce((sum, item) => sum + item.prix * item.quantite, 0),
