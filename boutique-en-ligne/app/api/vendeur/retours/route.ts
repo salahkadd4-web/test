@@ -30,11 +30,11 @@ export async function GET(req: NextRequest) {
 
   if (search) {
     where.OR = [
-      { product: { nom:   { contains: search, mode: 'insensitive' } } },
-      { user:    { nom:   { contains: search, mode: 'insensitive' } } },
-      { user:    { prenom:    { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
-      { user:    { email:     { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
-      { user:    { telephone: { contains: search, mode: 'insensitive' } } },  // ← NOUVEAU
+      { product: { nom:       { contains: search, mode: 'insensitive' } } },
+      { user:    { nom:       { contains: search, mode: 'insensitive' } } },
+      { user:    { prenom:    { contains: search, mode: 'insensitive' } } },
+      { user:    { email:     { contains: search, mode: 'insensitive' } } },
+      { user:    { telephone: { contains: search, mode: 'insensitive' } } },
     ]
   }
 
@@ -43,8 +43,23 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: 'desc' },
     include: {
       product: { select: { id: true, nom: true, images: true } },
-      user:    { select: { id: true, nom: true, prenom: true, email: true, telephone: true } },
-      order:   { select: { id: true, statut: true, createdAt: true } },
+      user: {
+        select: {
+          id:        true,
+          nom:       true,
+          prenom:    true,
+          email:     true,
+          telephone: true,
+          // ← AJOUT : compteurs pour afficher nbr retours / nbr commandes
+          _count: {
+            select: {
+              orders:  true,
+              returns: true,
+            },
+          },
+        },
+      },
+      order: { select: { id: true, statut: true, createdAt: true } },
     },
   })
 

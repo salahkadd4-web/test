@@ -12,20 +12,47 @@ export async function GET(req: NextRequest) {
     const token = await checkAdmin(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
+    const { searchParams } = new URL(req.url)
+    const search = searchParams.get('search') || ''
+
+    const where: any = { role: 'CLIENT' }
+    if (search) {
+      where.OR = [
+        { nom:       { contains: search, mode: 'insensitive' } },
+        { prenom:    { contains: search, mode: 'insensitive' } },
+        { email:     { contains: search, mode: 'insensitive' } },
+        { telephone: { contains: search, mode: 'insensitive' } },
+      ]
+    }
+
     const clients = await prisma.user.findMany({
-      where: { role: 'CLIENT' },
+      where,
       orderBy: { createdAt: 'desc' },
       include: {
         _count: {
           select: {
-            orders: true,
+            orders:    true,
             favorites: true,
+            returns:   true,   // ← FIXÉ : était absent → _count.returns était undefined
           },
+        },
+        // Score de fraude max parmi les retours du client
+        returns: {
+          select:   { fraudScore: true },
+          orderBy:  { fraudScore: 'desc' },
+          take:     1,
         },
       },
     })
 
-    return NextResponse.json(clients)
+    // Aplatir le maxFraudScore pour plus de commodité côté frontend
+    const result = clients.map(c => ({
+      ...c,
+      maxFraudScore: c.returns[0]?.fraudScore ?? null,
+      returns: undefined, // on n'expose pas la liste complète ici
+    }))
+
+    return NextResponse.json(result)
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }

@@ -21,22 +21,21 @@ type Order = {
 }
 
 type Return = {
-  id: string
-  returnReason: string
-  returnStatus: string
-  daysToReturn: number
-  mlDecision: string | null
-  mlConfidence: number | null
-  mlDecisionLabel: string | null
-  mlResponsibility: string | null
-  mlProbabilities: Record<string, number> | null
-  flowmerceClaimId: string | null
-  createdAt: string
+  id:            string
+  returnReason:  string
+  returnStatus:  string
+  daysToReturn:  number
+  description:   string | null
+  mlDecision:    string | null
+  finalDecision: string | null
+  finalNote:     string | null
+  fraudScore:    number | null
+  createdAt:     string
   product: { nom: string; images: string[] }
-  order: { id: string }
+  order:   { id: string }
 }
 
-// ── Config ────────────────────────────────────────────────────────────────
+// ── Labels ────────────────────────────────────────────────────────────────
 
 const reasonLabels: Record<string, string> = {
   DEFECTUEUX:      'Produit défectueux',
@@ -45,69 +44,32 @@ const reasonLabels: Record<string, string> = {
   NON_CONFORME:    'Ne correspond pas à la description',
 }
 
-const statusConfig: Record<string, { label: string; color: string; emoji: string; desc: string }> = {
-  EN_ATTENTE: {
-    label: 'En attente de validation',
-    color: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400',
-    emoji: '⏳',
-    desc:  'Le vendeur va examiner votre demande.',
-  },
-  APPROUVE: {
-    label: 'Approuvé',
-    color: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400',
-    emoji: '✅',
-    desc:  'Votre retour a été accepté.',
-  },
-  REFUSE: {
-    label: 'Refusé',
-    color: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400',
-    emoji: '❌',
-    desc:  'Votre demande a été refusée.',
-  },
-  REMBOURSE: {
-    label: 'Remboursé',
-    color: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',
-    emoji: '💰',
-    desc:  'Le remboursement a été effectué.',
-  },
-}
+// ── Config résolutions affichées au client (sans mention ML) ──────────────
 
-const resolutionConfig: Record<string, { label: string; emoji: string; color: string }> = {
-  Refund:   { label: 'Remboursement recommandé', emoji: '💰', color: 'text-green-700 dark:text-green-400' },
-  Exchange: { label: 'Échange recommandé',       emoji: '🔄', color: 'text-blue-700 dark:text-blue-400'  },
-  Repair:   { label: 'Réparation recommandée',   emoji: '🔧', color: 'text-orange-700 dark:text-orange-400' },
-  Reject:   { label: 'Refus recommandé',         emoji: '⚠️', color: 'text-red-700 dark:text-red-400'    },
-}
-
-function ProbBar({ label, value, max }: { label: string; value: number; max: number }) {
-  return (
-    <div className="flex items-center gap-2 mb-1">
-      <span className="text-xs font-mono w-20 text-gray-500 dark:text-gray-400 shrink-0">{label}</span>
-      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-        <div className="h-full bg-gray-700 dark:bg-gray-300 rounded-full" style={{ width: `${Math.round((value / max) * 100)}%` }} />
-      </div>
-      <span className="text-xs font-bold text-gray-700 dark:text-gray-300 w-12 text-right shrink-0">{value.toFixed(1)}%</span>
-    </div>
-  )
+const resolutionClient: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
+  Refund:   { label: 'Remboursement accordé',   emoji: '💰', color: 'text-green-700 dark:text-green-400',   bg: 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'   },
+  Exchange: { label: 'Échange accordé',         emoji: '🔄', color: 'text-blue-700 dark:text-blue-400',     bg: 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'         },
+  Repair:   { label: 'Réparation accordée',     emoji: '🔧', color: 'text-orange-700 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800' },
+  Reject:   { label: 'Demande non accordée',    emoji: '⚠️', color: 'text-red-700 dark:text-red-400',       bg: 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'             },
 }
 
 // ── Page principale ────────────────────────────────────────────────────────
 
 export default function RetoursPage() {
-  const [view, setView] = useState<'liste' | 'nouveau'>('liste')
-  const [retours, setRetours] = useState<Return[]>([])
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState<{ mlDecision: string | null; label: string | null; synced: boolean } | null>(null)
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null)
-  const [selectedRetour, setSelectedRetour] = useState<Return | null>(null)
+  const [view,            setView]           = useState<'liste' | 'nouveau'>('liste')
+  const [retours,         setRetours]        = useState<Return[]>([])
+  const [orders,          setOrders]         = useState<Order[]>([])
+  const [loading,         setLoading]        = useState(true)
+  const [submitting,      setSubmitting]     = useState(false)
+  const [error,           setError]          = useState('')
+  const [success,         setSuccess]        = useState<{ synced: boolean } | null>(null)
+  const [selectedOrder,   setSelectedOrder]  = useState<Order | null>(null)
+  const [selectedItem,    setSelectedItem]   = useState<OrderItem | null>(null)
+  const [selectedRetour,  setSelectedRetour] = useState<Return | null>(null)
   const [form, setForm] = useState({ orderId: '', productId: '', returnReason: '', description: '' })
 
-  const inputClass = "w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+  const inputClass = 'w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'
 
   useEffect(() => { fetchData() }, [])
 
@@ -147,63 +109,44 @@ export default function RetoursPage() {
         body:    JSON.stringify(form),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error); return }
+      if (!res.ok) {
+        // Afficher le message spécifique du serveur (délai, catégorie, etc.)
+        setError(data.error || 'Erreur lors de la soumission')
+        return
+      }
 
-      setSuccess({
-        mlDecision: data.retour?.mlDecision || null,
-        label:      data.retour?.mlDecisionLabel || null,
-        synced:     data.flowmerceSynced || false,
-      })
+      setSuccess({ synced: data.flowmerceSynced || false })
       setForm({ orderId: '', productId: '', returnReason: '', description: '' })
       setSelectedOrder(null)
       setSelectedItem(null)
       fetchData()
     } catch { setError('Erreur serveur') }
-    finally { setSubmitting(false) }
+    finally   { setSubmitting(false) }
   }
 
   if (loading) return (
-    <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">Chargement...</div>
+    <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+      Chargement...
+    </div>
   )
 
-  // ── Résultat après soumission ──────────────────────────────────────────
+  // ── Écran de confirmation après soumission ────────────────────────────────
   if (success) {
-    const res = success.mlDecision ? resolutionConfig[success.mlDecision] : null
     return (
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-8 text-center">
           <div className="text-5xl mb-4">📬</div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Demande envoyée !</h1>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Votre demande de retour est en attente de validation par le vendeur ou l'administrateur.
+            Votre demande de retour a bien été reçue et est en attente de traitement.
           </p>
 
-          {/* Recommandation ML */}
-          {res && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4 text-left">
-              <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">🤖 Analyse automatique</p>
-              <p className={`text-sm font-semibold ${res.color}`}>{res.emoji} {success.label}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Cette recommandation sera examinée par le vendeur avant de prendre une décision finale.
-              </p>
-            </div>
-          )}
-
-          {/* Badge Flowmerce */}
-          {success.synced && (
-            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded-xl p-3 mb-4 flex items-center gap-2 justify-center">
-              <span className="text-xs text-blue-700 dark:text-blue-400">
-                ✓ Dossier transmis à la plateforme de gestion des retours
-              </span>
-            </div>
-          )}
-
-          {/* Notice EN_ATTENTE */}
+          {/* Étapes attendues — sans mention ML ni Flowmerce */}
           <div className="bg-amber-50 dark:bg-amber-950 border border-amber-100 dark:border-amber-800 rounded-xl p-4 mb-6 text-left">
             <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-1">⏳ Prochaine étape</p>
             <p className="text-xs text-amber-600 dark:text-amber-500">
-              Le vendeur va examiner votre demande et vous informer de sa décision.
-              Votre retour reste en statut <strong>«&nbsp;En attente&nbsp;»</strong> jusqu'à sa validation.
+              Le vendeur va examiner votre demande et vous communiquer sa décision finale.
+              Votre retour restera en statut <strong>«&nbsp;En attente&nbsp;»</strong> jusqu'à validation.
             </p>
           </div>
 
@@ -247,7 +190,7 @@ export default function RetoursPage() {
         </button>
       </div>
 
-      {/* ── Liste des retours ──────────────────────────────────────────── */}
+      {/* ── Liste des retours ──────────────────────────────────────────────── */}
       {view === 'liste' && (
         <div>
           {retours.length === 0 ? (
@@ -264,8 +207,25 @@ export default function RetoursPage() {
           ) : (
             <div className="space-y-4">
               {retours.map(retour => {
-                const status = statusConfig[retour.returnStatus] || statusConfig.EN_ATTENTE
-                const res = retour.mlDecision ? resolutionConfig[retour.mlDecision] : null
+
+                // ── Construire l'affichage selon le statut ────────────────
+                const isFinalised = retour.returnStatus !== 'EN_ATTENTE'
+                const finalRes    = retour.finalDecision ? resolutionClient[retour.finalDecision] : null
+                const hasFraud    = (retour.fraudScore ?? 0) > 60
+
+                // Badge statut
+                let badgeText  = '⏳ En attente de décision'
+                let badgeClass = 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400'
+
+                if (isFinalised && finalRes) {
+                  badgeText  = `${finalRes.emoji} ${finalRes.label}`
+                  if (retour.finalDecision === 'Reject') {
+                    badgeClass = 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400'
+                  } else {
+                    badgeClass = 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400'
+                  }
+                }
+
                 return (
                   <div key={retour.id}
                     onClick={() => setSelectedRetour(retour)}
@@ -287,26 +247,19 @@ export default function RetoursPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className={status.color + ' text-xs font-semibold px-3 py-1 rounded-full shrink-0'}>
-                          {status.emoji} {status.label}
-                        </span>
-                        {retour.flowmerceClaimId && (
-                          <span className="text-xs text-blue-500 dark:text-blue-400">⟷ Flowmerce</span>
-                        )}
-                      </div>
+
+                      <span className={badgeClass + ' text-xs font-semibold px-3 py-1 rounded-full shrink-0 text-center'}>
+                        {badgeText}
+                      </span>
                     </div>
 
-                    {/* Recommandation ML */}
-                    {res && (
-                      <div className="mt-4 bg-gray-50 dark:bg-gray-800 rounded-xl p-3 border border-gray-100 dark:border-gray-700">
-                        <p className="text-xs text-gray-400 mb-1">🤖 Recommandation automatique</p>
-                        <p className={`text-sm font-semibold ${res.color}`}>{res.emoji} {retour.mlDecisionLabel}</p>
-                        {retour.returnStatus === 'EN_ATTENTE' && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                            En attente de validation par le vendeur
-                          </p>
-                        )}
+                    {/* Signal fraude si approuvé avec score élevé */}
+                    {isFinalised && hasFraud && retour.finalDecision !== 'Reject' && (
+                      <div className="mt-3 bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-xl p-3 flex items-center gap-2">
+                        <span className="text-orange-600 dark:text-orange-400 text-xs font-medium">
+                          ⚠️ Attention — Votre compte présente un historique de retours anormal.
+                          Un signalement peut être transmis à notre équipe de contrôle.
+                        </span>
                       </div>
                     )}
                   </div>
@@ -317,7 +270,7 @@ export default function RetoursPage() {
         </div>
       )}
 
-      {/* ── Formulaire nouveau retour (1 seule étape) ─────────────────── */}
+      {/* ── Formulaire nouveau retour ──────────────────────────────────────── */}
       {view === 'nouveau' && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">Nouvelle demande de retour</h2>
@@ -374,7 +327,7 @@ export default function RetoursPage() {
                 </div>
               )}
 
-              {/* Aperçu produit sélectionné */}
+              {/* Aperçu produit */}
               {selectedItem && (
                 <div className="bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded-xl p-3 flex items-center gap-3">
                   <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shrink-0">
@@ -413,118 +366,129 @@ export default function RetoursPage() {
                 />
               </div>
 
-              {/* Info validation */}
               <div className="bg-amber-50 dark:bg-amber-950 border border-amber-100 dark:border-amber-900 rounded-xl p-4">
                 <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-1">ℹ️ Comment ça fonctionne</p>
                 <p className="text-xs text-amber-600 dark:text-amber-500">
-                  Votre demande sera analysée automatiquement par notre système, puis validée par le vendeur ou l'administrateur.
-                  Vous resterez informé du statut de votre retour.
+                  Votre demande sera examinée par le vendeur ou l'administrateur.
+                  Vous serez informé dès qu'une décision sera prise.
                 </p>
               </div>
 
               <button type="submit" disabled={submitting}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition">
-                {submitting ? '🤖 Analyse en cours...' : 'Soumettre ma demande'}
+                {submitting ? '📤 Envoi en cours...' : 'Soumettre ma demande'}
               </button>
             </form>
           )}
         </div>
       )}
 
-      {/* ── Modal détail retour ───────────────────────────────────────── */}
-      {selectedRetour && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
-          onClick={e => { if (e.target === e.currentTarget) setSelectedRetour(null) }}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-800">
-            <div className="bg-gray-900 dark:bg-gray-800 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between sticky top-0">
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Détail du retour</p>
-                <p className="font-semibold text-sm">{selectedRetour.product.nom}</p>
-              </div>
-              <button onClick={() => setSelectedRetour(null)} className="text-gray-400 hover:text-white text-xl">✕</button>
-            </div>
+      {/* ── Modal détail retour ─────────────────────────────────────────────── */}
+      {selectedRetour && (() => {
+        const isFinalised = selectedRetour.returnStatus !== 'EN_ATTENTE'
+        const finalRes    = selectedRetour.finalDecision ? resolutionClient[selectedRetour.finalDecision] : null
+        const hasFraud    = (selectedRetour.fraudScore ?? 0) > 60
 
-            <div className="p-6 space-y-4">
-              {/* Statut */}
-              {(() => {
-                const status = statusConfig[selectedRetour.returnStatus] || statusConfig.EN_ATTENTE
-                return (
-                  <div className={status.color + ' rounded-xl p-4'}>
-                    <p className="text-sm font-semibold">{status.emoji} {status.label}</p>
-                    <p className="text-xs mt-1 opacity-80">{status.desc}</p>
-                  </div>
-                )
-              })()}
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+            onClick={e => { if (e.target === e.currentTarget) setSelectedRetour(null) }}>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-800">
 
-              {/* Info */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 mb-1">Raison</p>
-                  <p className="text-xs font-medium text-gray-800 dark:text-gray-100">{reasonLabels[selectedRetour.returnReason]}</p>
+              {/* Header */}
+              <div className="bg-gray-900 dark:bg-gray-800 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between sticky top-0">
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Détail du retour</p>
+                  <p className="font-semibold text-sm">{selectedRetour.product.nom}</p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 mb-1">Date de retour</p>
-                  <p className="text-xs font-medium text-gray-800 dark:text-gray-100">J+{selectedRetour.daysToReturn}</p>
-                </div>
+                <button onClick={() => setSelectedRetour(null)} className="text-gray-400 hover:text-white text-xl">✕</button>
               </div>
 
-              {/* Recommandation ML */}
-              {selectedRetour.mlDecision && (
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                  <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">🤖 Recommandation automatique</p>
+              <div className="p-6 space-y-4">
+
+                {/* ── Statut / Décision finale ──────────────────────────── */}
+                {!isFinalised ? (
+                  // EN ATTENTE : message neutre, aucune info ML
+                  <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">⏳ Demande en cours d'examen</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                      Votre demande est en attente de validation. Vous serez notifié dès qu'une décision sera prise.
+                    </p>
                   </div>
-                  <div className="p-4">
-                    {(() => {
-                      const res = resolutionConfig[selectedRetour.mlDecision] || resolutionConfig.Reject
-                      return (
-                        <>
-                          <p className={`text-sm font-bold mb-2 ${res.color}`}>{res.emoji} {selectedRetour.mlDecisionLabel}</p>
-                          {selectedRetour.mlConfidence && (
-                            <p className="text-xs text-gray-500 mb-3">Confiance : {selectedRetour.mlConfidence.toFixed(1)}%</p>
-                          )}
-                          {selectedRetour.mlProbabilities && (
-                            <div>
-                              {Object.entries(selectedRetour.mlProbabilities)
-                                .sort(([, a], [, b]) => b - a)
-                                .map(([label, value]) => {
-                                  const maxVal = Math.max(...Object.values(selectedRetour.mlProbabilities!))
-                                  return <ProbBar key={label} label={label} value={value * 100} max={maxVal * 100} />
-                                })
-                              }
-                            </div>
-                          )}
-                          {selectedRetour.returnStatus === 'EN_ATTENTE' && (
-                            <div className="mt-3 bg-amber-50 dark:bg-amber-950 border border-amber-100 dark:border-amber-800 rounded-lg p-2">
-                              <p className="text-xs text-amber-600 dark:text-amber-400">
-                                ⏳ Cette recommandation est en cours d'examen par le vendeur.
-                              </p>
-                            </div>
-                          )}
-                        </>
-                      )
-                    })()}
+                ) : finalRes ? (
+                  // DÉCISION FINALE : afficher uniquement la résolution
+                  <div className={`border rounded-xl p-4 ${finalRes.bg}`}>
+                    <p className={`text-base font-bold ${finalRes.color}`}>
+                      {finalRes.emoji} {finalRes.label}
+                    </p>
+                    {selectedRetour.finalDecision === 'Reject' && selectedRetour.finalNote && (
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">
+                        Motif : {selectedRetour.finalNote}
+                      </p>
+                    )}
+                    {selectedRetour.finalDecision === 'Refund' && (
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                        Le remboursement sera traité sous {5} jours ouvrables.
+                      </p>
+                    )}
+                    {selectedRetour.finalDecision === 'Exchange' && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                        Un échange sera organisé. Le vendeur vous contactera sous peu.
+                      </p>
+                    )}
+                    {selectedRetour.finalDecision === 'Repair' && (
+                      <p className="text-xs text-orange-600 dark:text-orange-400 mt-2">
+                        Le produit sera pris en charge pour réparation.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Décision en cours de traitement.</p>
+                  </div>
+                )}
+
+                {/* ── Signal fraude (si approuvé avec fraude élevée) ─────── */}
+                {isFinalised && hasFraud && selectedRetour.finalDecision !== 'Reject' && (
+                  <div className="bg-orange-50 dark:bg-orange-950 border border-orange-300 dark:border-orange-700 rounded-xl p-4">
+                    <p className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-1">
+                      ⚠️ Signalement — Comportement inhabituel détecté
+                    </p>
+                    <p className="text-xs text-orange-600 dark:text-orange-500">
+                      Votre historique de retours a déclenché un contrôle automatique.
+                      Un nombre élevé de demandes peut entraîner une restriction de vos accès.
+                    </p>
+                  </div>
+                )}
+
+                {/* ── Infos générales ────────────────────────────────────── */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <p className="text-xs text-gray-400 mb-1">Raison</p>
+                    <p className="text-xs font-medium text-gray-800 dark:text-gray-100">{reasonLabels[selectedRetour.returnReason]}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <p className="text-xs text-gray-400 mb-1">Date de demande</p>
+                    <p className="text-xs font-medium text-gray-800 dark:text-gray-100">J+{selectedRetour.daysToReturn}</p>
                   </div>
                 </div>
-              )}
 
-              {/* Badge Flowmerce */}
-              {selectedRetour.flowmerceClaimId && (
-                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded-xl p-3 flex items-center gap-2">
-                  <span className="text-xs text-blue-700 dark:text-blue-400">
-                    ⟷ Dossier traçé dans la plateforme Flowmerce
-                  </span>
-                </div>
-              )}
+                {/* ── Description client ─────────────────────────────────── */}
+                {selectedRetour.description && (
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <p className="text-xs text-gray-400 mb-1">Votre description</p>
+                    <p className="text-xs text-gray-700 dark:text-gray-300">{selectedRetour.description}</p>
+                  </div>
+                )}
 
-              <button onClick={() => setSelectedRetour(null)}
-                className="w-full border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                Fermer
-              </button>
+                <button onClick={() => setSelectedRetour(null)}
+                  className="w-full border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                  Fermer
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

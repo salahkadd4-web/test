@@ -25,7 +25,10 @@ type Return = {
   flowmerceClaimId: string | null
   flowmerceSynced:  boolean
   createdAt:        string
-  user:    { nom: string; prenom: string; email: string | null; telephone: string | null }
+  user: {
+    nom: string; prenom: string; email: string | null; telephone: string | null
+    _count: { orders: number; returns: number }   // ← AJOUT compteurs client
+  }
   product: {
     nom: string; images: string[]; prix: number
     category: { nom: string }

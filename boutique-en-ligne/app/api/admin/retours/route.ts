@@ -13,50 +13,23 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { searchParams } = new URL(req.url)
-    const vendeurId    = searchParams.get('vendeurId')    // filtre par vendeur spécifique
-    const adminOnly    = searchParams.get('adminOnly') === 'true' // produits admin (vendeurId null)
-    const statut       = searchParams.get('statut')        // ← NOUVEAU filtre statut
-    const categoryId   = searchParams.get('categoryId')   // ← NOUVEAU filtre catégorie
-    const clientId     = searchParams.get('clientId')     // ← NOUVEAU filtre client
-    const productId    = searchParams.get('productId')    // ← NOUVEAU filtre produit
-    const search       = searchParams.get('search') || ''
+    const vendeurId  = searchParams.get('vendeurId')
+    const adminOnly  = searchParams.get('adminOnly') === 'true'
+    const statut     = searchParams.get('statut')
+    const categoryId = searchParams.get('categoryId')
+    const clientId   = searchParams.get('clientId')
+    const productId  = searchParams.get('productId')
+    const search     = searchParams.get('search') || ''
 
     const where: any = {}
 
-    // Filtre vendeur spécifique
-    if (vendeurId) {
-      where.product = { ...where.product, vendeurId }
-    }
+    if (vendeurId)  where.product = { ...where.product, vendeurId }
+    if (adminOnly)  where.product = { ...where.product, vendeurId: null }
+    if (categoryId) where.product = { ...where.product, categoryId }
+    if (productId)  where.productId = productId
+    if (clientId)   where.userId = clientId
+    if (statut)     where.returnStatus = statut
 
-    // Filtre admin uniquement (produits sans vendeur)
-    if (adminOnly) {
-      where.product = { ...where.product, vendeurId: null }
-    }
-
-    // Filtre catégorie
-    if (categoryId) {
-      where.product = {
-        ...where.product,
-        categoryId,
-      }
-    }
-
-    // Filtre produit
-    if (productId) {
-      where.productId = productId
-    }
-
-    // Filtre client
-    if (clientId) {
-      where.userId = clientId
-    }
-
-    // Filtre statut
-    if (statut) {
-      where.returnStatus = statut
-    }
-
-    // Filtre recherche
     if (search) {
       where.OR = [
         { product: { nom: { contains: search, mode: 'insensitive' } } },
@@ -71,13 +44,25 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
-          select: { nom: true, prenom: true, email: true, telephone: true },
+          select: {
+            nom:       true,
+            prenom:    true,
+            email:     true,
+            telephone: true,
+            // ← AJOUT : compteurs pour afficher nbr retours / nbr commandes
+            _count: {
+              select: {
+                orders:  true,
+                returns: true,
+              },
+            },
+          },
         },
         product: {
           select: {
             nom: true, images: true, prix: true,
             category: { select: { nom: true } },
-            vendeur:  { select: { id: true, nomBoutique: true } }, // ← inclure vendeur
+            vendeur:  { select: { id: true, nomBoutique: true } },
           },
         },
         order: {

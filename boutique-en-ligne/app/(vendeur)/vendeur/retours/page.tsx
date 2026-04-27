@@ -15,13 +15,18 @@ interface Return {
   mlConfidence:     number | null
   mlDecisionLabel:  string | null
   mlProbabilities:  Record<string, number> | null
+  fraudScore:       number | null
   // Décision finale humaine
   finalDecision:    string | null
   finalNote:        string | null
   flowmerceClaimId: string | null
   product: { id: string; nom: string; images: string[] }
-  user:    { nom: string; prenom: string; email: string | null; telephone: string | null }
-  order:   { id: string; statut: string; createdAt: string }
+  user: {
+    nom: string; prenom: string; email: string | null; telephone: string | null
+    // ← AJOUT compteurs client
+    _count: { orders: number; returns: number }
+  }
+  order: { id: string; statut: string; createdAt: string }
 }
 
 const raisonLabel: Record<string, string> = {
@@ -32,10 +37,10 @@ const raisonLabel: Record<string, string> = {
 }
 
 const statutConfig: Record<string, { label: string; color: string; emoji: string }> = {
-  EN_ATTENTE: { label: 'En attente',  color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300', emoji: '⏳' },
-  APPROUVE:   { label: 'Approuvé',    color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',     emoji: '✅' },
-  REFUSE:     { label: 'Refusé',      color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',             emoji: '❌' },
-  REMBOURSE:  { label: 'Remboursé',   color: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',         emoji: '💰' },
+  EN_ATTENTE: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300', emoji: '⏳' },
+  APPROUVE:   { label: 'Approuvé',   color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',     emoji: '✅' },
+  REFUSE:     { label: 'Refusé',     color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',             emoji: '❌' },
+  REMBOURSE:  { label: 'Remboursé',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',         emoji: '💰' },
 }
 
 const resolutionConfig: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
@@ -54,17 +59,35 @@ function useDebounce<T>(value: T, delay: number): T {
   return debounced
 }
 
-function ProbBar({ label, value, max }: { label: string; value: number; max: number }) {
+// ── Badge retours/commandes ────────────────────────────────────────────────
+function ClientRetoursBadge({ returns, orders }: { returns: number; orders: number }) {
+  const ratio = orders > 0 ? returns / orders : 0
+  const isAlert = returns >= 3 || ratio >= 0.4
   return (
-    <div className="flex items-center gap-2 mb-1">
-      <span className="text-xs font-mono w-20 text-gray-500 dark:text-gray-400 shrink-0">{label}</span>
-      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-        <div className="h-full bg-gray-700 dark:bg-gray-300 rounded-full" style={{ width: `${Math.round((value / max) * 100)}%` }} />
-      </div>
-      <span className="text-xs font-bold text-gray-700 dark:text-gray-300 w-12 text-right shrink-0">
-        {(value * 100).toFixed(1)}%
-      </span>
-    </div>
+    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
+      isAlert
+        ? 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400'
+        : returns > 0
+          ? 'bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400'
+          : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+    }`}>
+      🔄 {returns}/{orders}
+    </span>
+  )
+}
+
+// ── Badge score de fraude ─────────────────────────────────────────────────
+function FraudBadge({ score }: { score: number | null }) {
+  if (score === null) return null
+  if (score <= 30) return null // score faible, pas d'affichage
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
+      score > 70
+        ? 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400'
+        : 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400'
+    }`}>
+      {score > 70 ? '🚨' : '⚠️'} Fraude {score.toFixed(0)}%
+    </span>
   )
 }
 
@@ -80,7 +103,6 @@ export default function VendeurRetoursPage() {
   const [updating,       setUpdating]       = useState(false)
   const [updateMsg,      setUpdateMsg]      = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
-  // État décision dans le modal
   const [showOverride,     setShowOverride]     = useState(false)
   const [overrideDecision, setOverrideDecision] = useState<FinalDecision | ''>('')
   const [overrideNote,     setOverrideNote]     = useState('')
@@ -112,7 +134,6 @@ export default function VendeurRetoursPage() {
   useEffect(() => { fetchCategories() }, [])
   useEffect(() => { fetchData(!!debouncedSearch) }, [fetchData])
 
-  // ── Ouvrir le modal ──────────────────────────────────────────────────
   const openModal = (retour: Return) => {
     setSelected(retour)
     setUpdateMsg(null)
@@ -121,7 +142,6 @@ export default function VendeurRetoursPage() {
     setOverrideNote('')
   }
 
-  // ── Prendre une décision ─────────────────────────────────────────────
   const handleDecision = async (
     id:            string,
     action:        'APPROVE_ML' | 'OVERRIDE',
@@ -259,19 +279,33 @@ export default function VendeurRetoursPage() {
                         </span>
                       </div>
                     </div>
+
+                    {/* Nom client + raison */}
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {r.user.prenom} {r.user.nom}
                       {r.user.telephone && <span className="ml-1 text-emerald-600 dark:text-emerald-400">· {r.user.telephone}</span>}
                       {' — '}{raisonLabel[r.returnReason] || r.returnReason}
                     </p>
+
+                    {/* ← AJOUT : retours/commandes + score fraude */}
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <ClientRetoursBadge returns={r.user._count?.returns ?? 0} orders={r.user._count?.orders ?? 0} />
+                      <FraudBadge score={r.fraudScore} />
+                    </div>
+
+                    {/* Décision ML (label uniquement, sans probabilités) */}
                     <div className="flex items-center gap-2 mt-0.5">
-                      {mlRes && (
-                        <p className={`text-xs ${mlRes.color}`}>{mlRes.emoji} ML : {mlRes.label}</p>
+                      {mlRes && r.mlConfidence !== null && (
+                        <p className={`text-xs ${mlRes.color}`}>
+                          {mlRes.emoji} ML : {mlRes.label}
+                          <span className="ml-1 text-gray-400">({r.mlConfidence.toFixed(1)}%)</span>
+                        </p>
                       )}
                       {finR && (
                         <p className={`text-xs font-bold ${finR.color}`}>→ {finR.emoji} {finR.label}</p>
                       )}
                     </div>
+
                     <p className="text-xs text-gray-400">{new Date(r.createdAt).toLocaleDateString('fr-DZ')}</p>
                   </div>
                 </div>
@@ -325,7 +359,7 @@ export default function VendeurRetoursPage() {
                 </div>
               </div>
 
-              {/* Info client */}
+              {/* Info client + compteurs */}
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
                 <p className="text-xs text-gray-400 mb-1">👤 Client</p>
                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
@@ -333,6 +367,14 @@ export default function VendeurRetoursPage() {
                 </p>
                 {selected.user.email     && <p className="text-xs text-gray-500">{selected.user.email}</p>}
                 {selected.user.telephone && <p className="text-xs text-gray-500">{selected.user.telephone}</p>}
+                {/* ← AJOUT : retours/commandes + score fraude dans le modal */}
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <ClientRetoursBadge
+                    returns={selected.user._count?.returns ?? 0}
+                    orders={selected.user._count?.orders  ?? 0}
+                  />
+                  <FraudBadge score={selected.fraudScore} />
+                </div>
               </div>
 
               {/* Description */}
@@ -343,7 +385,7 @@ export default function VendeurRetoursPage() {
                 </div>
               )}
 
-              {/* Recommandation ML */}
+              {/* Recommandation ML — confiance uniquement, sans barres de probabilités */}
               {selected.mlDecision && (
                 <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                   <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2">
@@ -357,20 +399,13 @@ export default function VendeurRetoursPage() {
                           <p className={`text-sm font-bold mb-1 ${res.color}`}>
                             {res.emoji} {selected.mlDecisionLabel || res.label}
                           </p>
-                          {selected.mlConfidence && (
-                            <p className="text-xs text-gray-500 mb-3">Confiance : {selected.mlConfidence.toFixed(1)}%</p>
+                          {/* ← Confiance conservée, probabilités masquées */}
+                          {selected.mlConfidence !== null && (
+                            <p className="text-xs text-gray-500">
+                              Confiance : <span className="font-semibold text-gray-700 dark:text-gray-300">{selected.mlConfidence.toFixed(1)}%</span>
+                            </p>
                           )}
-                          {selected.mlProbabilities && (
-                            <div>
-                              {Object.entries(selected.mlProbabilities)
-                                .sort(([, a], [, b]) => b - a)
-                                .map(([label, value]) => {
-                                  const maxVal = Math.max(...Object.values(selected.mlProbabilities!))
-                                  return <ProbBar key={label} label={label} value={value} max={maxVal} />
-                                })
-                              }
-                            </div>
-                          )}
+                          {/* mlProbabilities intentionnellement masqué côté vendeur */}
                         </>
                       )
                     })()}
@@ -414,7 +449,6 @@ export default function VendeurRetoursPage() {
                     )}
                   </p>
 
-                  {/* Bouton : appliquer la décision ML */}
                   {selected.mlDecision ? (
                     <button
                       onClick={() => handleDecision(selected.id, 'APPROVE_ML', null, null)}
@@ -430,7 +464,6 @@ export default function VendeurRetoursPage() {
                     <p className="text-xs text-gray-400 italic">Aucune recommandation ML pour ce retour.</p>
                   )}
 
-                  {/* Section override / autre décision */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                     <button
                       onClick={() => setShowOverride(v => !v)}
@@ -444,7 +477,7 @@ export default function VendeurRetoursPage() {
                       <div className="p-4 space-y-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                         <div className="grid grid-cols-2 gap-2">
                           {(['Refund', 'Exchange', 'Repair', 'Reject'] as FinalDecision[]).map(opt => {
-                            const cfg       = resolutionConfig[opt]
+                            const cfg        = resolutionConfig[opt]
                             const isSelected = overrideDecision === opt
                             return (
                               <button
@@ -464,7 +497,6 @@ export default function VendeurRetoursPage() {
                           })}
                         </div>
 
-                        {/* Note obligatoire si Reject */}
                         {overrideDecision === 'Reject' && (
                           <div>
                             <label className="block text-xs font-medium text-red-600 dark:text-red-400 mb-1">
