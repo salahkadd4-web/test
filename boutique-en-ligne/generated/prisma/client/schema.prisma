@@ -37,20 +37,6 @@ enum OrderStatus {
   ANNULEE
 }
 
-enum ReturnStatus {
-  EN_ATTENTE
-  APPROUVE
-  REFUSE
-  REMBOURSE
-}
-
-enum ReturnReason {
-  DEFECTUEUX
-  MAUVAIS_ARTICLE
-  CHANGEMENT_AVIS
-  NON_CONFORME
-}
-
 enum VendeurStatut {
   EN_ATTENTE
   APPROUVE
@@ -93,7 +79,6 @@ model User {
   messages       Message[]
   orders         Order[]
   resetTokens    ResetToken[]
-  returns        Return[]
   vendeurProfile VendeurProfile?
 }
 
@@ -156,7 +141,6 @@ model Product {
   orderItems  OrderItem[]
   category    Category        @relation(fields: [categoryId], references: [id])
   vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
-  returns     Return[]
 }
 
 model Cart {
@@ -202,6 +186,9 @@ model Order {
   statut               OrderStatus @default(EN_ATTENTE)
   total                Float
   adresse              String
+  modePaiement         String      @default("Paiement à la livraison")
+  methodeExpedition    String      @default("Livraison standard")
+  fraisLivraison       Float       @default(700)
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
   userId               String
@@ -212,7 +199,6 @@ model Order {
   scan2Result          String?
   user                 User        @relation(fields: [userId], references: [id])
   items                OrderItem[]
-  returns              Return[]
 }
 
 model OrderItem {
@@ -244,39 +230,4 @@ model OtpToken {
   data        String
   expiresAt   DateTime
   createdAt   DateTime @default(now())
-}
-
-// ── Return — enrichi pour l'intégration Flowmerce ────────────────────────
-model Return {
-  id               String       @id @default(cuid())
-  orderId          String
-  userId           String
-  productId        String
-  returnReason     ReturnReason
-  returnStatus     ReturnStatus @default(EN_ATTENTE)
-  daysToReturn     Int
-  description      String?
-  mlDecision       String?
-  mlConfidence     Float?
-  mlResponsibility String?
-  mlDecisionLabel  String?
-  mlProbabilities  Json?
-
-  // ── Décision finale humaine ────────────────────────────────────────────
-  finalDecision String?
-  finalNote     String?
-
-  fraudScore Float?
-
-  // ── Intégration Flowmerce ─────────────────────────────────────────────
-  flowmerceClaimId String?
-  flowmerceSynced  Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  order     Order    @relation(fields: [orderId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@index([flowmerceClaimId])
 }

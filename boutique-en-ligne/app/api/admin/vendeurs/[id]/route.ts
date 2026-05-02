@@ -42,20 +42,18 @@ export async function GET(
   }
 
   // Stats commandes & CA
-  const [totalCommandes, chiffreAffaire, totalRetours] = await Promise.all([
+  const [totalCommandes, chiffreAffaire] = await Promise.all([
     prisma.orderItem.count({ where: { product: { vendeurId: id } } }),
     prisma.orderItem.aggregate({
       _sum: { prix: true },
       where: { product: { vendeurId: id }, order: { statut: 'LIVREE' } },
     }),
-    prisma.return.count({ where: { product: { vendeurId: id } } }),
   ])
 
   return NextResponse.json({
     ...vendeur,
     totalCommandes,
     chiffreAffaire: chiffreAffaire._sum.prix ?? 0,
-    totalRetours,
   })
 }
 

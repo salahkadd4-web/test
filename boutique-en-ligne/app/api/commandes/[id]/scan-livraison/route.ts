@@ -29,56 +29,22 @@ export async function POST(
     }
 
     const commande = await prisma.order.findFirst({
-      where: { id, userId: token.id as string, statut: 'EXPEDIEE' },
+      where:   { id, userId: token.id as string, statut: 'EXPEDIEE' },
       include: { user: { select: { nom: true, prenom: true } } },
     })
     if (!commande) {
       return NextResponse.json({ error: 'Commande introuvable ou non expédiée' }, { status: 404 })
     }
 
-    // Essayer le scan ML — si indisponible, continuer quand même
-    let scanResult: any = {
-      decision:           'CONFIRME_SANS_ML',
-      delivery_confirmed: true,
-      message:            'Réception confirmée ✅',
-      similarity_pct:     null,
-    }
-
-    try {
-      const mlRes = await fetch(`${process.env.ML_API_URL}/api/v1/scan/delivery`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key':    process.env.ML_API_KEY || '',
-        },
-        body: JSON.stringify({ order_id: id, images_b64: imagesB64 }),
-        signal: AbortSignal.timeout(5000),
-      })
-      if (mlRes.ok) {
-        const mlData = await mlRes.json()
-        scanResult = {
-          ...mlData,
-          delivery_confirmed: true,
-          message: mlData.delivery_confirmed
-            ? 'Réception confirmée ✅ Produit conforme'
-            : `Réception confirmée ✅ (Note: ${mlData.message || mlData.decision})`,
-        }
-      }
-    } catch (mlError) {
-      console.warn('API ML indisponible — livraison confirmée sans scan')
-    }
-
-    // Mettre à jour le statut en DB
     await prisma.order.update({
       where: { id },
       data: {
         statut:      'LIVREE',
-        scan2Result: scanResult.decision,
+        scan2Result: 'CONFIRME',
         scan2Done:   true,
       },
     })
 
-    // ── Notifier l'admin en temps réel via Pusher ─────────
     await pusher.trigger('admin-commandes', 'statut-change', {
       commandeId: id,
       statut:     'LIVREE',
@@ -88,11 +54,10 @@ export async function POST(
     })
 
     return NextResponse.json({
-      ...scanResult,
+      decision:           'CONFIRME',
       delivery_confirmed: true,
-      message: scanResult.message || 'Réception confirmée ✅',
+      message:            'Réception confirmée ✅',
     })
-
   } catch (error) {
     console.error('Erreur scan livraison:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

@@ -10,13 +10,11 @@ export async function GET() {
   }
 
   const [
-    // ── Résumé global
     totalClients,
     totalVendeurs,
     totalVendeursApprouves,
     totalProduits,
     totalCommandes,
-    totalRetours,
     caData,
   ] = await Promise.all([
     prisma.user.count({ where: { role: 'CLIENT' } }),
@@ -24,7 +22,6 @@ export async function GET() {
     prisma.vendeurProfile.count({ where: { statut: 'APPROUVE' } }),
     prisma.product.count(),
     prisma.order.count(),
-    prisma.return.count(),
     prisma.order.aggregate({ _sum: { total: true }, where: { statut: 'LIVREE' } }),
   ])
 
@@ -39,13 +36,12 @@ export async function GET() {
 
   const vendeursAvecCA = await Promise.all(
     vendeursRaw.map(async (v) => {
-      const [ca, nbCommandes, nbRetours] = await Promise.all([
+      const [ca, nbCommandes] = await Promise.all([
         prisma.orderItem.aggregate({
           _sum: { prix: true },
           where: { product: { vendeurId: v.id }, order: { statut: 'LIVREE' } },
         }),
         prisma.orderItem.count({ where: { product: { vendeurId: v.id } } }),
-        prisma.return.count({ where: { product: { vendeurId: v.id } } }),
       ])
       return {
         id:          v.id,
@@ -53,9 +49,7 @@ export async function GET() {
         user:        v.user,
         nbProduits:  v._count.products,
         nbCommandes,
-        nbRetours,
         ca:          ca._sum.prix ?? 0,
-        tauxRetour:  nbCommandes > 0 ? Math.round((nbRetours / nbCommandes) * 1000) / 10 : 0,
       }
     })
   )
@@ -69,7 +63,7 @@ export async function GET() {
       id: true, nom: true, prix: true, images: true,
       category: { select: { nom: true } },
       vendeur: { select: { nomBoutique: true } },
-      _count: { select: { orderItems: true, returns: true } },
+      _count: { select: { orderItems: true } },
     },
     orderBy: { orderItems: { _count: 'desc' } },
     take: 10,
@@ -80,7 +74,7 @@ export async function GET() {
       id: true, nom: true, prix: true, images: true,
       category: { select: { nom: true } },
       vendeur: { select: { nomBoutique: true } },
-      _count: { select: { orderItems: true, returns: true } },
+      _count: { select: { orderItems: true } },
     },
     orderBy: { orderItems: { _count: 'asc' } },
     take: 10,
@@ -111,7 +105,7 @@ export async function GET() {
     where: { role: 'CLIENT' },
     select: {
       id: true, nom: true, prenom: true, email: true, wilaya: true,
-      _count: { select: { orders: true, returns: true } },
+      _count: { select: { orders: true } },
     },
     take: 100,
     orderBy: { createdAt: 'asc' },
@@ -139,7 +133,6 @@ export async function GET() {
       totalVendeursApprouves,
       totalProduits,
       totalCommandes,
-      totalRetours,
       chiffreAffaire: caData._sum.total ?? 0,
     },
     vendeurs:   { meilleurs: meilleursVendeurs, pires: pireVendeurs },

@@ -1,30 +1,32 @@
 import { prisma } from '@/lib/prisma'
+import { getFlowmerceClaims } from '@/lib/flowmerceApi'
 import Link from 'next/link'
 
 export default async function AdminPage() {
   const [
-    totalProduits, totalClients, totalCommandes, totalRetours,
-    retoursPending, retoursApprouves, retoursRembourses, commandesLivrees,
+    totalProduits, totalClients, totalCommandes,
+    commandesLivrees, allClaims,
   ] = await Promise.all([
     prisma.product.count(),
     prisma.user.count({ where: { role: 'CLIENT' } }),
     prisma.order.count(),
-    prisma.return.count(),
-    prisma.return.count({ where: { returnStatus: 'EN_ATTENTE' } }),
-    prisma.return.count({ where: { returnStatus: 'APPROUVE' } }),
-    prisma.return.count({ where: { returnStatus: 'REMBOURSE' } }),
     prisma.order.count({ where: { statut: 'LIVREE' } }),
+    getFlowmerceClaims(),
   ])
 
+  const totalRetours = allClaims.length
+  const retoursPending = allClaims.filter(c => c.status === 'PENDING' || c.status === 'EN_ATTENTE').length
+  const retoursApprouves = allClaims.filter(c => c.status === 'APPROVED').length
+  const retoursRembourses = allClaims.filter(c => c.status === 'APPROVED' && c.aiDecision === 'Refund').length
+
   const chiffreAffaireBrut = await prisma.order.aggregate({ _sum: { total: true }, where: { statut: 'LIVREE' } })
-  const montantRembourse = await prisma.return.findMany({
-    where: { returnStatus: 'REMBOURSE' },
-    include: { order: { include: { items: { include: { product: true } } } } },
-  })
-  const totalMontantRembourse = montantRembourse.reduce((acc, retour) => {
-    const item = retour.order.items.find((i) => i.productId === retour.productId)
-    return acc + (item ? item.prix * item.quantite : 0)
-  }, 0)
+
+  const montantRembourse = allClaims
+    .filter(c => c.status === 'APPROVED' && c.aiDecision === 'Refund')
+    .slice(0, 5)
+  const totalMontantRembourse = allClaims
+    .filter(c => c.status === 'APPROVED' && c.aiDecision === 'Refund')
+    .reduce((acc, claim) => acc + claim.order_total, 0)
 
   const ca    = chiffreAffaireBrut._sum.total || 0
   const caNet = ca - totalMontantRembourse
@@ -34,10 +36,17 @@ export default async function AdminPage() {
     take: 5, orderBy: { createdAt: 'desc' },
     include: { user: { select: { nom: true, prenom: true } } },
   })
-  const derniersRetours = await prisma.return.findMany({
-    take: 5, orderBy: { createdAt: 'desc' },
-    include: { user: { select: { nom: true, prenom: true } }, product: { select: { nom: true } } },
-  })
+  const derniersRetours = allClaims
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5)
+    .map(claim => ({
+      id: claim.id,
+      customer_name: claim.customer_name,
+      customer_email: claim.customer_email,
+      product_name: claim.product_name,
+      status: claim.status,
+      createdAt: claim.createdAt,
+    }))
 
   return (
     <div>
@@ -154,15 +163,15 @@ export default async function AdminPage() {
               derniersRetours.map((retour) => (
                 <div key={retour.id} className="px-4 py-3 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{retour.user.prenom} {retour.user.nom}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-1">{retour.product.nom}</p>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{retour.customer_name}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-1">{retour.product_name}</p>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ml-2 ${
-                    retour.returnStatus === 'APPROUVE'  ? 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400' :
-                    retour.returnStatus === 'REFUSE'    ? 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400' :
-                    retour.returnStatus === 'REMBOURSE' ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400' :
-                    'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400'
-                  }`}>{retour.returnStatus.replace(/_/g, ' ')}</span>
+                    retour.status === 'APPROVED'  ? 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400' :
+                    retour.status === 'REJECTED'  ? 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400' :
+                    retour.status === 'PENDING' || retour.status === 'EN_ATTENTE' ? 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400' :
+                    'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                  }`}>{retour.status === 'EN_ATTENTE' ? 'EN ATTENTE' : retour.status}</span>
                 </div>
               ))
             )}

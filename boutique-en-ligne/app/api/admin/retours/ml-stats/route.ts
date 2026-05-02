@@ -1,10 +1,6 @@
-// app/api/admin/retours/ml-stats/route.ts — CabaStore v2
-//
-// Le serveur FastAPI expose /health (pas /api/v1/stats)
-// Header : X-Internal-Key (pas x-api-key)
-
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthToken }              from '@/lib/getAuthToken'
+import { getAuthToken } from '@/lib/getAuthToken'
+import { getFlowmerceClaims } from '@/lib/flowmerceApi'
 
 export async function GET(_req: NextRequest) {
   try {
@@ -13,38 +9,22 @@ export async function GET(_req: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const mlUrl = (process.env.ML_API_URL || 'http://localhost:8000').replace(/\/$/, '')
-    const mlKey = process.env.ML_API_KEY || 'dev-internal-key'
+    const claims = await getFlowmerceClaims()
 
-    const res = await fetch(`${mlUrl}/health`, {
-      headers: { 'X-Internal-Key': mlKey },
-      signal:  AbortSignal.timeout(5000),
-    })
+    const withDecision  = claims.filter(c => c.ml?.decision)
+    const avgConfidence = withDecision.length
+      ? withDecision.reduce((sum, c) => sum + (c.ml?.confidence ?? 0), 0) / withDecision.length
+      : 0
+    const fraudAlerts = claims.filter(c => (c.Fraud_Score ?? 0) > 60).length
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: 'API ML indisponible', ml_status: 'offline' },
-        { status: 503 }
-      )
-    }
-
-    const health = await res.json()
-
-    // Adapter au format attendu par le dashboard admin
     return NextResponse.json({
-      total_decisions:  0,
-      avg_confidence:   0,
-      total_alerts:     0,
-      fraud_rate_pct:   0,
-      ml_status:        health.status === 'ok' ? 'online' : 'offline',
-      models_loaded:    health.models_loaded    ?? {},
-      artifacts_loaded: health.artifacts_loaded ?? {},
-      seuil_risque:     health.seuil_risque     ?? 60,
+      total_decisions: withDecision.length,
+      avg_confidence:  Math.round(avgConfidence * 10) / 10,
+      total_alerts:    fraudAlerts,
+      fraud_rate_pct:  claims.length ? Math.round((fraudAlerts / claims.length) * 100) : 0,
+      ml_status:       'flowmerce',
     })
   } catch {
-    return NextResponse.json(
-      { error: 'API ML indisponible', ml_status: 'offline' },
-      { status: 503 }
-    )
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

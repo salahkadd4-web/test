@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthToken } from '@/lib/getAuthToken'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -13,25 +14,27 @@ export async function GET(
 
     const { id } = await params
 
-    // Appel à l'API ML pour l'historique des scans
-    const res = await fetch(
-      `${process.env.ML_API_URL}/api/v1/scan/history/${id}`,
-      {
-        headers: { 'x-api-key': process.env.ML_API_KEY || '' },
-        signal: AbortSignal.timeout(5000),
-      }
-    )
+    const commande = await prisma.order.findUnique({
+      where:  { id },
+      select: { scan2Done: true, scan2Result: true, updatedAt: true },
+    })
 
-    if (!res.ok) {
+    if (!commande || !commande.scan2Done) {
       return NextResponse.json({ order_id: id, total_scans: 0, scans: [] })
     }
 
-    const data = await res.json()
-    return NextResponse.json(data)
-
+    return NextResponse.json({
+      order_id:    id,
+      total_scans: 1,
+      scans: [
+        {
+          decision:  commande.scan2Result ?? 'CONFIRME',
+          scanned_at: commande.updatedAt.toISOString(),
+        },
+      ],
+    })
   } catch (error) {
     console.error('Erreur scan history:', error)
-    // Si ML indisponible — retourner vide sans erreur
     return NextResponse.json({ order_id: '', total_scans: 0, scans: [] })
   }
 }

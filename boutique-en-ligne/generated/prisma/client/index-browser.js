@@ -219,6 +219,9 @@ exports.Prisma.OrderScalarFieldEnum = {
   statut: 'statut',
   total: 'total',
   adresse: 'adresse',
+  modePaiement: 'modePaiement',
+  methodeExpedition: 'methodeExpedition',
+  fraisLivraison: 'fraisLivraison',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId',
@@ -257,37 +260,9 @@ exports.Prisma.OtpTokenScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
-exports.Prisma.ReturnScalarFieldEnum = {
-  id: 'id',
-  orderId: 'orderId',
-  userId: 'userId',
-  productId: 'productId',
-  returnReason: 'returnReason',
-  returnStatus: 'returnStatus',
-  daysToReturn: 'daysToReturn',
-  description: 'description',
-  mlDecision: 'mlDecision',
-  mlConfidence: 'mlConfidence',
-  mlResponsibility: 'mlResponsibility',
-  mlDecisionLabel: 'mlDecisionLabel',
-  mlProbabilities: 'mlProbabilities',
-  finalDecision: 'finalDecision',
-  finalNote: 'finalNote',
-  fraudScore: 'fraudScore',
-  flowmerceClaimId: 'flowmerceClaimId',
-  flowmerceSynced: 'flowmerceSynced',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
-};
-
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
-  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -298,12 +273,6 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
-};
-
-exports.Prisma.JsonNullValueFilter = {
-  DbNull: Prisma.DbNull,
-  JsonNull: Prisma.JsonNull,
-  AnyNull: Prisma.AnyNull
 };
 exports.Role = exports.$Enums.Role = {
   CLIENT: 'CLIENT',
@@ -344,20 +313,6 @@ exports.OrderStatus = exports.$Enums.OrderStatus = {
   ANNULEE: 'ANNULEE'
 };
 
-exports.ReturnReason = exports.$Enums.ReturnReason = {
-  DEFECTUEUX: 'DEFECTUEUX',
-  MAUVAIS_ARTICLE: 'MAUVAIS_ARTICLE',
-  CHANGEMENT_AVIS: 'CHANGEMENT_AVIS',
-  NON_CONFORME: 'NON_CONFORME'
-};
-
-exports.ReturnStatus = exports.$Enums.ReturnStatus = {
-  EN_ATTENTE: 'EN_ATTENTE',
-  APPROUVE: 'APPROUVE',
-  REFUSE: 'REFUSE',
-  REMBOURSE: 'REMBOURSE'
-};
-
 exports.Prisma.ModelName = {
   User: 'User',
   VendeurProfile: 'VendeurProfile',
@@ -371,8 +326,7 @@ exports.Prisma.ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   ResetToken: 'ResetToken',
-  OtpToken: 'OtpToken',
-  Return: 'Return'
+  OtpToken: 'OtpToken'
 };
 
 /**

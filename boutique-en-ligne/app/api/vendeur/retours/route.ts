@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { getFlowmerceClaims } from '@/lib/flowmerceApi'
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -17,51 +18,52 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url)
   const statut     = searchParams.get('statut')
-  const search     = searchParams.get('search') || ''
+  const search     = searchParams.get('search')?.toLowerCase() || ''
   const categoryId = searchParams.get('categoryId')
 
-  const where: any = { product: { vendeurId: vendeur.id } }
+  // Récupérer tous les claims depuis Flowmerce
+  const claims = await getFlowmerceClaims({ status: statut || undefined })
 
-  if (statut) where.returnStatus = statut
+  // Enrichir avec les données produit pour filtrer par vendeur
+  const productIds = claims.map(c => c.external_product_id).filter(Boolean) as string[]
+
+  const products = productIds.length
+    ? await prisma.product.findMany({
+        where:  { id: { in: productIds }, vendeurId: vendeur.id },
+        select: {
+          id: true, nom: true, images: true,
+          category: { select: { id: true, nom: true } },
+        },
+      })
+    : []
+
+  const vendeurProductIds = new Set(products.map(p => p.id))
+  const productMap        = Object.fromEntries(products.map(p => [p.id, p]))
+
+  // Filtrer uniquement les claims liés aux produits de ce vendeur
+  let filtered = claims.filter(c =>
+    c.external_product_id && vendeurProductIds.has(c.external_product_id)
+  )
 
   if (categoryId) {
-    where.product = { ...where.product, categoryId }
+    filtered = filtered.filter(c => {
+      const p = c.external_product_id ? productMap[c.external_product_id] : null
+      return p?.category?.id === categoryId
+    })
   }
 
   if (search) {
-    where.OR = [
-      { product: { nom:       { contains: search, mode: 'insensitive' } } },
-      { user:    { nom:       { contains: search, mode: 'insensitive' } } },
-      { user:    { prenom:    { contains: search, mode: 'insensitive' } } },
-      { user:    { email:     { contains: search, mode: 'insensitive' } } },
-      { user:    { telephone: { contains: search, mode: 'insensitive' } } },
-    ]
+    filtered = filtered.filter(c =>
+      c.product_name.toLowerCase().includes(search) ||
+      c.customer_name.toLowerCase().includes(search) ||
+      (c.customer_email || '').toLowerCase().includes(search)
+    )
   }
 
-  const retours = await prisma.return.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      product: { select: { id: true, nom: true, images: true } },
-      user: {
-        select: {
-          id:        true,
-          nom:       true,
-          prenom:    true,
-          email:     true,
-          telephone: true,
-          // ← AJOUT : compteurs pour afficher nbr retours / nbr commandes
-          _count: {
-            select: {
-              orders:  true,
-              returns: true,
-            },
-          },
-        },
-      },
-      order: { select: { id: true, statut: true, createdAt: true } },
-    },
-  })
+  const enriched = filtered.map(c => ({
+    ...c,
+    product: c.external_product_id ? productMap[c.external_product_id] ?? null : null,
+  }))
 
-  return NextResponse.json(retours)
+  return NextResponse.json(enriched)
 }

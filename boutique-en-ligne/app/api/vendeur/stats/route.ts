@@ -24,8 +24,6 @@ export async function GET() {
     totalCommandes,
     commandesEnAttente,
     commandesLivrees,
-    totalRetours,
-    retoursEnAttente,
     caData,
     top5Produits,
     commandesParMois,
@@ -35,8 +33,6 @@ export async function GET() {
     prisma.orderItem.count({ where: { product: { vendeurId: vid } } }),
     prisma.order.count({ where: { statut: 'EN_ATTENTE',  items: { some: { product: { vendeurId: vid } } } } }),
     prisma.order.count({ where: { statut: 'LIVREE',       items: { some: { product: { vendeurId: vid } } } } }),
-    prisma.return.count({ where: { product: { vendeurId: vid } } }),
-    prisma.return.count({ where: { product: { vendeurId: vid }, returnStatus: 'EN_ATTENTE' } }),
     prisma.orderItem.aggregate({
       _sum: { prix: true },
       where: { product: { vendeurId: vid }, order: { statut: 'LIVREE' } },
@@ -63,7 +59,6 @@ export async function GET() {
   ])
 
   const chiffreAffaire = caData._sum.prix ?? 0
-  const tauxRetour     = totalCommandes > 0 ? Math.round((totalRetours / totalCommandes) * 1000) / 10 : 0
 
   // 5 produits les moins vendus (avec au moins 1 vente)
   const flop5Produits = await prisma.product.findMany({
@@ -82,10 +77,7 @@ export async function GET() {
     totalCommandes,
     commandesEnAttente,
     commandesLivrees,
-    totalRetours,
-    retoursEnAttente,
     chiffreAffaire,
-    tauxRetour,
     top5Produits,
     flop5Produits,
   })

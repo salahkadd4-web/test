@@ -1,6 +1,6 @@
-// app/api/admin/retours/[id]/route.ts — CabaStore v2
+// app/api/admin/retours/[id]/route.ts — CabaStore
 //
-// PATCH : admin prend une décision sur un retour
+// PATCH : admin prend une décision sur un claim Flowmerce
 //
 // body attendu :
 // {
@@ -8,14 +8,10 @@
 //   finalDecision: 'Refund' | 'Exchange' | 'Repair' | 'Reject'  (requis si OVERRIDE)
 //   adminNote:     string  (obligatoire si finalDecision = 'Reject', ≥ 10 car.)
 // }
-//
-// APPROVE_ML  → applique la recommandation ML, returnStatus = APPROUVE
-// OVERRIDE    → admin choisit une résolution différente, returnStatus = REFUSE
 
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma }                    from '@/lib/prisma'
-import { getAuthToken }              from '@/lib/getAuthToken'
-import { syncFlowmerceStatus, FlowmerceResolution } from '@/lib/flowmerceApi'
+import { NextRequest, NextResponse }                        from 'next/server'
+import { getAuthToken }                                     from '@/lib/getAuthToken'
+import { getFlowmerceClaim, syncFlowmerceStatus, FlowmerceResolution } from '@/lib/flowmerceApi'
 
 async function checkAdmin() {
   const token = await getAuthToken()
@@ -30,13 +26,10 @@ export async function PATCH(
 ) {
   try {
     const token = await checkAdmin()
-    if (!token) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { id } = await params
 
-    // ── Parser le body ────────────────────────────────────────────────────
     let body: Record<string, unknown>
     try {
       body = await req.json()
@@ -57,35 +50,28 @@ export async function PATCH(
       )
     }
 
-    // ── Récupérer le retour ───────────────────────────────────────────────
-    const retour = await prisma.return.findUnique({ where: { id } })
-    if (!retour) {
-      return NextResponse.json({ error: 'Retour introuvable' }, { status: 404 })
-    }
-    if (retour.returnStatus !== 'EN_ATTENTE') {
-      return NextResponse.json(
-        { error: 'Ce retour a déjà été traité' },
-        { status: 409 }
-      )
+    // Récupérer le claim depuis Flowmerce
+    const claim = await getFlowmerceClaim(id)
+    if (!claim) return NextResponse.json({ error: 'Claim introuvable' }, { status: 404 })
+
+    if (claim.status !== 'PENDING' && claim.status !== 'EN_ATTENTE') {
+      return NextResponse.json({ error: 'Ce claim a déjà été traité' }, { status: 409 })
     }
 
-    // ── Calculer la décision finale ───────────────────────────────────────
-    let newStatus:   'APPROUVE' | 'REFUSE'
-    let resolution:  FlowmerceResolution
+    let newStatus:  'APPROVED' | 'REJECTED'
+    let resolution: FlowmerceResolution
 
     if (action === 'APPROVE_ML') {
-      // Admin approuve → on applique la recommandation ML telle quelle
-      if (!retour.mlDecision || !VALID_RESOLUTIONS.includes(retour.mlDecision as FlowmerceResolution)) {
+      if (!claim.ml?.decision || !VALID_RESOLUTIONS.includes(claim.ml.decision)) {
         return NextResponse.json(
-          { error: 'Aucune recommandation ML disponible pour ce retour' },
+          { error: 'Aucune recommandation ML disponible pour ce claim' },
           { status: 422 }
         )
       }
-      newStatus  = 'APPROUVE'
-      resolution = retour.mlDecision as FlowmerceResolution
+      newStatus  = 'APPROVED'
+      resolution = claim.ml.decision
 
     } else {
-      // OVERRIDE → admin choisit une résolution différente
       if (!finalDecision || !VALID_RESOLUTIONS.includes(finalDecision as FlowmerceResolution)) {
         return NextResponse.json(
           { error: `finalDecision invalide — valeurs acceptées : ${VALID_RESOLUTIONS.join(', ')}` },
@@ -101,35 +87,18 @@ export async function PATCH(
           )
         }
       }
-      newStatus  = 'REFUSE'
+      newStatus  = 'REJECTED'
       resolution = finalDecision as FlowmerceResolution
     }
 
-    // ── Mettre à jour en base ─────────────────────────────────────────────
-    const updated = await prisma.return.update({
-      where: { id },
-      data: {
-        returnStatus:  newStatus,
-        finalDecision: resolution,
-        finalNote:     (adminNote || '').trim() || null,
-      },
-    })
+    await syncFlowmerceStatus(
+      id,
+      newStatus,
+      adminNote || `Décision admin CabaStore : ${resolution}`,
+      resolution
+    )
 
-    // ── Synchroniser avec Flowmerce (best-effort, non bloquant) ──────────
-    if (retour.flowmerceClaimId) {
-      syncFlowmerceStatus(
-        retour.flowmerceClaimId,
-        newStatus === 'APPROUVE' ? 'APPROVED' : 'REJECTED',
-        (adminNote || `Décision admin CabaStore : ${resolution}`),
-        resolution
-      ).catch(err => console.error('[Admin PATCH] Flowmerce sync failed (non-bloquant):', err))
-    }
-
-    return NextResponse.json({
-      retour:       updated,
-      finalDecision: resolution,
-      synced:        !!retour.flowmerceClaimId,
-    })
+    return NextResponse.json({ claimId: id, finalDecision: resolution, synced: true })
   } catch (error) {
     console.error('[Admin PATCH retour]', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
