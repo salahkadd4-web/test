@@ -26,6 +26,14 @@ type Order = {
   items:             OrderItem[]
 }
 
+type ScanResult = {
+  delivery_confirmed?: boolean
+  message?: string
+  similarity_pct?: number
+  decision?: string
+  error?: string
+}
+
 const statutConfig: Record<string, { label: string; color: string; emoji: string }> = {
   EN_ATTENTE:     { label: 'En attente',     color: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400', emoji: '⏳' },
   CONFIRMEE:      { label: 'Confirmée',      color: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',         emoji: '✅' },
@@ -48,7 +56,7 @@ function CommandesContent() {
   const [scanCommande, setScanCommande]   = useState<Order | null>(null)
   const [scanImages, setScanImages]       = useState<string[]>([])
   const [scanLoading, setScanLoading]     = useState(false)
-  const [scanResult, setScanResult]       = useState<any>(null)
+  const [scanResult, setScanResult]       = useState<ScanResult | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
