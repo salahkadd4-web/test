@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const { adresse } = await req.json()
+    const { adresse, modePaiement, methodeExpedition, fraisLivraison } = await req.json()
 
     if (!adresse) {
       return NextResponse.json({ error: 'Adresse de livraison requise' }, { status: 400 })
@@ -59,17 +59,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Calculer le total
-    const total = panier.items.reduce(
+    const sousTotal = panier.items.reduce(
       (acc, item) => acc + item.product.prix * item.quantite,
       0
     )
+    const frais = typeof fraisLivraison === 'number' ? fraisLivraison : 700
+    const total = sousTotal + frais
 
     // Créer la commande
     const commande = await prisma.order.create({
       data: {
-        userId: token.id as string,
+        userId:            token.id as string,
         adresse,
         total,
+        modePaiement:      modePaiement      || 'Paiement à la livraison',
+        methodeExpedition: methodeExpedition || 'Livraison standard',
+        fraisLivraison:    frais,
         items: {
           create: panier.items.map((item) => ({
             productId: item.productId,
