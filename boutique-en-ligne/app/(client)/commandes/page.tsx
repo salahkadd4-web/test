@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 
 type OrderItem = {
   id: string
@@ -13,15 +12,18 @@ type OrderItem = {
 }
 
 type Order = {
-  id: string
-  statut: string
-  total: number
-  adresse: string
-  createdAt: string
-  scan1Done: boolean
-  scan2Done: boolean
-  scan2Result: string | null
-  items: OrderItem[]
+  id:                string
+  statut:            string
+  total:             number
+  adresse:           string
+  modePaiement:      string
+  methodeExpedition: string
+  fraisLivraison:    number
+  createdAt:         string
+  scan1Done:         boolean
+  scan2Done:         boolean
+  scan2Result:       string | null
+  items:             OrderItem[]
 }
 
 const statutConfig: Record<string, { label: string; color: string; emoji: string }> = {
@@ -33,17 +35,10 @@ const statutConfig: Record<string, { label: string; color: string; emoji: string
   ANNULEE:        { label: 'Annulée',        color: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400',             emoji: '❌' },
 }
 
-// ── Flowmerce config ──────────────────────────────────────────────────────────
-const FLOWMERCE_BASE    = process.env.NEXT_PUBLIC_FLOWMERCE_URL ?? 'https://tulip-gulp-coveting.ngrok-free.dev'
-const FLOWMERCE_API_KEY = 'flk_K34y3sJxXNzBezNxBqio4qEPDqPsJfHP'
-// ─────────────────────────────────────────────────────────────────────────────
 
 function CommandesContent() {
   const searchParams      = useSearchParams()
   const success           = searchParams.get('success')
-  const { data: session } = useSession()
-  const user = session?.user as { nom?: string; prenom?: string; name?: string; email?: string; telephone?: string } | undefined
-
   const [commandes, setCommandes] = useState<Order[]>([])
   const [loading, setLoading]     = useState(true)
   const [expanded, setExpanded]   = useState<string | null>(null)
@@ -95,25 +90,6 @@ function CommandesContent() {
     } finally {
       setScanLoading(false)
     }
-  }
-
-  // ── Ouvre la page Flowmerce dans un nouvel onglet ────────────────────────
-  const openFlowmerceReturn = (commande: Order, item: OrderItem) => {
-    const url = new URL(`${FLOWMERCE_BASE}/return/${FLOWMERCE_API_KEY}`)
-    // Infos client
-    url.searchParams.set('customer_name',      `${user?.nom ?? ''} ${user?.prenom ?? ''}`.trim() || user?.name || '')
-    url.searchParams.set('customer_email',     user?.email ?? '')
-    url.searchParams.set('customer_telephone', (user as any)?.telephone ?? '')
-    // Infos produit & commande
-    url.searchParams.set('product_name',       item.product.nom)
-    url.searchParams.set('product_price',      item.prix.toFixed(2))
-    url.searchParams.set('product_quantity',   String(item.quantite))
-    url.searchParams.set('order_id',           commande.id)
-    url.searchParams.set('order_total',        commande.total.toFixed(2))
-    url.searchParams.set('order_address',      commande.adresse)
-    url.searchParams.set('shop_name',          'CabaStore')
-    url.searchParams.set('order_date',         commande.createdAt)
-    window.open(url.toString(), '_blank', 'noopener,noreferrer')
   }
 
   // ── Loading ──────────────────────────────────────────────────────────────
@@ -261,6 +237,7 @@ function CommandesContent() {
                           <div key={item.id} className="flex items-start gap-3">
                             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden shrink-0">
                               {item.product.images[0]
+                                // eslint-disable-next-line @next/next/no-img-element
                                 ? <img src={item.product.images[0]} alt={item.product.nom} className="w-full h-full object-cover" />
                                 : <div className="w-full h-full flex items-center justify-center">📦</div>
                               }
@@ -269,17 +246,14 @@ function CommandesContent() {
                               <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{item.product.nom}</p>
                               <p className="text-xs text-gray-500">x{item.quantite} — {item.prix.toFixed(2)} DA/u</p>
 
-                              {/* ── Bouton retour → ouvre Flowmerce dans un nouvel onglet ── */}
                               {commande.statut === 'LIVREE' && (
-                                <button
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    openFlowmerceReturn(commande, item)
-                                  }}
+                                <Link
+                                  href="/retours"
+                                  onClick={e => e.stopPropagation()}
                                   className="mt-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 font-medium"
                                 >
-                                  ↩ Retourner via Flowmerce
-                                </button>
+                                  ↩ Faire un retour
+                                </Link>
                               )}
                             </div>
                             <p className="font-semibold text-sm text-gray-800 dark:text-gray-100 shrink-0">
@@ -290,9 +264,35 @@ function CommandesContent() {
                       </div>
                     </div>
 
-                    <div className="border-t border-gray-100 dark:border-gray-800 pt-3 flex justify-between font-bold text-lg">
-                      <span className="text-gray-800 dark:text-gray-100">Total</span>
-                      <span className="text-blue-600 dark:text-blue-400">{commande.total.toFixed(2)} DA</span>
+                    {/* Infos paiement & livraison */}
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                        <p className="text-gray-400 mb-1">💳 Paiement</p>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">{commande.modePaiement || 'Paiement à la livraison'}</p>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                        <p className="text-gray-400 mb-1">🚚 Expédition</p>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">{commande.methodeExpedition || 'Livraison standard'}</p>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                        <p className="text-gray-400 mb-1">📦 Frais livraison</p>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">{(commande.fraisLivraison ?? 700).toFixed(2)} DA</p>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-gray-100 dark:border-gray-800 pt-3 space-y-1">
+                      <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <span>Sous-total articles</span>
+                        <span>{(commande.total - (commande.fraisLivraison ?? 700)).toFixed(2)} DA</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <span>Frais de livraison</span>
+                        <span>{(commande.fraisLivraison ?? 700).toFixed(2)} DA</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-lg pt-1 border-t border-gray-100 dark:border-gray-800">
+                        <span className="text-gray-800 dark:text-gray-100">Total</span>
+                        <span className="text-blue-600 dark:text-blue-400">{commande.total.toFixed(2)} DA</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -321,7 +321,7 @@ function CommandesContent() {
               <>
                 <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 rounded-xl p-3 mb-4">
                   <p className="text-xs text-indigo-700 dark:text-indigo-400">
-                    📌 Photographiez le colis/produit reçu. Le système va vérifier qu'il correspond à votre commande et confirmer la livraison.
+                    📌 Photographiez le colis/produit reçu. Le système va vérifier qu&apos;il correspond à votre commande et confirmer la livraison.
                   </p>
                 </div>
 
@@ -332,6 +332,7 @@ function CommandesContent() {
                   {scanImages.length > 0 ? (
                     <div className="grid grid-cols-3 gap-2">
                       {scanImages.map((img, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img key={i} src={img} alt="" className="w-full h-16 object-cover rounded-lg" />
                       ))}
                     </div>
