@@ -2,6 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { countVendeurClaims } from '@/lib/flowmerceApi'
 
 export default async function VendeurDashboard() {
   const session = await auth()
@@ -21,16 +22,14 @@ export default async function VendeurDashboard() {
   const [
     totalProduits, produitsActifs,
     totalCommandes, commandesEnAttente,
-    totalRetours, retoursEnAttente,
     caData,
     top5,
+    flowmerceCounts,
   ] = await Promise.all([
     prisma.product.count({ where: { vendeurId: vid } }),
     prisma.product.count({ where: { vendeurId: vid, actif: true } }),
     prisma.orderItem.count({ where: { product: { vendeurId: vid } } }),
     prisma.order.count({ where: { statut: 'EN_ATTENTE', items: { some: { product: { vendeurId: vid } } } } }),
-    prisma.return.count({ where: { product: { vendeurId: vid } } }),
-    prisma.return.count({ where: { product: { vendeurId: vid }, returnStatus: 'EN_ATTENTE' } }),
     prisma.orderItem.aggregate({
       _sum: { prix: true },
       where: { product: { vendeurId: vid }, order: { statut: 'LIVREE' } },
@@ -41,7 +40,12 @@ export default async function VendeurDashboard() {
       orderBy: { orderItems: { _count: 'desc' } },
       take:    5,
     }),
+    // Retours via Flowmerce
+    countVendeurClaims(vendeur.flowmerceApiKey ?? ''),
   ])
+
+  const totalRetours     = flowmerceCounts.total
+  const retoursEnAttente = flowmerceCounts.enAttente
 
   const ca         = caData._sum.prix ?? 0
   const tauxRetour = totalCommandes > 0 ? Math.round((totalRetours / totalCommandes) * 1000) / 10 : 0
@@ -95,6 +99,7 @@ export default async function VendeurDashboard() {
         <Link href="/vendeur/retours" className="group bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800 hover:border-red-200 dark:hover:border-red-800 transition-all">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Retours</p>
           <p className="text-2xl font-bold text-red-500">{totalRetours}</p>
+          <span className="text-xs text-indigo-500 mt-1 inline-block">Voir les retours →</span>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tauxRetour}% taux →</p>
         </Link>
 

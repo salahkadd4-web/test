@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       include: {
         category: true,
         vendeur: { select: { id: true, nomBoutique: true } },
+        variants: { orderBy: { createdAt: 'asc' } },
       },
     })
 
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     const token = await checkAdmin(req)
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const { nom, description, prix, stock, images, categoryId } = await req.json()
+    const { nom, description, prix, stock, images, categoryId, prixVariables, variants } = await req.json()
 
     if (!nom || !prix || !categoryId) {
       return NextResponse.json({ error: 'Nom, prix et catégorie sont requis' }, { status: 400 })
@@ -56,7 +57,17 @@ export async function POST(req: NextRequest) {
         stock: parseInt(stock) || 0,
         images: images || [],
         categoryId,
+        prixVariables: prixVariables && prixVariables.length > 0 ? prixVariables : undefined,
+        variants: variants && variants.length > 0 ? {
+          create: variants.map((v: any) => ({
+            nom: v.nom,
+            couleur: v.couleur || null,
+            stock: parseInt(v.stock) || 0,
+            images: v.images || [],
+          })),
+        } : undefined,
       },
+      include: { variants: true },
     })
 
     return NextResponse.json(produit, { status: 201 })

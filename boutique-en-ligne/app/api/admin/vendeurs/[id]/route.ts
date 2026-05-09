@@ -145,5 +145,14 @@ export async function PATCH(
     return NextResponse.json({ message: 'Demande de pièces envoyée' })
   }
 
+  if (action === 'set_flowmerce_key') {
+    const { flowmerceApiKey } = body
+    await prisma.vendeurProfile.update({
+      where: { id }, 
+      data:  { flowmerceApiKey: flowmerceApiKey || null },
+    })
+    return NextResponse.json({ message: 'Clé Flowmerce mise à jour' })
+  }
+
   return NextResponse.json({ error: 'Action invalide' }, { status: 400 })
 }

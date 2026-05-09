@@ -22,7 +22,9 @@ export default async function ProduitsPage({
         images: true,
         prix: true,
         stock: true,
+        prixVariables: true,
         category: { select: { nom: true } },
+        variants: { select: { id: true, couleur: true, nom: true }, orderBy: { createdAt: 'asc' } },
       },
     }),
     prisma.category.findMany({ orderBy: { nom: 'asc' } }),
@@ -35,7 +37,7 @@ export default async function ProduitsPage({
       </div>
       <ProduitsSearch
         categories={categories}
-        initialProduits={produits}
+        initialProduits={produits as any}
         initialRecherche={recherche}
         initialCategorie={categorie}
       />

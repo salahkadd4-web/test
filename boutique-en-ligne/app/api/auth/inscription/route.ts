@@ -9,13 +9,17 @@ import {
   sanitize, isValidEmail, isValidPhone, isStrongPassword,
 } from '@/lib/security'
 
+const IS_DEV = process.env.NODE_ENV === 'development'
+const DEV_OTP_CODE = '000000'
+
 export async function POST(req: NextRequest) {
   const limited = rateLimit(req, rateLimits.auth)
   if (limited) return limited
 
   try {
     const body = await req.json()
-    const { etape, code } = body
+    const etape = Number(body.etape)   // le frontend envoie '1' / '2' (string) → on convertit en nombre
+    const { code } = body
 
     // Sanitisation
     const nom         = sanitize(body.nom)
@@ -77,7 +81,8 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: 'Cet email est déjà utilisé' }, { status: 400 })
         }
 
-        const otpCode  = crypto.randomInt(100000, 999999).toString()
+        // En dev : code fixe 000000, sinon code aléatoire
+        const otpCode  = IS_DEV ? DEV_OTP_CODE : crypto.randomInt(100000, 999999).toString()
         const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
 
         await prisma.otpToken.deleteMany({ where: { identifiant: email } })
@@ -90,8 +95,18 @@ export async function POST(req: NextRequest) {
           },
         })
 
-        await sendConfirmationEmail(email, otpCode, nom)
-        return NextResponse.json({ message: 'Code envoyé par email', requireOTP: true })
+        // En dev : pas d'envoi d'email réel
+        if (!IS_DEV) {
+          await sendConfirmationEmail(email, otpCode, nom)
+        }
+
+        return NextResponse.json({
+          message: IS_DEV
+            ? '[DEV] Vérification désactivée — utilisez le code : 000000'
+            : 'Code envoyé par email',
+          requireOTP: true,
+          ...(IS_DEV && { devCode: DEV_OTP_CODE }),
+        })
       }
 
       // ── Inscription par téléphone ──
@@ -108,14 +123,25 @@ export async function POST(req: NextRequest) {
         await prisma.otpToken.create({
           data: {
             identifiant: telephone,
-            token: 'TWILIO_VERIFY',
+            // En dev : code fixe 000000, sinon marqueur Twilio Verify
+            token: IS_DEV ? DEV_OTP_CODE : 'TWILIO_VERIFY',
             expiresAt: new Date(Date.now() + 15 * 60 * 1000),
             data: JSON.stringify({ nom, prenom, telephone, motDePasse, role: roleChoisi, nomBoutique }),
           },
         })
 
-        await sendOTP(telephone)
-        return NextResponse.json({ message: 'Code envoyé par SMS', requireOTP: true })
+        // En dev : pas d'envoi SMS réel
+        if (!IS_DEV) {
+          await sendOTP(telephone)
+        }
+
+        return NextResponse.json({
+          message: IS_DEV
+            ? '[DEV] Vérification désactivée — utilisez le code : 000000'
+            : 'Code envoyé par SMS',
+          requireOTP: true,
+          ...(IS_DEV && { devCode: DEV_OTP_CODE }),
+        })
       }
     }
 
@@ -141,20 +167,25 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Session expirée, recommencez' }, { status: 400 })
       }
 
-      if (email) {
-        const valid = crypto.timingSafeEqual(
-          Buffer.from(otpToken.token),
-          Buffer.from(String(code))
-        )
-        if (!valid) {
-          return NextResponse.json({ error: 'Code invalide ou expiré' }, { status: 400 })
-        }
-      }
+      // ── Vérification OTP (bypass en dev avec le code 000000) ──
+      const isDevBypass = IS_DEV && String(code) === DEV_OTP_CODE
 
-      if (telephone) {
-        const isValid = await verifyOTP(telephone, String(code))
-        if (!isValid) {
-          return NextResponse.json({ error: 'Code invalide ou expiré' }, { status: 400 })
+      if (!isDevBypass) {
+        if (email) {
+          const valid = crypto.timingSafeEqual(
+            Buffer.from(otpToken.token),
+            Buffer.from(String(code))
+          )
+          if (!valid) {
+            return NextResponse.json({ error: 'Code invalide ou expiré' }, { status: 400 })
+          }
+        }
+
+        if (telephone) {
+          const isValid = await verifyOTP(telephone, String(code))
+          if (!isValid) {
+            return NextResponse.json({ error: 'Code invalide ou expiré' }, { status: 400 })
+          }
         }
       }
 

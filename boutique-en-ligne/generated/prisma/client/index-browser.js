@@ -144,7 +144,8 @@ exports.Prisma.VendeurProfileScalarFieldEnum = {
   description: 'description',
   adminNote: 'adminNote',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  flowmerceApiKey: 'flowmerceApiKey'
 };
 
 exports.Prisma.VendeurDocumentScalarFieldEnum = {
@@ -178,11 +179,23 @@ exports.Prisma.ProductScalarFieldEnum = {
   prix: 'prix',
   stock: 'stock',
   images: 'images',
+  prixVariables: 'prixVariables',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   categoryId: 'categoryId',
   actif: 'actif',
   vendeurId: 'vendeurId'
+};
+
+exports.Prisma.ProductVariantScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  nom: 'nom',
+  couleur: 'couleur',
+  stock: 'stock',
+  images: 'images',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.CartScalarFieldEnum = {
@@ -196,7 +209,8 @@ exports.Prisma.CartItemScalarFieldEnum = {
   id: 'id',
   quantite: 'quantite',
   cartId: 'cartId',
-  productId: 'productId'
+  productId: 'productId',
+  variantId: 'variantId'
 };
 
 exports.Prisma.FavoriteScalarFieldEnum = {
@@ -204,14 +218,6 @@ exports.Prisma.FavoriteScalarFieldEnum = {
   createdAt: 'createdAt',
   userId: 'userId',
   productId: 'productId'
-};
-
-exports.Prisma.MessageScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  contenu: 'contenu',
-  lu: 'lu',
-  createdAt: 'createdAt'
 };
 
 exports.Prisma.OrderScalarFieldEnum = {
@@ -229,7 +235,8 @@ exports.Prisma.OrderScalarFieldEnum = {
   scan1Result: 'scan1Result',
   scan1ShippingAllowed: 'scan1ShippingAllowed',
   scan2Done: 'scan2Done',
-  scan2Result: 'scan2Result'
+  scan2Result: 'scan2Result',
+  retourDemande: 'retourDemande'
 };
 
 exports.Prisma.OrderItemScalarFieldEnum = {
@@ -237,7 +244,9 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   quantite: 'quantite',
   prix: 'prix',
   orderId: 'orderId',
-  productId: 'productId'
+  productId: 'productId',
+  variantId: 'variantId',
+  variantNom: 'variantNom'
 };
 
 exports.Prisma.ResetTokenScalarFieldEnum = {
@@ -265,6 +274,11 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -273,6 +287,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.Role = exports.$Enums.Role = {
   CLIENT: 'CLIENT',
@@ -319,10 +339,10 @@ exports.Prisma.ModelName = {
   VendeurDocument: 'VendeurDocument',
   Category: 'Category',
   Product: 'Product',
+  ProductVariant: 'ProductVariant',
   Cart: 'Cart',
   CartItem: 'CartItem',
   Favorite: 'Favorite',
-  Message: 'Message',
   Order: 'Order',
   OrderItem: 'OrderItem',
   ResetToken: 'ResetToken',

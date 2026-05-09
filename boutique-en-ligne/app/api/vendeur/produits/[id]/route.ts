@@ -8,11 +8,7 @@ async function getVendeurOrFail(userId: string) {
   return vendeur
 }
 
-// GET /api/vendeur/produits/[id]
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth()
   if (!session?.user || session.user.role !== 'VENDEUR') {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
@@ -24,7 +20,8 @@ export async function GET(
     where: { id: params.id, vendeurId: vendeur.id },
     include: {
       category: true,
-      _count: { select: { orderItems: true, favorites: true, returns: true } },
+      variants: { orderBy: { createdAt: 'asc' } },
+      _count: { select: { orderItems: true, favorites: true } },
     },
   })
   if (!produit) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
@@ -32,11 +29,7 @@ export async function GET(
   return NextResponse.json(produit)
 }
 
-// PATCH /api/vendeur/produits/[id]
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth()
   if (!session?.user || session.user.role !== 'VENDEUR') {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
@@ -44,46 +37,54 @@ export async function PATCH(
   const vendeur = await getVendeurOrFail(session.user.id)
   if (!vendeur) return NextResponse.json({ error: 'Compte non approuvé' }, { status: 403 })
 
-  const produit = await prisma.product.findFirst({
-    where: { id: params.id, vendeurId: vendeur.id },
-  })
+  const produit = await prisma.product.findFirst({ where: { id: params.id, vendeurId: vendeur.id } })
   if (!produit) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
 
   const body = await req.json()
-  const { nom, description, prix, stock, images, categoryId, actif } = body
+  const { nom, description, prix, stock, images, categoryId, actif, prixVariables, variants } = body
 
-  // Si changement de catégorie, vérifier qu'elle est approuvée
   if (categoryId && categoryId !== produit.categoryId) {
-    const cat = await prisma.category.findFirst({
-      where: { id: categoryId, statut: 'APPROUVEE' },
-    })
-    if (!cat) {
-      return NextResponse.json({ error: 'Catégorie invalide ou non approuvée' }, { status: 400 })
-    }
+    const cat = await prisma.category.findFirst({ where: { id: categoryId, statut: 'APPROUVEE' } })
+    if (!cat) return NextResponse.json({ error: 'Catégorie invalide ou non approuvée' }, { status: 400 })
   }
 
   const updated = await prisma.product.update({
     where: { id: params.id },
     data: {
-      ...(nom         !== undefined && { nom:         nom.trim() }),
-      ...(description !== undefined && { description: description?.trim() || null }),
-      ...(prix        !== undefined && { prix:        parseFloat(prix) }),
-      ...(stock       !== undefined && { stock:       parseInt(stock) }),
+      ...(nom         !== undefined && { nom:          nom.trim() }),
+      ...(description !== undefined && { description:  description?.trim() || null }),
+      ...(prix        !== undefined && { prix:         parseFloat(prix) }),
+      ...(stock       !== undefined && { stock:        parseInt(stock) }),
       ...(images      !== undefined && { images }),
       ...(categoryId  !== undefined && { categoryId }),
       ...(actif       !== undefined && { actif }),
+      ...(prixVariables !== undefined && {
+        prixVariables: prixVariables && prixVariables.length > 0 ? prixVariables : null
+      }),
     },
     include: { category: { select: { id: true, nom: true } } },
   })
 
+  // Synchroniser les variantes si fournies
+  if (variants !== undefined) {
+    await prisma.productVariant.deleteMany({ where: { productId: params.id } })
+    if (variants.length > 0) {
+      await prisma.productVariant.createMany({
+        data: variants.map((v: any) => ({
+          productId: params.id,
+          nom: v.nom,
+          couleur: v.couleur || null,
+          stock: parseInt(v.stock) || 0,
+          images: v.images || [],
+        })),
+      })
+    }
+  }
+
   return NextResponse.json(updated)
 }
 
-// DELETE /api/vendeur/produits/[id]
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth()
   if (!session?.user || session.user.role !== 'VENDEUR') {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
@@ -98,7 +99,6 @@ export async function DELETE(
   if (!produit) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
 
   if (produit._count.orderItems > 0) {
-    // Ne pas supprimer si des commandes existent : désactiver seulement
     await prisma.product.update({ where: { id: params.id }, data: { actif: false } })
     return NextResponse.json({ message: 'Produit désactivé (commandes existantes)' })
   }

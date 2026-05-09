@@ -4,13 +4,30 @@ import { notFound } from 'next/navigation'
 import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
 
+type PrixTier = { minQte: number; maxQte: number | null; prix: number }
+
+function getPrixMin(prix: number, prixVariables: unknown): number {
+  const tiers = prixVariables as PrixTier[] | null
+  if (!tiers || tiers.length === 0) return prix
+  return Math.min(...tiers.map(t => t.prix), prix)
+}
+
 export default async function CategoryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
   const categorie = await prisma.category.findUnique({
     where: { id },
     include: {
-      products: { where: { actif: true }, orderBy: { createdAt: 'desc' } },
+      products: {
+        where: { actif: true },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          variants: {
+            select: { id: true, nom: true, couleur: true },
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      },
       _count: { select: { products: { where: { actif: true } } } },
     },
   })
@@ -60,29 +77,105 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categorie.products.map((produit) => (
-            <Link key={produit.id} href={`/produits/${produit.id}`}
-              className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300">
-              <div className="relative h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-                {produit.images[0] ? (
-                  <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <span className="text-4xl">📦</span>
-                )}
-                <div className="absolute top-2 right-2 flex flex-col gap-2">
-                  <FavoriIconButton produitId={produit.id} />
-                  <CartIconButton produitId={produit.id} stock={produit.stock} />
+          {categorie.products.map((produit) => {
+            const hasTiers  = Array.isArray(produit.prixVariables) && (produit.prixVariables as PrixTier[]).length > 0
+            const prixMin   = getPrixMin(produit.prix, produit.prixVariables)
+            const estReduit = hasTiers && prixMin < produit.prix
+
+            return (
+              <Link
+                key={produit.id}
+                href={`/produits/${produit.id}`}
+                className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300"
+              >
+                {/* Image */}
+                <div className="relative h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+                  {produit.images[0] ? (
+                    <img
+                      src={produit.images[0]}
+                      alt={produit.nom}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <span className="text-4xl">📦</span>
+                  )}
+
+                  {/* Badge prix dégressif */}
+                  {hasTiers && (
+                    <div className="absolute top-2 left-2">
+                      <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow">
+                        💰 dégressif
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="absolute top-2 right-2 flex flex-col gap-2">
+                    <FavoriIconButton produitId={produit.id} />
+                    <CartIconButton produitId={produit.id} stock={produit.stock} />
+                  </div>
                 </div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2 line-clamp-2">{produit.nom}</h3>
-                <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{produit.prix.toFixed(2)} DA</p>
-                <p className={`text-xs mt-1 ${produit.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
-                  {produit.stock > 0 ? `En stock (${produit.stock})` : 'Rupture de stock'}
-                </p>
-              </div>
-            </Link>
-          ))}
+
+                {/* Infos */}
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2 line-clamp-2">
+                    {produit.nom}
+                  </h3>
+
+                  {/* Bloc prix */}
+                  <div className="flex items-baseline gap-1.5 flex-wrap mb-1.5">
+                    {hasTiers && (
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500">à partir de</span>
+                    )}
+                    <span className={`text-lg font-bold ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                      {prixMin.toFixed(2)} DA
+                    </span>
+                    {estReduit && (
+                      <>
+                        <span className="text-sm text-gray-400 dark:text-gray-500 line-through font-normal">
+                          {produit.prix.toFixed(2)}
+                        </span>
+                        <span className="text-[9px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 font-bold px-1 py-0.5 rounded-full">
+                          −{Math.round((1 - prixMin / produit.prix) * 100)}%
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Swatches variantes */}
+                  {produit.variants.length > 0 && (
+                    <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                      {produit.variants.slice(0, 5).map(v =>
+                        v.couleur ? (
+                          <span
+                            key={v.id}
+                            title={v.nom}
+                            className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 inline-block shrink-0"
+                            style={{ backgroundColor: v.couleur }}
+                          />
+                        ) : (
+                          <span
+                            key={v.id}
+                            className="text-[9px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-full"
+                          >
+                            {v.nom}
+                          </span>
+                        )
+                      )}
+                      {produit.variants.length > 5 && (
+                        <span className="text-[9px] text-gray-400">+{produit.variants.length - 5}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Stock */}
+                  <p className={`text-xs ${produit.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                    {produit.stock > 0 ? `En stock (${produit.stock})` : 'Rupture de stock'}
+                  </p>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

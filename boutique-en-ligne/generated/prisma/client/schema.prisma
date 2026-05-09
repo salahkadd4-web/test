@@ -76,25 +76,25 @@ model User {
   wilaya         String?
   cart           Cart?
   favorites      Favorite[]
-  messages       Message[]
   orders         Order[]
   resetTokens    ResetToken[]
   vendeurProfile VendeurProfile?
 }
 
 model VendeurProfile {
-  id          String            @id @default(cuid())
-  userId      String            @unique
-  statut      VendeurStatut     @default(EN_ATTENTE)
-  nomBoutique String?
-  description String?
-  adminNote   String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  user        User              @relation(fields: [userId], references: [id])
-  documents   VendeurDocument[]
-  products    Product[]
-  categories  Category[]
+  id              String            @id @default(cuid())
+  userId          String            @unique
+  statut          VendeurStatut     @default(EN_ATTENTE)
+  nomBoutique     String?
+  description     String?
+  adminNote       String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User              @relation(fields: [userId], references: [id])
+  documents       VendeurDocument[]
+  products        Product[]
+  categories      Category[]
+  flowmerceApiKey String?
 }
 
 model VendeurDocument {
@@ -125,22 +125,38 @@ model Category {
 }
 
 model Product {
-  id          String          @id @default(cuid())
-  nom         String
-  description String?
-  prix        Float
-  stock       Int             @default(0)
-  images      String[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  categoryId  String
-  actif       Boolean         @default(true)
-  vendeurId   String?
-  cartItems   CartItem[]
-  favorites   Favorite[]
-  orderItems  OrderItem[]
-  category    Category        @relation(fields: [categoryId], references: [id])
-  vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
+  id            String           @id @default(cuid())
+  nom           String
+  description   String?
+  prix          Float
+  stock         Int              @default(0)
+  images        String[]
+  prixVariables Json?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  categoryId    String
+  actif         Boolean          @default(true)
+  vendeurId     String?
+  cartItems     CartItem[]
+  favorites     Favorite[]
+  orderItems    OrderItem[]
+  category      Category         @relation(fields: [categoryId], references: [id])
+  vendeur       VendeurProfile?  @relation(fields: [vendeurId], references: [id])
+  variants      ProductVariant[]
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  productId  String
+  nom        String
+  couleur    String?
+  stock      Int         @default(0)
+  images     String[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 }
 
 model Cart {
@@ -153,12 +169,14 @@ model Cart {
 }
 
 model CartItem {
-  id        String  @id @default(cuid())
-  quantite  Int     @default(1)
+  id        String          @id @default(cuid())
+  quantite  Int             @default(1)
   cartId    String
   productId String
-  cart      Cart    @relation(fields: [cartId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  variantId String?
+  cart      Cart            @relation(fields: [cartId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
 }
 
 model Favorite {
@@ -170,15 +188,6 @@ model Favorite {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, productId])
-}
-
-model Message {
-  id        String   @id @default(cuid())
-  userId    String
-  contenu   String
-  lu        Boolean  @default(false)
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Order {
@@ -197,18 +206,22 @@ model Order {
   scan1ShippingAllowed Boolean     @default(false)
   scan2Done            Boolean     @default(false)
   scan2Result          String?
+  retourDemande        Boolean     @default(false)
   user                 User        @relation(fields: [userId], references: [id])
   items                OrderItem[]
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  quantite  Int
-  prix      Float
-  orderId   String
-  productId String
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  id         String          @id @default(cuid())
+  quantite   Int
+  prix       Float
+  orderId    String
+  productId  String
+  variantId  String?
+  variantNom String?
+  order      Order           @relation(fields: [orderId], references: [id])
+  product    Product         @relation(fields: [productId], references: [id])
+  variant    ProductVariant? @relation(fields: [variantId], references: [id])
 }
 
 model ResetToken {

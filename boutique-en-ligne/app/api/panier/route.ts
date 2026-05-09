@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthToken } from '@/lib/getAuthToken'
 
-// GET — Récupérer le panier
 export async function GET(req: NextRequest) {
   try {
     const token = await getAuthToken()
@@ -12,7 +11,14 @@ export async function GET(req: NextRequest) {
       where: { userId: token.id as string },
       include: {
         items: {
-          include: { product: { include: { category: true } } },
+          include: {
+            product: {
+              include: {
+                category: true,
+              },
+            },
+            variant: true,
+          },
         },
       },
     })
@@ -23,40 +29,55 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST — Ajouter un produit au panier
 export async function POST(req: NextRequest) {
   try {
     const token = await getAuthToken()
     if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const { produitId, quantite = 1 } = await req.json()
+    const { produitId, quantite = 1, variantId } = await req.json()
 
-    // Vérifier le stock
-    const produit = await prisma.product.findUnique({ where: { id: produitId } })
+    const produit = await prisma.product.findUnique({
+      where: { id: produitId },
+      include: { variants: true },
+    })
     if (!produit) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
-    if (produit.stock === 0) return NextResponse.json({ error: 'Produit en rupture de stock' }, { status: 400 })
 
-    // Créer ou récupérer le panier
+    // Vérifier le stock (variante ou produit global)
+    if (variantId) {
+      const variant = produit.variants.find(v => v.id === variantId)
+      if (!variant) return NextResponse.json({ error: 'Variante introuvable' }, { status: 404 })
+      if (variant.stock === 0) return NextResponse.json({ error: 'Variante en rupture de stock' }, { status: 400 })
+    } else {
+      if (produit.stock === 0) return NextResponse.json({ error: 'Produit en rupture de stock' }, { status: 400 })
+    }
+
     let panier = await prisma.cart.findUnique({ where: { userId: token.id as string } })
     if (!panier) {
       panier = await prisma.cart.create({ data: { userId: token.id as string } })
     }
 
-    // Vérifier si le produit est déjà dans le panier
+    // Chercher un item existant pour ce produit + variante
     const itemExistant = await prisma.cartItem.findFirst({
-      where: { cartId: panier.id, productId: produitId },
+      where: {
+        cartId: panier.id,
+        productId: produitId,
+        variantId: variantId || null,
+      },
     })
 
     if (itemExistant) {
-      // Mettre à jour la quantité
       await prisma.cartItem.update({
         where: { id: itemExistant.id },
         data: { quantite: itemExistant.quantite + quantite },
       })
     } else {
-      // Ajouter le produit
       await prisma.cartItem.create({
-        data: { cartId: panier.id, productId: produitId, quantite },
+        data: {
+          cartId: panier.id,
+          productId: produitId,
+          quantite,
+          variantId: variantId || null,
+        },
       })
     }
 

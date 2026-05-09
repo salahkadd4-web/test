@@ -23,6 +23,7 @@ interface Vendeur {
   user: { nom: string; prenom: string; email: string | null; telephone: string | null }
   documents: Doc[]
   _count: { products: number; categories: number }
+  flowmerceApiKey: string | null
 }
 
 const statutConfig: Record<string, { label: string; color: string; icon: string }> = {
@@ -63,6 +64,8 @@ export default function AdminVendeursPage() {
   const [newDocs,        setNewDocs]        = useState<{ type: string; label: string; description: string }[]>([])
   const [docAction,      setDocAction]      = useState<{ docId: string; action: 'accepter' | 'refuser'; note: string } | null>(null)
   const [toastMsg,       setToastMsg]       = useState<string | null>(null)
+  const [flowmerceKey,   setFlowmerceKey]   = useState('')
+  const [savingKey,      setSavingKey]      = useState(false)
 
   const debouncedSearch = useDebounce(search, 350)
   const abortRef        = useRef<AbortController | null>(null)
@@ -95,7 +98,25 @@ export default function AdminVendeursPage() {
 
   const fetchDetail = async (id: string) => {
     const res = await fetch(`/api/admin/vendeurs/${id}`)
-    if (res.ok) setSelected(await res.json())
+    if (res.ok) {
+      const data = await res.json()
+      setSelected(data)
+      setFlowmerceKey(data.flowmerceApiKey ?? '')
+    }
+  }
+
+  const saveFlowmerceKey = async () => {
+    if (!selected) return
+    setSavingKey(true)
+    const res = await fetch(`/api/admin/vendeurs/${selected.id}`, {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ action: 'set_flowmerce_key', flowmerceApiKey: flowmerceKey.trim() }),
+    })
+    const data = await res.json()
+    showToast(res.ok ? '🔑 Clé Flowmerce enregistrée' : (data.error || 'Erreur'))
+    if (res.ok) setSelected(prev => prev ? { ...prev, flowmerceApiKey: flowmerceKey.trim() || null } : prev)
+    setSavingKey(false)
   }
 
   const doAction = async (id: string, action: string, extra: object = {}) => {
@@ -376,6 +397,42 @@ export default function AdminVendeursPage() {
                   className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
                   placeholder="Motif, commentaire..." />
               </div>
+
+              {/* ── Clé API Flowmerce ── */}
+              {selected.statut === 'APPROUVE' && (
+                <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-900 rounded-xl p-4 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-0.5">🔑 Clé API Flowmerce</p>
+                    <p className="text-xs text-indigo-500 dark:text-indigo-400">
+                      Permet d'activer la gestion des retours pour ce vendeur.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={flowmerceKey}
+                      onChange={e => setFlowmerceKey(e.target.value)}
+                      placeholder="flk_xxxxxxxxxxxx"
+                      className="flex-1 text-sm border border-indigo-200 dark:border-indigo-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    />
+                    <button
+                      onClick={saveFlowmerceKey}
+                      disabled={savingKey}
+                      className="shrink-0 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"
+                    >
+                      {savingKey ? '...' : 'Sauver'}
+                    </button>
+                  </div>
+                  {selected.flowmerceApiKey && (
+                    <p className="text-xs text-indigo-400 dark:text-indigo-500">
+                      ✅ Clé active : <span className="font-mono">{selected.flowmerceApiKey.slice(0, 8)}…</span>
+                    </p>
+                  )}
+                  {!selected.flowmerceApiKey && (
+                    <p className="text-xs text-orange-500">⚠️ Aucune clé — les retours sont désactivés pour ce vendeur</p>
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 {(selected.statut === 'EN_ATTENTE' || selected.statut === 'PIECES_REQUISES') && (

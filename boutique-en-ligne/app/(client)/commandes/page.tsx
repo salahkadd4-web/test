@@ -23,6 +23,7 @@ type Order = {
   scan1Done:         boolean
   scan2Done:         boolean
   scan2Result:       string | null
+  retourDemande:     boolean
   items:             OrderItem[]
 }
 
@@ -183,6 +184,25 @@ function CommandesContent() {
                         📷 Scanner à la réception
                       </button>
                     )}
+                    {/* ── Bouton retour — visible directement sur la carte ── */}
+                    {commande.statut === 'LIVREE' && (
+                      commande.retourDemande ? (
+                        <span
+                          onClick={e => e.stopPropagation()}
+                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-default"
+                        >
+                          ✓ Retour demandé
+                        </span>
+                      ) : (
+                      <a
+                        href={`/retours?orderId=${commande.id}`}
+                        onClick={e => e.stopPropagation()}
+                        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950 transition"
+                      >
+                        ↩ Retour
+                      </a>
+                      )
+                    )}
                     <p className="font-bold text-blue-600 dark:text-blue-400 text-lg">{commande.total.toFixed(2)} DA</p>
                     <span className="text-gray-400 text-sm">{isExpanded ? '▲' : '▼'}</span>
                   </div>
@@ -254,15 +274,6 @@ function CommandesContent() {
                               <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{item.product.nom}</p>
                               <p className="text-xs text-gray-500">x{item.quantite} — {item.prix.toFixed(2)} DA/u</p>
 
-                              {commande.statut === 'LIVREE' && (
-                                <Link
-                                  href="/retours"
-                                  onClick={e => e.stopPropagation()}
-                                  className="mt-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 font-medium"
-                                >
-                                  ↩ Faire un retour
-                                </Link>
-                              )}
                             </div>
                             <p className="font-semibold text-sm text-gray-800 dark:text-gray-100 shrink-0">
                               {(item.prix * item.quantite).toFixed(2)} DA

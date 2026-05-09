@@ -1,259 +1,202 @@
 // lib/flowmerceApi.ts — CabaStore
-// Variables d'env requises :
-//   FLOWMERCE_API_URL=http://localhost:3000  (ou URL de prod)
-//   FLOWMERCE_API_KEY=flk_xxxx
-//   FLOWMERCE_WEBHOOK_SECRET=secret-xyz
-//   NEXTAUTH_URL=http://localhost:3001
+//
+// Couche d'intégration avec Flowmerce.
+// Ce fichier est la SEULE source de vérité pour toute communication avec Flowmerce.
+// Il peut être copié tel quel dans n'importe quelle autre plateforme Next.js.
+//
+// Variables d'environnement requises :
+//   FLOWMERCE_URL=https://flowmerce.app         (URL de Flowmerce)
+//   FLOWMERCE_API_KEY=flk_xxxx                  (clé API du compte admin CabaStore dans Flowmerce)
+//
+// Chaque vendeur CabaStore possède sa propre clé API Flowmerce stockée
+// dans VendeurProfile.flowmerceApiKey — fournie manuellement par l'admin.
 
-const FLOWMERCE_URL     = (process.env.FLOWMERCE_API_URL || '').replace(/\/$/, '')
-const FLOWMERCE_API_KEY = process.env.FLOWMERCE_API_KEY  || ''
-const CABA_URL          = (process.env.NEXTAUTH_URL || 'http://localhost:3001').replace(/\/$/, '')
+const FLOWMERCE_URL = (process.env.FLOWMERCE_URL || '').replace(/\/$/, '')
 
-export const FLOWMERCE_WEBHOOK_SECRET = process.env.FLOWMERCE_WEBHOOK_SECRET || 'change-me-in-prod'
+// ── Types publics ──────────────────────────────────────────────────────────
 
-// ── Types ──────────────────────────────────────────────────────────────────
-
-export type FlowmerceResolution = 'Refund' | 'Exchange' | 'Repair' | 'Reject'
-
-export interface FlowmerceCreatePayload {
-  returnId:       string
-  orderId:        string
-  customerName:   string
-  customerEmail:  string
-  customerPhone?: string
-  productName:    string
-  description:    string
-  orderDate:      string
-  orderTotal:     number
-  // Identifiants externes pour enrichissement côté CabaStore
-  external_product_id?:    string
-  external_return_reason?: string
-  desired_resolution?:     string
-  // Données ML
-  Customer_Gender:         string
-  Customer_Age:            number
-  Customer_Wilaya:         string
-  Customer_Past_Returns:   number
-  Product_Category:        string
-  Product_Price_DA:        number
-  Order_Quantity:          number
-  Total_Amount_DA:         number
-  Payment_Method:          string
-  Shipping_Method:         string
-  Shipping_Cost_DA:        number
-  Return_Reason:           string
-  Days_to_Return:          number
-  Shop_Return_Window_Days: number
-  Within_Return_Policy:    0 | 1
-  Fraud_Score:             number
-  Customer_Satisfaction:   number
-  Is_Suspicious:           0 | 1
+export interface FlowmerceSession {
+  token:      string
+  url:        string
+  expires_at: string
 }
 
-// Réponse de Flowmerce à la création
-export interface FlowmerceClaimCreated {
-  claim: { id: string; status: string; createdAt: string }
-  ml?: {
-    decision:      FlowmerceResolution
-    confidence:    number
-    probabilities: Record<string, number>
-  }
-  risk_flag?: {
-    is_suspicious:   boolean
-    fraud_score:     number
-    above_threshold: boolean
-  }
-}
-
-// Claim complet retourné par les endpoints GET
 export interface FlowmerceClaim {
-  id:                      string
-  status:                  string
-  createdAt:               string
-  order_id:                string
-  customer_name:           string
-  customer_email:          string
-  customer_phone:          string | null
-  product_name:            string
-  description:             string | null
-  order_date:              string
-  order_total:             number
-  external_return_id?:     string
-  external_product_id?:    string
-  external_return_reason?: string
-  external_source?:        string
-  Return_Reason?:          string
-  Days_to_Return?:         number
-  Fraud_Score?:            number
-  Is_Suspicious?:          number
-  ml?: {
-    decision:      FlowmerceResolution
-    confidence:    number
-    probabilities: Record<string, number>
-  }
-  risk_flag?: {
-    is_suspicious:   boolean
-    fraud_score:     number
-    above_threshold: boolean
-  }
-  aiDecision?:   FlowmerceResolution | null
-  overrideNote?: string | null
+  id:            string
+  orderId:       string
+  customerName:  string
+  customerEmail: string
+  productName:   string
+  type:          'EXCHANGE' | 'REFUND' | 'REPAIR'
+  status:        'PENDING' | 'APPROVED' | 'REJECTED' | 'IN_PROGRESS'
+  aiDecision:    string | null
+  aiScore:       number | null
+  fraudScore:    number | null
+  source:        string
+  createdAt:     string
+  updatedAt:     string
+  processedAt:   string | null
+  prediction:    Record<string, unknown> | null
 }
 
-// Mapping raisons (enum OU chaîne française) → valeurs attendues par Flowmerce
-const FLOWMERCE_REASON_MAP: Record<string, string> = {
-  // Clés enum (ancien format)
-  DEFECTUEUX:      'DEFECTIVE',
-  MAUVAIS_ARTICLE: 'WRONG_ITEM',
-  CHANGEMENT_AVIS: 'CHANGE_MIND',
-  NON_CONFORME:    'DESCRIPTION',
-  // Chaînes françaises (nouveau format)
-  'Produit défectueux':          'DEFECTIVE',
-  'Produit contrefait':          'DEFECTIVE',
-  'Produit endommagé livraison': 'DEFECTIVE',
-  "Changement d'avis":           'CHANGE_MIND',
-  'Panne après utilisation':     'DEFECTIVE',
-  'Mauvaise taille':             'DESCRIPTION',
-  'Allergie/Réaction':           'DEFECTIVE',
-  'Ne correspond pas':           'DESCRIPTION',
-  'Erreur de commande vendeur':  'WRONG_ITEM',
-  'Pièces manquantes':           'WRONG_ITEM',
+export interface FlowmerceClaimsResponse {
+  claims: FlowmerceClaim[]
+  meta: {
+    total:       number
+    limit:       number
+    offset:      number
+    vendor:      { id: string; companyName: string }
+  }
 }
 
-// ── Headers communs ────────────────────────────────────────────────────────
+// ── Helpers internes ───────────────────────────────────────────────────────
 
-function authHeaders() {
+function headers(apiKey: string) {
   return {
     'Content-Type':  'application/json',
-    'Authorization': `Bearer ${FLOWMERCE_API_KEY}`,
+    'Authorization': `Bearer ${apiKey}`,
   }
 }
 
-// ── 1. Créer un claim dans Flowmerce ──────────────────────────────────────
+function assertConfigured() {
+  if (!FLOWMERCE_URL) throw new Error('FLOWMERCE_URL manquant dans .env')
+}
 
-export async function createFlowmerceClaim(
-  data: FlowmerceCreatePayload
-): Promise<FlowmerceClaimCreated> {
-  if (!FLOWMERCE_URL || !FLOWMERCE_API_KEY) {
-    throw new Error('FLOWMERCE_API_URL ou FLOWMERCE_API_KEY manquant dans .env')
-  }
+// ── 1. Créer une session de retour ─────────────────────────────────────────
+//
+// Appeler quand le client clique "Faire un retour" sur une commande livrée.
+// Retourne l'URL hébergée de Flowmerce à laquelle rediriger le client.
+// Le formulaire de retour est entièrement géré par Flowmerce — aucun formulaire
+// côté plateforme n'est nécessaire.
 
-  const description = data.description?.trim().length >= 10
-    ? data.description
-    : `Retour CabaStore : ${data.productName}.`
+export async function createReturnSession(params: {
+  apiKey:       string   // clé API Flowmerce du vendeur concerné
+  orderId:      string
+  customerEmail:string
+  customerName: string
+  productName:  string
+  customerPhone?:string
+  orderDate?:   string   // ISO-8601
+  shopName?:    string
+  expiresIn?:   number   // heures, défaut 72
+}): Promise<FlowmerceSession> {
+  assertConfigured()
 
-  const res = await fetch(`${FLOWMERCE_URL}/api/claims/external`, {
+  const res = await fetch(`${FLOWMERCE_URL}/api/return-sessions`, {
     method:  'POST',
-    headers: authHeaders(),
+    headers: headers(params.apiKey),
     body: JSON.stringify({
-      order_id:                data.orderId,
-      customer_name:           data.customerName,
-      customer_email:          data.customerEmail,
-      customer_phone:          data.customerPhone || null,
-      product_name:            data.productName,
-      description,
-      order_date:              data.orderDate,
-      order_total:             data.orderTotal,
-      external_return_id:      data.returnId,
-      external_product_id:     data.external_product_id || null,
-      external_return_reason:  data.external_return_reason || null,
-      desired_resolution:      data.desired_resolution     || null,
-      external_source:         'cabastore',
-      webhook_url:             `${CABA_URL}/api/retours/flowmerce-webhook`,
-      webhook_secret:          FLOWMERCE_WEBHOOK_SECRET,
-      Customer_Gender:         data.Customer_Gender,
-      Customer_Age:            data.Customer_Age,
-      Customer_Wilaya:         data.Customer_Wilaya,
-      Customer_Past_Returns:   data.Customer_Past_Returns,
-      Shop_Name:               'CabaStore',
-      Product_Category:        data.Product_Category,
-      Product_Price_DA:        data.Product_Price_DA,
-      Order_Quantity:          data.Order_Quantity,
-      Total_Amount_DA:         data.Total_Amount_DA,
-      Payment_Method:          data.Payment_Method,
-      Shipping_Method:         data.Shipping_Method,
-      Shipping_Cost_DA:        data.Shipping_Cost_DA,
-      reason:                  FLOWMERCE_REASON_MAP[data.external_return_reason || ''] || data.Return_Reason,
-      Return_Reason:           data.Return_Reason,
-      Days_to_Return:          data.Days_to_Return,
-      Shop_Return_Window_Days: data.Shop_Return_Window_Days,
-      Within_Return_Policy:    data.Within_Return_Policy,
-      Fraud_Score:             data.Fraud_Score,
-      Customer_Satisfaction:   data.Customer_Satisfaction,
-      Is_Suspicious:           data.Is_Suspicious,
+      order_id:       params.orderId,
+      customer_email: params.customerEmail,
+      customer_name:  params.customerName,
+      product_name:   params.productName,
+      customer_phone: params.customerPhone ?? '',
+      order_date:     params.orderDate     ?? '',
+      shop_name:      params.shopName      ?? '',
+      expires_in:     params.expiresIn     ?? 72,
     }),
   })
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({})) as { error?: string }
-    throw new Error(err.error || `Flowmerce API error ${res.status}`)
+    const err = await res.json().catch(() => ({})) as { error?: string; code?: string }
+    throw Object.assign(
+      new Error(err.error || `Flowmerce error ${res.status}`),
+      { code: err.code, status: res.status }
+    )
   }
 
-  return res.json() as Promise<FlowmerceClaimCreated>
+  return res.json() as Promise<FlowmerceSession>
 }
 
-// ── 2. Lister les claims depuis Flowmerce ─────────────────────────────────
+// ── 2. Lister les claims d'un vendeur ─────────────────────────────────────
+//
+// Utilisé par le dashboard vendeur dans CabaStore pour afficher ses retours.
 
-export async function getFlowmerceClaims(params?: {
-  status?:        string
-  customerEmail?: string
-}): Promise<FlowmerceClaim[]> {
-  if (!FLOWMERCE_URL || !FLOWMERCE_API_KEY) return []
+export async function getVendeurClaims(params: {
+  apiKey:   string
+  status?:  'PENDING' | 'APPROVED' | 'REJECTED' | 'IN_PROGRESS'
+  limit?:   number
+  offset?:  number
+}): Promise<FlowmerceClaimsResponse> {
+  assertConfigured()
 
   const url = new URL(`${FLOWMERCE_URL}/api/claims/external`)
-  url.searchParams.set('source', 'cabastore')
-  if (params?.status)        url.searchParams.set('status', params.status)
-  if (params?.customerEmail) url.searchParams.set('customer_email', params.customerEmail)
+  if (params.status) url.searchParams.set('status', params.status)
+  if (params.limit)  url.searchParams.set('limit',  String(params.limit))
+  if (params.offset) url.searchParams.set('offset', String(params.offset))
 
-  const res = await fetch(url.toString(), { headers: authHeaders() })
-  if (!res.ok) return []
-  return res.json() as Promise<FlowmerceClaim[]>
+  const res = await fetch(url.toString(), { headers: headers(params.apiKey) })
+  if (!res.ok) return { claims: [], meta: { total: 0, limit: 50, offset: 0, vendor: { id: '', companyName: '' } } }
+
+  return res.json() as Promise<FlowmerceClaimsResponse>
 }
 
-// ── 3. Récupérer un claim par ID ──────────────────────────────────────────
+// ── 3. Compter les claims d'un vendeur (pour dashboard KPIs) ──────────────
 
-export async function getFlowmerceClaim(id: string): Promise<FlowmerceClaim | null> {
-  if (!FLOWMERCE_URL || !FLOWMERCE_API_KEY || !id) return null
+export async function countVendeurClaims(apiKey: string): Promise<{
+  total:      number
+  enAttente:  number
+}> {
+  if (!FLOWMERCE_URL || !apiKey) return { total: 0, enAttente: 0 }
 
-  const res = await fetch(`${FLOWMERCE_URL}/api/claims/${id}`, {
-    headers: authHeaders(),
-  })
-  if (!res.ok) return null
-  return res.json() as Promise<FlowmerceClaim>
+  const [allRes, pendingRes] = await Promise.allSettled([
+    getVendeurClaims({ apiKey, limit: 1 }),
+    getVendeurClaims({ apiKey, status: 'PENDING', limit: 1 }),
+  ])
+
+  return {
+    total:     allRes.status     === 'fulfilled' ? allRes.value.meta.total     : 0,
+    enAttente: pendingRes.status === 'fulfilled' ? pendingRes.value.meta.total : 0,
+  }
 }
 
-// ── 4. Compter les claims passés d'un client (pour fraud score) ───────────
+// ── 5. getFlowmerceClaims — tous les claims, usage admin ──────────────────
+//
+// Utilise FLOWMERCE_API_KEY (clé admin plateforme dans .env).
+// Retourne les claims en snake_case pour compatibilité admin/page.tsx.
 
-export async function countFlowmerceClaimsByCustomer(email: string): Promise<number> {
-  const claims = await getFlowmerceClaims({ customerEmail: email })
-  return claims.length
+export interface FlowmerceAdminClaim {
+  id:             string
+  customer_name:  string
+  customer_email: string
+  product_name:   string
+  status:         string
+  aiDecision:     string | null
+  order_total:    number
+  createdAt:      string
 }
 
-// ── 5. Synchroniser le statut ET la résolution finale vers Flowmerce ──────
+export async function getFlowmerceClaims(params?: {
+  status?: string
+  limit?:  number
+}): Promise<FlowmerceAdminClaim[]> {
+  const adminKey = process.env.FLOWMERCE_API_KEY
+  if (!FLOWMERCE_URL || !adminKey) return []
 
-export async function syncFlowmerceStatus(
-  flowmerceClaimId: string,
-  newStatus:        'APPROVED' | 'REJECTED',
-  note?:            string,
-  resolution?:      FlowmerceResolution
-): Promise<void> {
-  if (!FLOWMERCE_URL || !FLOWMERCE_API_KEY || !flowmerceClaimId) return
+  try {
+    const url = new URL(`${FLOWMERCE_URL}/api/claims/external`)
+    if (params?.status) url.searchParams.set('status', params.status)
+    url.searchParams.set('limit', String(params?.limit ?? 200))
 
-  await fetch(`${FLOWMERCE_URL}/api/claims/${flowmerceClaimId}`, {
-    method:  'PATCH',
-    headers: authHeaders(),
-    body: JSON.stringify({
-      status:         newStatus,
-      aiDecision:     resolution ?? null,
-      overrideNote:   note || null,
-      _from_external: true,
-    }),
-  })
-}
+    const res = await fetch(url.toString(), {
+      headers: headers(adminKey),
+      next: { revalidate: 60 },
+    })
+    if (!res.ok) return []
 
-// ── 6. URL du dashboard Flowmerce ─────────────────────────────────────────
+    const data = await res.json() as { claims: FlowmerceClaim[] }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function getFlowmerceClaimUrl(_flowmerceClaimId: string): string {
-  return `${FLOWMERCE_URL}/dashboard/claims`
+    return data.claims.map(c => ({
+      id:             c.id,
+      customer_name:  c.customerName,
+      customer_email: c.customerEmail,
+      product_name:   c.productName,
+      status:         c.status,
+      aiDecision:     c.aiDecision,
+      order_total:    (c.prediction as Record<string, number> | null)?.orderTotal ?? 0,
+      createdAt:      c.createdAt,
+    }))
+  } catch {
+    return []
+  }
 }

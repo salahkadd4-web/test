@@ -18,7 +18,9 @@ export async function GET(req: NextRequest) {
       images: true,
       prix: true,
       stock: true,
+      prixVariables: true,
       category: { select: { nom: true } },
+      variants: { select: { id: true, couleur: true, nom: true }, orderBy: { createdAt: 'asc' } },
     },
   })
 
