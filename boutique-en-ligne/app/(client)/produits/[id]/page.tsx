@@ -5,7 +5,6 @@ import FavoriButton from '@/components/client/FavoriButton'
 import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
 import ProduitDetailClient from '@/components/client/ProduitDetailClient'
-import { Banknote, Package } from 'lucide-react'
 
 export default async function ProduitDetailPage({
   params,
@@ -18,7 +17,10 @@ export default async function ProduitDetailPage({
     where: { id },
     include: {
       category: true,
-      variants: { orderBy: { createdAt: 'asc' } },
+      variants: {
+        orderBy: { createdAt: 'asc' },
+        include: { options: { orderBy: { createdAt: 'asc' } } },
+      },
     },
   })
 
@@ -61,7 +63,8 @@ export default async function ProduitDetailPage({
           stock: produit.stock,
           images: produit.images,
           prixVariables: produit.prixVariables as any,
-          variants: produit.variants,
+          typeOption: (produit as any).typeOption ?? null,
+          variants: produit.variants as any,
         }}
       />
 
@@ -92,7 +95,7 @@ async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: strin
   if (produits.length === 0) return null
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div className="products-grid grid grid-cols-2 md:grid-cols-4 gap-6">
       {produits.map((produit) => {
         const tiers     = produit.prixVariables as { minQte: number; maxQte: number | null; prix: number }[] | null
         const hasTiers  = Array.isArray(tiers) && tiers.length > 0
@@ -103,7 +106,7 @@ async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: strin
           <Link
             key={produit.id}
             href={`/produits/${produit.id}`}
-            className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300"
+            className="product-card group bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800"
           >
             {/* Image */}
             <div className="relative h-44 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
@@ -114,13 +117,14 @@ async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: strin
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               ) : (
-                <span className="text-3xl"><Package className="w-10 h-10" /></span>
+                <span className="text-3xl">📦</span>
               )}
 
               {/* Badge dégressif */}
               {hasTiers && (
                 <div className="absolute top-2 left-2">
-                  <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow"><Banknote className="w-4 h-4 inline mr-1" />{' '}dégressif
+                  <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow">
+                    💰 dégressif
                   </span>
                 </div>
               )}

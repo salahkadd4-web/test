@@ -11,6 +11,7 @@ type OrderItem = {
   quantite:  number
   prix:      number
   variantNom?: string | null
+  variantOptionValeur?: string | null
   variant?: {
     id:      string
     nom:     string
@@ -522,6 +523,11 @@ export default function AdminCommandesPage() {
                               <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.variant.couleur }} />
                             )}
                             {item.variant.nom}
+                          </span>
+                        )}
+                        {item.variantOptionValeur && (
+                          <span className="text-xs bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full font-medium">
+                            {item.variantOptionValeur}
                           </span>
                         )}
                         <p className="text-xs text-gray-500 dark:text-gray-400">

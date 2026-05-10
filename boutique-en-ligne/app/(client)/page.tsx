@@ -2,8 +2,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
-import CategoriesCarousel from '@/components/client/CategoriesCarousel'
-import { Suspense } from 'react'
+import SuitcaseAnimationBg from '@/components/client/SuitcaseAnimationBg'
 import { Banknote, Package, Tag } from 'lucide-react'
 
 export default function HomePage() {
@@ -12,28 +11,26 @@ export default function HomePage() {
 
       {/* ── Hero Section avec animation ─────────────────── */}
       <section className="bg-black dark:bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6">
-        
-        {/* Fond gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black opacity-90" />
-
+ 
+        {/* ── Animation valise en arrière-plan ── */}
+        <SuitcaseAnimationBg />
+      
+        {/* ── Fond gradient (gardé, il se superpose à l'animation) ── */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black opacity-40" />
+      
+        {/* ── Contenu identique à avant — z-10 pour passer au-dessus ── */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center text-center">
-          
-          {/* Texte au dessus */}
+      
           <p className="text-gray-500 uppercase tracking-[0.5em] text-xs font-light mb-8">
             Première boutique online en Algérie spécialisée en importation
           </p>
-
-          {/* Animation valise */}
-
-          {/* Séparateur */}
+      
           <div className="w-px h-12 bg-gray-600 mx-auto my-8" />
-
-          {/* Texte en dessous */}
+      
           <p className="text-gray-400 text-base md:text-lg font-light leading-relaxed max-w-lg mx-auto mb-10">
-            Des produits d'exception sélectionnés pour vous, livrés partout en Algérie.
+            Des produits d&apos;exception sélectionnés pour vous, livrés partout en Algérie.
           </p>
-
-          {/* Boutons */}
+      
           <div className="flex gap-6 justify-center flex-wrap">
             <Link
               href="/produits"
@@ -48,29 +45,18 @@ export default function HomePage() {
               Catégories
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ── Avantages ────────────────────────────────────── */}
-      <section className="border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200 dark:divide-gray-800">
-          {[
-            { label: 'Qualité Premium',    desc: 'Produits sélectionnés' },
-            { label: 'Livraison Express',  desc: 'Partout en Algérie' },
-            { label: 'Paiement Sécurisé', desc: 'Transactions protégées' },
-            { label: 'Support Dédié',     desc: 'À votre écoute' },
-          ].map((item) => (
-            <div key={item.label} className="px-4 md:px-8 py-4 text-center">
-              <p className="text-xs uppercase tracking-[0.2em] text-black dark:text-white font-medium mb-1">{item.label}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">{item.desc}</p>
-            </div>
-          ))}
+      
         </div>
       </section>
 
       {/* ── Catégories ───────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="text-center mb-16">
+          <img
+            src="/logo_noir.png"
+            alt="CabaStore Logo"
+            className="h-20 w-auto object-contain mx-auto mb-4 dark:invert"
+          />
           <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.4em] text-xs mb-4">Parcourir</p>
           <h2 className="text-4xl font-extralight tracking-[0.1em] text-black dark:text-white">Catégories</h2>
           <div className="w-12 h-px bg-black dark:bg-white mx-auto mt-6" />
@@ -88,6 +74,11 @@ export default function HomePage() {
       <section className="bg-gray-50 dark:bg-gray-900 py-24 px-6 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
+            <img
+              src="/logo_noir.png"
+              alt="CabaStore Logo"
+              className="h-20 w-auto object-contain mx-auto mb-4 dark:invert"
+            />
             <p className="text-gray-400 dark:text-gray-500 uppercase tracking-[0.4em] text-xs mb-4">Nouveautés</p>
             <h2 className="text-4xl font-extralight tracking-[0.1em] text-black dark:text-white">Dernières Arrivées</h2>
             <div className="w-12 h-px bg-black dark:bg-white mx-auto mt-6" />
@@ -96,7 +87,7 @@ export default function HomePage() {
           <div className="text-center mt-16">
             <Link
               href="/produits"
-              className="border border-black dark:border-white text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-xs uppercase tracking-[0.3em] px-12 py-4 transition-all duration-300 inline-block"
+              className="nav-link border border-black dark:border-white text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-xs uppercase tracking-[0.3em] px-12 py-4 transition-all duration-300 inline-block"
             >
               Voir Tout
             </Link>
@@ -143,10 +134,19 @@ export default function HomePage() {
   )
 }
 
-async function CategoriesSection() {
+    async function CategoriesSection() {
   const categories = await prisma.category.findMany({
-    take: 6,
-    include: { _count: { select: { products: { where: { actif: true } } } } },
+    where: { products: { some: { actif: true } } },
+    include: {
+      products: {
+        where: { actif: true },
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          variants: { select: { id: true, couleur: true, nom: true }, orderBy: { createdAt: 'asc' } },
+        },
+      },
+    },
   })
 
   if (categories.length === 0) {
@@ -154,33 +154,117 @@ async function CategoriesSection() {
   }
 
   return (
-    <>
-      {/* Mobile → carrousel */}
-      <div className="md:hidden">
-        <CategoriesCarousel categories={categories} />
-      </div>
-
-      {/* Desktop → grille */}
-      <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {categories.map((cat) => (
-          <Link
-            key={cat.id}
-            href={`/categories/${cat.id}`}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center hover:shadow-md transition hover:border-gray-300 border border-transparent dark:border-gray-700"
-          >
-            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 overflow-hidden">
+    <div className="space-y-14">
+      {categories.map((cat) => (
+        <div key={cat.id}>
+          {/* En-tête catégorie */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
               {cat.image ? (
-                <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover rounded-full" />
+                <img src={cat.image} alt={cat.nom} className="w-8 h-8 rounded-full object-cover" />
               ) : (
-                <span className="text-2xl"><Tag className="w-4 h-4" /></span>
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <Tag className="w-4 h-4 text-gray-400" />
+                </div>
               )}
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white tracking-wide">{cat.nom}</h3>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{cat.products.length} produits</span>
             </div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{cat.nom}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">{cat._count.products} produits</p>
-          </Link>
-        ))}
-      </div>
-    </>
+            <Link
+              href={`/categories/${cat.id}`}
+              className="voir-tout-link text-xs uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"
+            >
+              Voir tout →
+            </Link>
+          </div>
+
+          {/* Ligne de produits scrollable */}
+          <div className="products-row flex gap-4 overflow-x-auto pb-3 scrollbar-hide snap-x snap-mandatory">
+            {cat.products.map((produit) => {
+              const tiers    = produit.prixVariables as { minQte: number; maxQte: number | null; prix: number }[] | null
+              const hasTiers = Array.isArray(tiers) && tiers.length > 0
+              const prixMin  = hasTiers ? Math.min(...tiers!.map(t => t.prix), produit.prix) : produit.prix
+              const estReduit = hasTiers && prixMin < produit.prix
+
+              return (
+                <Link
+                  key={produit.id}
+                  href={`/produits/${produit.id}`}
+                  className="product-card group flex-none w-40 bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-transparent dark:border-gray-700 snap-start"
+                >
+                  {/* Image */}
+                  <div className="relative h-40 bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                    {produit.images[0] ? (
+                      <img
+                        src={produit.images[0]}
+                        alt={produit.nom}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+                      </div>
+                    )}
+                    {hasTiers && (
+                      <div className="absolute top-1.5 left-1.5">
+                        <span className="text-[9px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full">
+                          <Banknote className="w-3 h-3 inline mr-0.5" />dégressif
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Infos */}
+                  <div className="p-3">
+                    <p className="text-xs font-semibold text-gray-800 dark:text-white line-clamp-2 mb-1.5 leading-tight">
+                      {produit.nom}
+                    </p>
+                    <div className="flex items-baseline gap-1 flex-wrap">
+                      {hasTiers && (
+                        <span className="text-[9px] text-gray-400">à partir de</span>
+                      )}
+                      <span className={`text-sm font-bold ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                        {prixMin.toFixed(2)} DA
+                      </span>
+                      {estReduit && (
+                        <span className="text-[9px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 font-bold px-1 py-0.5 rounded-full">
+                          −{Math.round((1 - prixMin / produit.prix) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    {/* Swatches */}
+                    {produit.variants.length > 0 && (
+                      <div className="flex items-center gap-1 flex-wrap mt-1.5">
+                        {produit.variants.slice(0, 4).map(v =>
+                          v.couleur ? (
+                            <span
+                              key={v.id}
+                              title={v.nom}
+                              className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 shrink-0"
+                              style={{ backgroundColor: v.couleur }}
+                            />
+                          ) : (
+                            <span
+                              key={v.id}
+                              className="text-[8px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded-full"
+                            >
+                              {v.nom}
+                            </span>
+                          )
+                        )}
+                        {produit.variants.length > 4 && (
+                          <span className="text-[8px] text-gray-400">+{produit.variants.length - 4}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -200,7 +284,7 @@ async function ProduitsSection() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div className="products-grid grid grid-cols-2 md:grid-cols-4 gap-6">
       {produits.map((produit) => {
         const tiers     = produit.prixVariables as { minQte: number; maxQte: number | null; prix: number }[] | null
         const hasTiers  = Array.isArray(tiers) && tiers.length > 0
@@ -211,7 +295,7 @@ async function ProduitsSection() {
           <Link
             key={produit.id}
             href={`/produits/${produit.id}`}
-            className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 border border-transparent dark:border-gray-700"
+            className="product-card group bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-transparent dark:border-gray-700"
           >
             {/* Image */}
             <div className="relative h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">

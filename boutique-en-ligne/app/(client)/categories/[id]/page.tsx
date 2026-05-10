@@ -87,7 +87,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
               <Link
                 key={produit.id}
                 href={`/produits/${produit.id}`}
-                className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300"
+                className="product-card group bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800"
               >
                 {/* Image */}
                 <div className="relative h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">

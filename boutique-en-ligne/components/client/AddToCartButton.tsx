@@ -34,6 +34,7 @@ export default function AddToCartButton({
       if (res.ok) {
         setSuccess(true)
         setTimeout(() => setSuccess(false), 2000)
+        window.dispatchEvent(new CustomEvent('cart-updated'))
       }
     } catch {
       console.error('Erreur panier')

@@ -5,6 +5,7 @@ import { CheckCircle2, Loader2, MapPin, Package, Phone, RefreshCw, Search, Tag, 
 
 interface OrderItem {
   id: string; quantite: number; prix: number
+  variantOptionValeur?: string | null
   variant?: { id: string; nom: string; couleur: string | null; images: string[] } | null
   product: { id: string; nom: string; images: string[] }
 }
@@ -227,6 +228,7 @@ export default function VendeurCommandesPage() {
                       )}
                       {item.product.nom}
                       {item.variant && ` — ${item.variant.nom}`}
+                      {item.variantOptionValeur && ` (${item.variantOptionValeur})`}
                       {' '}×{item.quantite}
                     </span>
                   ))}
@@ -317,6 +319,11 @@ export default function VendeurCommandesPage() {
                           <span className="inline-flex items-center gap-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded-full mb-0.5">
                             {item.variant.couleur && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.variant.couleur }} />}
                             {item.variant.nom}
+                          </span>
+                        )}
+                        {item.variantOptionValeur && (
+                          <span className="inline-flex items-center text-xs bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full font-medium mb-0.5">
+                            {item.variantOptionValeur}
                           </span>
                         )}
                         <p className="text-xs text-gray-400 dark:text-gray-500">×{item.quantite} — {item.prix.toLocaleString('fr-DZ')} DA/u</p>

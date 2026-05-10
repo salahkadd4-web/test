@@ -57,7 +57,7 @@ export default function FavorisPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {favoris.map((favori) => (
             <div key={favori.id}
-              className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:shadow-md dark:hover:shadow-gray-900 transition-all duration-300">
+              className="product-card bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800">
               <Link href={`/produits/${favori.product.id}`}>
                 <div className="h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
                   {favori.product.images[0] ? (

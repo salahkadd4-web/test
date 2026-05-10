@@ -36,6 +36,7 @@ export default function CartIconButton({ produitId, stock }: { produitId: string
         if (res.ok) {
           setInCart(false)
           setCartItemId(null)
+          window.dispatchEvent(new CustomEvent('cart-updated'))
         }
       } else {
         // Ajouter puis re-fetch pour récupérer l'id du cartItem
@@ -49,6 +50,7 @@ export default function CartIconButton({ produitId, stock }: { produitId: string
         const data = await res.json()
         const item = data?.items?.find((i: any) => i.productId === produitId)
         if (item) { setInCart(true); setCartItemId(item.id) }
+        window.dispatchEvent(new CustomEvent('cart-updated'))
       }
     } finally {
       setLoading(false)

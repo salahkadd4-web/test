@@ -56,7 +56,11 @@ export default function FavoriButton({ produitId }: { produitId: string }) {
           : 'border-blue-600 text-blue-600 hover:bg-blue-50'
       }`}
     >
-      {isFavori ? <><Heart className="w-4 h-4 fill-red-500 text-red-500" />{' '}Retiré des favoris</> : <><Heart className="w-4 h-4" />{' '}Ajouter aux favoris</>}
+      <span className="flex items-center justify-center gap-2">
+        {isFavori
+          ? <><Heart className="w-4 h-4 fill-red-500 text-red-500" />Retiré des favoris</>
+          : <><Heart className="w-4 h-4" />Ajouter aux favoris</>}
+      </span>
     </button>
   )
 }

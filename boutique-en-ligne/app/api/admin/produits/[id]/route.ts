@@ -2,89 +2,69 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthToken } from '@/lib/getAuthToken'
 
-async function checkAdmin(req: NextRequest) {
+async function checkAdmin() {
   const token = await getAuthToken()
   return token?.role === 'ADMIN' ? token : null
 }
 
-// PUT — Modifier un produit (avec prixVariables et variantes)
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = await checkAdmin(req)
-    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
+    if (!await checkAdmin()) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     const { id } = await params
-    const { nom, description, prix, stock, images, categoryId, prixVariables, variants } = await req.json()
+    const { nom, description, prix, stock, images, categoryId, prixVariables, typeOption, variants } = await req.json()
 
-    const newStock = parseInt(stock)
-
-    // Mettre à jour le produit
-    const produit = await prisma.product.update({
+    await prisma.product.update({
       where: { id },
       data: {
-        nom,
-        description: description || null,
-        prix: parseFloat(prix),
-        stock: newStock,
-        images: images || [],
-        categoryId,
-        actif: newStock > 0,
-        prixVariables: prixVariables && prixVariables.length > 0 ? prixVariables : null,
+        nom, description: description || null,
+        prix: parseFloat(prix), stock: parseInt(stock),
+        images: images || [], categoryId,
+        actif: parseInt(stock) > 0,
+        typeOption: typeOption || null,
+        prixVariables: prixVariables?.length > 0 ? prixVariables : null,
       },
     })
 
-    // Synchroniser les variantes si fournies
     if (variants !== undefined) {
-      // Supprimer les variantes existantes et recréer
+      // Supprimer toutes les variantes existantes (cascade supprime options)
       await prisma.productVariant.deleteMany({ where: { productId: id } })
       if (variants.length > 0) {
-        await prisma.productVariant.createMany({
-          data: variants.map((v: any) => ({
-            productId: id,
-            nom: v.nom,
-            couleur: v.couleur || null,
-            stock: parseInt(v.stock) || 0,
-            images: v.images || [],
-          })),
-        })
+        for (const v of variants) {
+          await prisma.productVariant.create({
+            data: {
+              productId: id,
+              nom: v.nom, couleur: v.couleur || null,
+              stock: parseInt(v.stock) || 0, images: v.images || [],
+              options: v.options?.length > 0 ? {
+                create: v.options.map((o: any) => ({
+                  valeur: o.valeur, stock: parseInt(o.stock) || 0,
+                })),
+              } : undefined,
+            },
+          })
+        }
       }
     }
 
     const updated = await prisma.product.findUnique({
       where: { id },
-      include: { variants: { orderBy: { createdAt: 'asc' } } },
+      include: { variants: { include: { options: { orderBy: { createdAt: 'asc' } } } } },
     })
-
     return NextResponse.json(updated)
-  } catch (error) {
-    console.error('Erreur modification produit:', error)
+  } catch (e) {
+    console.error(e)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
-// PATCH — Activer / Désactiver
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = await checkAdmin(req)
-    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
+    if (!await checkAdmin()) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     const { id } = await params
     const { actif } = await req.json()
-
-    const produit = await prisma.product.update({
-      where: { id },
-      data: { actif },
-    })
-
+    const produit = await prisma.product.update({ where: { id }, data: { actif } })
     return NextResponse.json(produit)
-  } catch (error) {
-    console.error('Erreur changement statut produit:', error)
+  } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

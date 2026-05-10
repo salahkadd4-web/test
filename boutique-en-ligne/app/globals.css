@@ -52,3 +52,180 @@ html, body {
 ::-webkit-scrollbar-thumb:hover { background: #333; }
 
 ::selection { background: #0a0a0a; color: #ffffff; }
+/* ─── Animation carte produit ─── */
+.product-card {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.35s ease,
+              border-color 0.35s ease,
+              opacity 0.35s ease;
+  will-change: transform;
+  position: relative;
+  z-index: 1;
+}
+.product-card:hover {
+  transform: translateY(-8px) scale(1.06);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  z-index: 10;
+}
+/* Les cartes voisines s'effacent légèrement */
+.products-row:has(.product-card:hover) .product-card:not(:hover),
+.products-grid:has(.product-card:hover) .product-card:not(:hover) {
+  transform: scale(0.97);
+  opacity: 0.75;
+}
+
+/* ─── Animation badge panier ─── */
+@keyframes bounce-once {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.4); }
+  60%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.animate-bounce-once {
+  animation: bounce-once 0.4s ease-out;
+}
+
+/* ─── Styles hover élégants liens ─── */
+
+/* Liens de navigation (Accueil, Catégories, Produits) */
+/* Soulignement qui glisse de gauche à droite */
+.nav-link {
+  position: relative;
+  padding-bottom: 2px;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.nav-link:hover::after { width: 100%; }
+
+/* Liens du menu avatar */
+/* Bordure gauche + fond qui glisse */
+.menu-link {
+  position: relative;
+  border-left: 2px solid transparent;
+  transition: border-color 0.2s ease, background 0.2s ease, padding-left 0.2s ease, color 0.2s ease;
+}
+.menu-link:hover {
+  border-left-color: currentColor;
+  padding-left: 20px;
+}
+
+/* Liens "Voir tout →" */
+/* Flèche qui avance */
+.voir-tout-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.25s ease, gap 0.25s ease, letter-spacing 0.25s ease;
+}
+.voir-tout-link:hover {
+  gap: 8px;
+  letter-spacing: 0.25em;
+}
+
+/* ════════════════════════════════════════
+   BOUTONS ÉLÉGANTS — globals.css only
+   ════════════════════════════════════════ */
+
+/* ── Base : transition fluide sur tous les boutons ── */
+button:not([disabled]) {
+  transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.22s ease,
+              background-color 0.22s ease,
+              border-color 0.22s ease !important;
+}
+button:not([disabled]):active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+/* ── Boutons noirs remplis (bg-black) ── */
+button[class*="bg-black"]:not([disabled]),
+a[class*="bg-black"]:not([class*="bg-black/"]) {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.22s ease, box-shadow 0.22s ease,
+              background-color 0.22s ease !important;
+}
+button[class*="bg-black"]:not([disabled]):hover,
+a[class*="bg-black"]:not([class*="bg-black/"]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Boutons blancs remplis (bg-white) ── */
+button[class*="bg-white"]:not([disabled]) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+}
+button[class*="bg-white"]:not([disabled]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+/* ── Boutons outline (border-black / border-white) ── */
+button[class*="border-black"]:not([disabled]),
+button[class*="border-white"]:not([disabled]),
+a[class*="border-black"],
+a[class*="border-white"] {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.22s ease, box-shadow 0.22s ease,
+              background-color 0.25s ease, color 0.25s ease !important;
+}
+button[class*="border-black"]:not([disabled]):hover,
+button[class*="border-white"]:not([disabled]):hover,
+a[class*="border-black"]:hover,
+a[class*="border-white"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  letter-spacing: 0.32em;
+}
+
+/* ── Boutons bleus (bg-blue-*) ── */
+button[class*="bg-blue-"]:not([disabled]) {
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.28);
+  transition: transform 0.22s ease, box-shadow 0.22s ease,
+              background-color 0.22s ease !important;
+}
+button[class*="bg-blue-"]:not([disabled]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.42);
+}
+
+/* ── Boutons rouges (bg-red-*) ── */
+button[class*="bg-red-"]:not([disabled]) {
+  transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+}
+button[class*="bg-red-"]:not([disabled]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35);
+}
+
+/* ── Boutons verts (bg-green-*) ── */
+button[class*="bg-green-"]:not([disabled]) {
+  transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+}
+button[class*="bg-green-"]:not([disabled]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+}
+
+/* ── Effet press universel ── */
+button:not([disabled]):active,
+a[class*="px-"]:active {
+  transform: translateY(0) scale(0.97) !important;
+  box-shadow: none !important;
+}
+
+/* ── Désactivés : aucun effet ── */
+button[disabled] {
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}

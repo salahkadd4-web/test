@@ -166,9 +166,9 @@ exports.Prisma.CategoryScalarFieldEnum = {
   nom: 'nom',
   description: 'description',
   image: 'image',
-  statut: 'statut',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  statut: 'statut',
   vendeurId: 'vendeurId'
 };
 
@@ -179,12 +179,13 @@ exports.Prisma.ProductScalarFieldEnum = {
   prix: 'prix',
   stock: 'stock',
   images: 'images',
-  prixVariables: 'prixVariables',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   categoryId: 'categoryId',
   actif: 'actif',
-  vendeurId: 'vendeurId'
+  vendeurId: 'vendeurId',
+  prixVariables: 'prixVariables',
+  typeOption: 'typeOption'
 };
 
 exports.Prisma.ProductVariantScalarFieldEnum = {
@@ -194,6 +195,15 @@ exports.Prisma.ProductVariantScalarFieldEnum = {
   couleur: 'couleur',
   stock: 'stock',
   images: 'images',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VariantOptionScalarFieldEnum = {
+  id: 'id',
+  variantId: 'variantId',
+  valeur: 'valeur',
+  stock: 'stock',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -210,7 +220,8 @@ exports.Prisma.CartItemScalarFieldEnum = {
   quantite: 'quantite',
   cartId: 'cartId',
   productId: 'productId',
-  variantId: 'variantId'
+  variantId: 'variantId',
+  variantOptionId: 'variantOptionId'
 };
 
 exports.Prisma.FavoriteScalarFieldEnum = {
@@ -225,9 +236,6 @@ exports.Prisma.OrderScalarFieldEnum = {
   statut: 'statut',
   total: 'total',
   adresse: 'adresse',
-  modePaiement: 'modePaiement',
-  methodeExpedition: 'methodeExpedition',
-  fraisLivraison: 'fraisLivraison',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId',
@@ -236,7 +244,11 @@ exports.Prisma.OrderScalarFieldEnum = {
   scan1ShippingAllowed: 'scan1ShippingAllowed',
   scan2Done: 'scan2Done',
   scan2Result: 'scan2Result',
-  retourDemande: 'retourDemande'
+  fraisLivraison: 'fraisLivraison',
+  methodeExpedition: 'methodeExpedition',
+  modePaiement: 'modePaiement',
+  retourDemande: 'retourDemande',
+  approbationsVendeurs: 'approbationsVendeurs'
 };
 
 exports.Prisma.OrderItemScalarFieldEnum = {
@@ -246,7 +258,9 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   orderId: 'orderId',
   productId: 'productId',
   variantId: 'variantId',
-  variantNom: 'variantNom'
+  variantNom: 'variantNom',
+  variantOptionId: 'variantOptionId',
+  variantOptionValeur: 'variantOptionValeur'
 };
 
 exports.Prisma.ResetTokenScalarFieldEnum = {
@@ -340,6 +354,7 @@ exports.Prisma.ModelName = {
   Category: 'Category',
   Product: 'Product',
   ProductVariant: 'ProductVariant',
+  VariantOption: 'VariantOption',
   Cart: 'Cart',
   CartItem: 'CartItem',
   Favorite: 'Favorite',

@@ -9,8 +9,12 @@ import AndroidBackButton from '@/components/client/AndroidBackButton'
 
 
 export const metadata: Metadata = {
-  title: 'Boutique en ligne',
-  description: 'Votre boutique en ligne',
+  title: 'Caba Store',
+  description: 'Votre boutique en ligne — Caba Store',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/icons/icon-192.webp',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Boutique" />
+        <meta name="apple-mobile-web-app-title" content="Caba Store" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <script dangerouslySetInnerHTML={{
           __html: `

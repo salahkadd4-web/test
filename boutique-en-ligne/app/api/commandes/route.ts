@@ -36,11 +36,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Adresse de livraison requise' }, { status: 400 })
     }
 
-    // Récupérer le panier
+    // Récupérer le panier avec variantes et options
     const panier = await prisma.cart.findUnique({
       where: { userId: token.id as string },
       include: {
-        items: { include: { product: true } },
+        items: {
+          include: {
+            product: true,
+            variant: true,
+            variantOption: true,
+          },
+        },
       },
     })
 
@@ -50,11 +56,27 @@ export async function POST(req: NextRequest) {
 
     // Vérifier le stock de chaque produit
     for (const item of panier.items) {
-      if (item.product.stock < item.quantite) {
-        return NextResponse.json(
-          { error: `Stock insuffisant pour ${item.product.nom}` },
-          { status: 400 }
-        )
+      if (item.variantOption) {
+        if (item.variantOption.stock < item.quantite) {
+          return NextResponse.json(
+            { error: `Stock insuffisant pour ${item.product.nom} (${item.variantOption.valeur})` },
+            { status: 400 }
+          )
+        }
+      } else if (item.variant) {
+        if (item.variant.stock < item.quantite) {
+          return NextResponse.json(
+            { error: `Stock insuffisant pour ${item.product.nom} (${item.variant.nom})` },
+            { status: 400 }
+          )
+        }
+      } else {
+        if (item.product.stock < item.quantite) {
+          return NextResponse.json(
+            { error: `Stock insuffisant pour ${item.product.nom}` },
+            { status: 400 }
+          )
+        }
       }
     }
 
@@ -66,7 +88,7 @@ export async function POST(req: NextRequest) {
     const frais = typeof fraisLivraison === 'number' ? fraisLivraison : 700
     const total = sousTotal + frais
 
-    // Créer la commande
+    // Créer la commande en sauvegardant variante + option (taille/pointure)
     const commande = await prisma.order.create({
       data: {
         userId:            token.id as string,
@@ -77,24 +99,37 @@ export async function POST(req: NextRequest) {
         fraisLivraison:    frais,
         items: {
           create: panier.items.map((item) => ({
-            productId: item.productId,
-            quantite: item.quantite,
-            prix: item.product.prix,
+            productId:          item.productId,
+            quantite:           item.quantite,
+            prix:               item.product.prix,
+            variantId:          item.variantId          ?? null,
+            variantNom:         item.variant?.nom        ?? null,
+            variantOptionId:    item.variantOptionId    ?? null,
+            variantOptionValeur: item.variantOption?.valeur ?? null,
           })),
         },
       },
     })
 
-    // Mettre à jour le stock
+    // Mettre à jour le stock (option > variante > produit)
     for (const item of panier.items) {
-      const newStock = item.product.stock - item.quantite
-      await prisma.product.update({
-        where: { id: item.productId },
-        data: {
-          stock: newStock,
-          actif: newStock > 0,
-        },
-      })
+      if (item.variantOptionId) {
+        await prisma.variantOption.update({
+          where: { id: item.variantOptionId },
+          data:  { stock: { decrement: item.quantite } },
+        })
+      } else if (item.variantId) {
+        await prisma.productVariant.update({
+          where: { id: item.variantId },
+          data:  { stock: { decrement: item.quantite } },
+        })
+      } else {
+        const newStock = item.product.stock - item.quantite
+        await prisma.product.update({
+          where: { id: item.productId },
+          data:  { stock: newStock, actif: newStock > 0 },
+        })
+      }
     }
 
     // Vider le panier

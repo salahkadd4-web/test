@@ -127,6 +127,14 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Bloquer si un retour a déjà été demandé pour cette commande
+  if (order.retourDemande) {
+    return NextResponse.json(
+      { error: 'Une demande de retour a déjà été soumise pour cette commande.' },
+      { status: 409 }
+    )
+  }
+
   const item = order.items.find(i => i.product.nom === productName) ?? order.items[0]
 
   // ── 4. Résoudre la clé API Flowmerce ────────────────────────────────────
@@ -166,7 +174,7 @@ export async function POST(req: NextRequest) {
     payment_method:     PAYMENT_MAP[order.modePaiement ?? '']      ?? 'Cash on Delivery',
     shipping_method:    SHIPPING_MAP[order.methodeExpedition ?? ''] ?? 'Home Delivery',
     shipping_cost:      order.fraisLivraison ?? 0,
-    external_return_id: `cabastore-${orderId}-${Date.now()}`,
+    external_return_id: `cabastore-${orderId}`,
     external_source:    'CabaStore',
   }
 

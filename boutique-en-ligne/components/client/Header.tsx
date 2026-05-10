@@ -37,7 +37,27 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [search, setSearch]             = useState('')
   const [menuOpen, setMenuOpen]         = useState(false)
+  const [cartCount, setCartCount]       = useState(0)
   const userMenuRef = useRef<HTMLDivElement>(null)
+
+  // ── Panier : count + écoute des mises à jour ──
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      try {
+        const res  = await fetch('/api/panier')
+        const data = await res.json()
+        const total = data?.items?.reduce((sum: number, i: any) => sum + (i.quantite ?? 1), 0) ?? 0
+        setCartCount(total)
+      } catch { setCartCount(0) }
+    }
+
+    if (!session) { setCartCount(0); return }
+
+    fetchCartCount()
+    window.addEventListener('cart-updated', fetchCartCount)
+    return () => window.removeEventListener('cart-updated', fetchCartCount)
+  }, [session])
+
   const isMobile    = useIsMobile()
   const hidden      = useHideOnScroll()
 
@@ -124,6 +144,21 @@ export default function Header() {
               </Link>
             )}
 
+            {session && (
+              <Link
+                href="/panier"
+                className="relative flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 active:scale-95"
+                title="Mon panier"
+              >
+                <ShoppingCart className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-md animate-bounce-once">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {session ? (
               <div className="relative" ref={userMenuRef}>
                 <button onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -202,9 +237,9 @@ export default function Header() {
 
           <div className="flex items-center gap-6 flex-1">
             <nav className="hidden md:flex items-center gap-6 shrink-0">
-              <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Accueil</Link>
-              <Link href="/categories" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Catégories</Link>
-              <Link href="/produits" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Produits</Link>
+              <Link href="/" className="nav-link text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Accueil</Link>
+              <Link href="/categories" className="nav-link text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Catégories</Link>
+              <Link href="/produits" className="nav-link text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs uppercase tracking-[0.2em] transition-colors">Produits</Link>
             </nav>
             <div className="flex-1 max-w-sm hidden md:flex items-center">
               <SearchBar />
@@ -218,6 +253,22 @@ export default function Header() {
                 className="hidden md:flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-3 py-2 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-all">
                 <span><Store className="w-5 h-5" /></span>
                 <span className="uppercase tracking-widest">Espace Vendeur</span>
+              </Link>
+            )}
+
+            {/* ── Icône Panier avec badge ── */}
+            {session && (
+              <Link
+                href="/panier"
+                className="relative flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 active:scale-95"
+                title="Mon panier"
+              >
+                <ShoppingCart className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-md">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
               </Link>
             )}
 
@@ -245,14 +296,14 @@ export default function Header() {
                     <div className="py-1">
                       {userMenuItems.map((item) => (
                         <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          className="menu-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                           <span>{(() => { const Icon = item.icon; return <Icon className="w-4 h-4" /> })()}</span>
                           <span className="text-xs uppercase tracking-[0.15em]">{item.label}</span>
                         </Link>
                       ))}
                       {isVendeur && (
                         <Link href="/vendeur" onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors">
+                          className="menu-link flex items-center gap-3 px-4 py-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950">
                           <span><Store className="w-5 h-5" /></span>
                           <span className="text-xs uppercase tracking-[0.15em] font-medium">Espace Vendeur</span>
                         </Link>
@@ -269,10 +320,7 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <>
-                <Link href="/connexion" className="text-gray-500 dark:text-gray-400 hover:text-black text-xs uppercase tracking-[0.2em] transition-colors">Connexion</Link>
-                <Link href="/inscription" className="bg-black dark:bg-white dark:text-black text-white text-xs uppercase tracking-[0.2em] px-5 py-2.5 transition-colors">S'inscrire</Link>
-              </>
+              <Link href="/connexion" className="bg-black dark:bg-white dark:text-black text-white text-xs uppercase tracking-[0.2em] px-5 py-2.5 transition-colors">Connexion</Link>
             )}
           </div>
         </div>
@@ -310,7 +358,7 @@ export default function Header() {
               <button onClick={handleSignOut} className="block text-red-500 text-xs uppercase tracking-[0.2em]">Déconnexion</button>
             ) : (
               <Link href="/connexion" onClick={() => setMenuOpen(false)}
-                className="block text-gray-600 hover:text-black text-xs uppercase tracking-[0.2em]">Connexion</Link>
+                className="inline-block bg-black dark:bg-white text-white dark:text-black text-xs uppercase tracking-[0.2em] px-5 py-2.5 transition-colors">Connexion</Link>
             )}
           </div>
         )}
