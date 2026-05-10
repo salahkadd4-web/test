@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       user: { select: { id: true, nom: true, prenom: true, email: true, telephone: true } },
       items: {
         where:   { product: { vendeurId: vendeur.id } },
-        include: { product: { select: { id: true, nom: true, images: true } } },
+        include: { variant: { select: { id: true, nom: true, couleur: true, images: true } }, product: { select: { id: true, nom: true, images: true } } },
       },
     },
   })

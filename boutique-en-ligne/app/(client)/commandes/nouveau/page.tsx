@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Check, CheckCircle2, ClipboardList, CreditCard, MapPin, Package, ShoppingBag, ShoppingCart, Smartphone, Truck } from 'lucide-react'
 
 type CartItem = {
   id: string
@@ -110,7 +111,7 @@ export default function NouvelleCommandePage() {
 
   if (!panier || panier.items.length === 0) return (
     <div className="max-w-4xl mx-auto px-4 py-12 pt-4 text-center">
-      <p className="text-6xl mb-4">🛒</p>
+      <p className="text-6xl mb-4"><ShoppingCart className="w-5 h-5" /></p>
       <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Votre panier est vide</h1>
       <Link href="/produits" className="bg-black dark:bg-white text-white dark:text-black px-8 py-3 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition">
         Voir les produits
@@ -130,7 +131,7 @@ export default function NouvelleCommandePage() {
           {!hasTelephone && (
             <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
               <div className="flex items-start gap-3 mb-4">
-                <span className="text-2xl">📱</span>
+                <span className="text-2xl"><Smartphone className="w-8 h-8" /></span>
                 <div>
                   <h3 className="font-semibold text-amber-800 dark:text-amber-300 text-sm">Numéro de téléphone requis</h3>
                   <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
@@ -154,7 +155,7 @@ export default function NouvelleCommandePage() {
                   onClick={handleSaveTelephone} disabled={savingTel || !telephone}
                   className="w-full bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
                 >
-                  {savingTel ? 'Enregistrement...' : '✓ Enregistrer le numéro'}
+                  {savingTel ? 'Enregistrement...' : <><Check className="w-4 h-4" />{' '}Enregistrer le numéro</>}
                 </button>
               </div>
             </div>
@@ -162,7 +163,7 @@ export default function NouvelleCommandePage() {
 
           {/* Formulaire */}
           <div className={`bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 ${!hasTelephone ? 'opacity-50 pointer-events-none' : ''}`}>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">📋 Détails de la commande</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6"><ClipboardList className="w-4 h-4 inline mr-1" />{' '}Détails de la commande</h2>
 
             {error && (
               <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg mb-4">
@@ -174,7 +175,7 @@ export default function NouvelleCommandePage() {
 
               {/* Adresse */}
               <div>
-                <label className={labelClass}>📍 Adresse de livraison *</label>
+                <label className={labelClass}><MapPin className="w-4 h-4 inline mr-1" />{' '}Adresse de livraison *</label>
                 <textarea
                   value={adresse} onChange={e => setAdresse(e.target.value)}
                   required rows={3}
@@ -185,7 +186,7 @@ export default function NouvelleCommandePage() {
 
               {/* Mode de paiement */}
               <div>
-                <label className={labelClass}>💳 Mode de paiement *</label>
+                <label className={labelClass}><CreditCard className="w-4 h-4 inline mr-1" />{' '}Mode de paiement *</label>
                 <select value={modePaiement} onChange={e => setModePaiement(e.target.value)} className={inputClass}>
                   {MODES_PAIEMENT.map(m => (
                     <option key={m} value={m}>{m}</option>
@@ -195,7 +196,7 @@ export default function NouvelleCommandePage() {
 
               {/* Méthode d'expédition */}
               <div>
-                <label className={labelClass}>🚚 Méthode d&apos;expédition *</label>
+                <label className={labelClass}><Truck className="w-4 h-4 inline mr-1" />{' '}Méthode d&apos;expédition *</label>
                 <div className="space-y-2">
                   {METHODES_EXPEDITION.map(opt => (
                     <button
@@ -245,7 +246,7 @@ export default function NouvelleCommandePage() {
                   {item.product.images[0]
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={item.product.images[0]} alt={item.product.nom} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center">📦</div>
+                    : <div className="w-full h-full flex items-center justify-center"><Package className="w-5 h-5" /></div>
                   }
                 </div>
                 <div className="flex-1">
@@ -281,28 +282,28 @@ export default function NouvelleCommandePage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-gray-100 dark:border-gray-800">
             <div className="text-center mb-6">
-              <p className="text-5xl mb-3">🛍️</p>
+              <ShoppingBag className="w-14 h-14" />
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Confirmer la commande ?</h2>
               <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Vérifiez les détails avant de confirmer</p>
             </div>
 
             <div className="space-y-3 mb-4">
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                <p className="text-xs text-gray-400 mb-1">📍 Adresse</p>
+                <p className="text-xs text-gray-400 mb-1"><MapPin className="w-4 h-4 inline mr-1" />{' '}Adresse</p>
                 <p className="text-sm text-gray-800 dark:text-gray-200">{adresse}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 mb-1">💳 Paiement</p>
+                  <p className="text-xs text-gray-400 mb-1"><CreditCard className="w-4 h-4 inline mr-1" />{' '}Paiement</p>
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{modePaiement}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 mb-1">🚚 Livraison</p>
+                  <p className="text-xs text-gray-400 mb-1"><Truck className="w-4 h-4 inline mr-1" />{' '}Livraison</p>
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{methodeExpedition}</p>
                 </div>
               </div>
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 max-h-36 overflow-y-auto">
-                <p className="text-xs text-gray-400 mb-2">📦 Articles</p>
+                <p className="text-xs text-gray-400 mb-2"><Package className="w-4 h-4 inline mr-1" />{' '}Articles</p>
                 {panier.items.map(item => (
                   <div key={item.id} className="flex justify-between text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <span className="line-clamp-1 flex-1">{item.product.nom} x{item.quantite}</span>
@@ -332,7 +333,7 @@ export default function NouvelleCommandePage() {
               </button>
               <button onClick={handleConfirmer} disabled={submitting}
                 className="flex-1 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-2.5 rounded-xl transition disabled:opacity-50">
-                {submitting ? 'En cours...' : 'Confirmer ✅'}
+                {submitting ? 'En cours...' : <>Confirmer{' '}<CheckCircle2 className="w-5 h-5" /></>}
               </button>
             </div>
           </div>

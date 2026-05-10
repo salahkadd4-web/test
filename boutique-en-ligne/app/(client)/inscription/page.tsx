@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Check, X } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Page d'inscription — design cohérent avec la page connexion (luxe minimaliste)
@@ -146,7 +147,7 @@ export default function InscriptionPage() {
               ? 'border border-black dark:border-white text-black dark:text-white'
               : 'border border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-600'
           }`}>
-            {s < etape ? '✓' : s}
+            {s < etape ? <Check className="w-4 h-4" /> : s}
           </div>
           <span className={`text-xs uppercase tracking-[0.2em] hidden sm:block transition-colors duration-300 ${
             etape === s
@@ -333,8 +334,8 @@ export default function InscriptionPage() {
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                             </svg>
                           )}
-                          {!checkingId && idStatus === 'available' && <span className="text-green-500 text-sm font-bold">✓</span>}
-                          {!checkingId && idStatus === 'taken'     && <span className="text-red-400 text-sm font-bold">✗</span>}
+                          {!checkingId && idStatus === 'available' && <span className="text-green-500 text-sm font-bold"><Check className="w-4 h-4" /></span>}
+                          {!checkingId && idStatus === 'taken'     && <span className="text-red-400 text-sm font-bold"><X className="w-4 h-4" /></span>}
                         </div>
                       </div>
                     ) : (
@@ -357,16 +358,15 @@ export default function InscriptionPage() {
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                             </svg>
                           )}
-                          {!checkingId && idStatus === 'available' && <span className="text-green-500 text-sm font-bold">✓</span>}
-                          {!checkingId && idStatus === 'taken'     && <span className="text-red-400 text-sm font-bold">✗</span>}
+                          {!checkingId && idStatus === 'available' && <span className="text-green-500 text-sm font-bold"><Check className="w-4 h-4" /></span>}
+                          {!checkingId && idStatus === 'taken'     && <span className="text-red-400 text-sm font-bold"><X className="w-4 h-4" /></span>}
                         </div>
                       </div>
                     )}
 
                     {/* Message sous le champ */}
                     {idStatus === 'available' && (
-                      <p className="text-xs text-green-600 dark:text-green-400 mt-1.5">
-                        ✓ {identifiantType === 'email' ? 'Email' : 'Numéro'} disponible
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1.5"><Check className="w-4 h-4 inline mr-1" />{' '}{identifiantType === 'email' ? 'Email' : 'Numéro'} disponible
                       </p>
                     )}
                     {idStatus === 'taken' && (
@@ -419,7 +419,7 @@ export default function InscriptionPage() {
                                   ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
                                   : 'border border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-700'
                               }`}>
-                                {ok ? '✓' : ''}
+                                {ok ? <Check className="w-4 h-4" /> : ''}
                               </span>
                               {label}
                             </p>

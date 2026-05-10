@@ -4,6 +4,7 @@ import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
 import CategoriesCarousel from '@/components/client/CategoriesCarousel'
 import { Suspense } from 'react'
+import { Banknote, Package, Tag } from 'lucide-react'
 
 export default function HomePage() {
   return (
@@ -171,7 +172,7 @@ async function CategoriesSection() {
               {cat.image ? (
                 <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover rounded-full" />
               ) : (
-                <span className="text-2xl">🏷️</span>
+                <span className="text-2xl"><Tag className="w-4 h-4" /></span>
               )}
             </div>
             <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{cat.nom}</p>
@@ -188,7 +189,10 @@ async function ProduitsSection() {
     where: { actif: true },
     take: 8,
     orderBy: { createdAt: 'desc' },
-    include: { category: true },
+    include: {
+      category: true,
+      variants: { select: { id: true, nom: true, couleur: true }, orderBy: { createdAt: 'asc' } },
+    },
   })
 
   if (produits.length === 0) {
@@ -197,30 +201,99 @@ async function ProduitsSection() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-      {produits.map((produit) => (
-        <Link
-          key={produit.id}
-          href={`/produits/${produit.id}`}
-          className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden hover:shadow-md transition border border-transparent dark:border-gray-700"
-        >
-          <div className="relative h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-            {produit.images[0] ? (
-              <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-4xl">📦</span>
-            )}
-            <div className="absolute top-2 right-2 flex flex-col gap-2">
-                              <FavoriIconButton produitId={produit.id} />
-                              <CartIconButton produitId={produit.id} stock={produit.stock} />
+      {produits.map((produit) => {
+        const tiers     = produit.prixVariables as { minQte: number; maxQte: number | null; prix: number }[] | null
+        const hasTiers  = Array.isArray(tiers) && tiers.length > 0
+        const prixMin   = hasTiers ? Math.min(...tiers!.map(t => t.prix), produit.prix) : produit.prix
+        const estReduit = hasTiers && prixMin < produit.prix
+
+        return (
+          <Link
+            key={produit.id}
+            href={`/produits/${produit.id}`}
+            className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 border border-transparent dark:border-gray-700"
+          >
+            {/* Image */}
+            <div className="relative h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+              {produit.images[0] ? (
+                <img
+                  src={produit.images[0]}
+                  alt={produit.nom}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <Package className="w-14 h-14" />
+              )}
+
+              {/* Badge dégressif */}
+              {hasTiers && (
+                <div className="absolute top-2 left-2">
+                  <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow"><Banknote className="w-4 h-4 inline mr-1" />{' '}dégressif
+                  </span>
+                </div>
+              )}
+
+              {/* Actions favoris / panier */}
+              <div className="absolute top-2 right-2 flex flex-col gap-2">
+                <FavoriIconButton produitId={produit.id} />
+                <CartIconButton produitId={produit.id} stock={produit.stock} />
+              </div>
             </div>
-          </div>
-          <div className="p-4">
-            <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{produit.category.nom}</p>
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 line-clamp-2">{produit.nom}</h3>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{produit.prix.toFixed(2)} DA</p>
-          </div>
-        </Link>
-      ))}
+
+            {/* Infos */}
+            <div className="p-4">
+              <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{produit.category.nom}</p>
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 line-clamp-2">{produit.nom}</h3>
+
+              {/* Bloc prix */}
+              <div className="flex items-baseline gap-1.5 flex-wrap mb-1.5">
+                {hasTiers && (
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500">à partir de</span>
+                )}
+                <span className={`text-lg font-bold ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                  {prixMin.toFixed(2)} DA
+                </span>
+                {estReduit && (
+                  <>
+                    <span className="text-sm text-gray-400 line-through font-normal">
+                      {produit.prix.toFixed(2)}
+                    </span>
+                    <span className="text-[9px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 font-bold px-1 py-0.5 rounded-full">
+                      −{Math.round((1 - prixMin / produit.prix) * 100)}%
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Swatches variantes */}
+              {produit.variants.length > 0 && (
+                <div className="flex items-center gap-1 flex-wrap">
+                  {produit.variants.slice(0, 5).map(v =>
+                    v.couleur ? (
+                      <span
+                        key={v.id}
+                        title={v.nom}
+                        className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 inline-block shrink-0"
+                        style={{ backgroundColor: v.couleur }}
+                      />
+                    ) : (
+                      <span
+                        key={v.id}
+                        className="text-[9px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-full"
+                      >
+                        {v.nom}
+                      </span>
+                    )
+                  )}
+                  {produit.variants.length > 5 && (
+                    <span className="text-[9px] text-gray-400">+{produit.variants.length - 5}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </Link>
+        )
+      })}
     </div>
   )
 }

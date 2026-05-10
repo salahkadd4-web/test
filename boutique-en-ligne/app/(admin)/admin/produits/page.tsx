@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import MultiImageUpload from '@/components/admin/MultiImageUpload'
+import { AlertTriangle, Ban, Banknote, CheckCircle2, ClipboardList, Eye, Package, Palette, Pencil, ShoppingCart, Store, Tag } from 'lucide-react'
 
 type Category = { id: string; nom: string }
 type VendeurOption = { id: string; nomBoutique: string | null; user: { nom: string; prenom: string } }
@@ -153,7 +154,7 @@ export default function AdminProduitsPage() {
                 ? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400'
                 : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
             }`}>
-            {showInactifs ? '👁 Voir actifs' : `🚫 Désactivés (${produitsInactifs.length})`}
+            {showInactifs ? <><Eye className="w-4 h-4" />{' '}Voir actifs</> : `🚫 Désactivés (${produitsInactifs.length})`}
           </button>
           {!showInactifs && (
             <button onClick={openCreate} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg transition">
@@ -164,8 +165,7 @@ export default function AdminProduitsPage() {
       </div>
 
       {showInactifs && (
-        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm px-4 py-3 rounded-xl mb-4">
-          🚫 Vous visualisez les produits désactivés — ils ne sont pas visibles par les clients.
+        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm px-4 py-3 rounded-xl mb-4"><Ban className="w-4 h-4 inline mr-1" />{' '}Vous visualisez les produits désactivés — ils ne sont pas visibles par les clients.
         </div>
       )}
 
@@ -176,19 +176,18 @@ export default function AdminProduitsPage() {
             className="flex-1 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
           <select value={filterVendeur} onChange={e => { setFilterVendeur(e.target.value); setAdminOnly(false) }} disabled={adminOnly}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px] disabled:opacity-40">
-            <option value="">🏪 Tous les vendeurs</option>
+            <option value=""><Store className="w-4 h-4 inline mr-1" />{' '}Tous les vendeurs</option>
             {vendeurs.map(v => <option key={v.id} value={v.id}>{v.nomBoutique || `${v.user.prenom} ${v.user.nom}`}</option>)}
           </select>
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[180px]">
-            <option value="">🏷️ Toutes les catégories</option>
+            <option value=""><Tag className="w-4 h-4 inline mr-1" />{' '}Toutes les catégories</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
           </select>
           <button onClick={() => { setAdminOnly(v => !v); setFilterVendeur('') }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap border ${
               adminOnly ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-700'
-            }`}>
-            🛒 Admin seulement
+            }`}><ShoppingCart className="w-4 h-4 inline mr-1" />{' '}Admin seulement
           </button>
         </div>
       </div>
@@ -215,7 +214,7 @@ export default function AdminProduitsPage() {
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shrink-0">
-                      {produit.images[0] ? <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">📦</div>}
+                      {produit.images[0] ? <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Package className="w-5 h-5" /></div>}
                     </div>
                     <div>
                       <p className="font-medium text-gray-800 dark:text-gray-100">{produit.nom}</p>
@@ -225,13 +224,13 @@ export default function AdminProduitsPage() {
                 </td>
                 <td className="px-6 py-4">
                   {produit.vendeur
-                    ? <span className="text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">🏪 {produit.vendeur.nomBoutique || '—'}</span>
-                    : <span className="text-xs bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full">🛒 Admin</span>}
+                    ? <span className="text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full"><Store className="w-4 h-4 inline mr-1" />{' '}{produit.vendeur.nomBoutique || '—'}</span>
+                    : <span className="text-xs bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full"><ShoppingCart className="w-4 h-4 inline mr-1" />{' '}Admin</span>}
                 </td>
                 <td className="px-6 py-4">
                   <p className="font-semibold text-blue-600 dark:text-blue-400">{produit.prix.toFixed(2)} DA</p>
                   {Array.isArray(produit.prixVariables) && produit.prixVariables.length > 0 && (
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">💰 {produit.prixVariables.length} palier{produit.prixVariables.length > 1 ? 's' : ''}</p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-0.5"><Banknote className="w-4 h-4 inline mr-1" />{' '}{produit.prixVariables.length} palier{produit.prixVariables.length > 1 ? 's' : ''}</p>
                   )}
                 </td>
                 <td className="px-6 py-4">
@@ -254,15 +253,15 @@ export default function AdminProduitsPage() {
                 </td>
                 <td className="px-6 py-4">
                   <span className={`text-xs font-semibold px-2 py-1 rounded-full ${produit.actif ? 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
-                    {produit.actif ? '✅ Actif' : '🚫 Désactivé'}
+                    {produit.actif ? <><CheckCircle2 className="w-5 h-5" />{' '}Actif</> : <><Ban className="w-5 h-5" />{' '}Désactivé</>}
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex gap-2">
-                    <button onClick={() => openEdit(produit)} className="bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 px-3 py-1 rounded-lg text-xs font-medium transition">✏️ Modifier</button>
+                    <button onClick={() => openEdit(produit)} className="bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 px-3 py-1 rounded-lg text-xs font-medium transition"><Pencil className="w-4 h-4 inline mr-1" />{' '}Modifier</button>
                     <button onClick={() => setToggleId(produit.id)}
                       className={`px-3 py-1 rounded-lg text-xs font-medium transition ${produit.actif ? 'bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400' : 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400'}`}>
-                      {produit.actif ? '🚫 Désactiver' : '✅ Activer'}
+                      {produit.actif ? <><Ban className="w-5 h-5" />{' '}Désactiver</> : <><CheckCircle2 className="w-5 h-5" />{' '}Activer</>}
                     </button>
                   </div>
                 </td>
@@ -278,7 +277,7 @@ export default function AdminProduitsPage() {
           <div key={produit.id} className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 ${!produit.actif ? 'opacity-60' : ''}`}>
             <div className="flex items-start gap-3 mb-3">
               <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shrink-0">
-                {produit.images[0] ? <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xl">📦</div>}
+                {produit.images[0] ? <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xl"><Package className="w-8 h-8" /></div>}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm truncate">{produit.nom}</p>
@@ -290,10 +289,10 @@ export default function AdminProduitsPage() {
               {produit.variants.length > 0 && <span className="bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-full">{produit.variants.length} variante{produit.variants.length > 1 ? 's' : ''}</span>}
             </div>
             <div className="flex gap-2">
-              <button onClick={() => openEdit(produit)} className="flex-1 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-2 rounded-lg text-xs font-medium transition">✏️ Modifier</button>
+              <button onClick={() => openEdit(produit)} className="flex-1 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-2 rounded-lg text-xs font-medium transition"><Pencil className="w-4 h-4 inline mr-1" />{' '}Modifier</button>
               <button onClick={() => setToggleId(produit.id)}
                 className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition ${produit.actif ? 'bg-orange-50 dark:bg-orange-950 text-orange-600' : 'bg-green-50 dark:bg-green-950 text-green-600'}`}>
-                {produit.actif ? '🚫 Désactiver' : '✅ Activer'}
+                {produit.actif ? <><Ban className="w-5 h-5" />{' '}Désactiver</> : <><CheckCircle2 className="w-5 h-5" />{' '}Activer</>}
               </button>
             </div>
           </div>
@@ -307,7 +306,7 @@ export default function AdminProduitsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[92vh] overflow-y-auto border border-gray-100 dark:border-gray-800">
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-              {editProduit ? '✏️ Modifier le produit' : '+ Ajouter un produit'}
+              {editProduit ? <><Pencil className="w-4 h-4" />{' '}Modifier le produit</> : '+ Ajouter un produit'}
             </h2>
 
             {/* Onglets */}
@@ -315,7 +314,7 @@ export default function AdminProduitsPage() {
               {(['infos', 'prix', 'variantes'] as const).map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${activeTab === tab ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}>
-                  {tab === 'infos' ? '📋 Informations' : tab === 'prix' ? '💰 Prix' : '🎨 Variantes'}
+                  {tab === 'infos' ? <><ClipboardList className="w-5 h-5" />{' '}Informations</> : tab === 'prix' ? <><Banknote className="w-5 h-5" />{' '}Prix</> : <><Palette className="w-5 h-5" />{' '}Variantes</>}
                 </button>
               ))}
             </div>
@@ -376,7 +375,7 @@ export default function AdminProduitsPage() {
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">💰 Prix dégressifs par quantité</label>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300"><Banknote className="w-4 h-4 inline mr-1" />{' '}Prix dégressifs par quantité</label>
                       <button type="button" onClick={() => setPrixTiers(t => [...t, emptyTier()])}
                         className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-lg hover:bg-purple-200 transition">
                         + Ajouter un palier
@@ -417,7 +416,7 @@ export default function AdminProduitsPage() {
                 <>
                   <div className="flex items-center justify-between mb-1">
                     <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">🎨 Couleurs ou parfums</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300"><Palette className="w-4 h-4 inline mr-1" />{' '}Couleurs ou parfums</p>
                       <p className="text-xs text-gray-400 mt-0.5">Chaque variante a son propre stock et ses propres images</p>
                     </div>
                     <button type="button" onClick={() => setVariants(v => [...v, emptyVariant()])}
@@ -503,7 +502,7 @@ export default function AdminProduitsPage() {
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-gray-800">
-              <p className="text-5xl mb-4">{produit.actif ? '🚫' : cantActivate ? '⚠️' : '✅'}</p>
+              <p className="text-5xl mb-4">{produit.actif ? <Ban className="w-5 h-5" /> : cantActivate ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}</p>
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 {produit.actif ? 'Désactiver ce produit ?' : cantActivate ? 'Stock épuisé' : 'Activer ce produit ?'}
               </h2>

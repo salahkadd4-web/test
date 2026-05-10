@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { Heart, Package, XCircle } from 'lucide-react'
 
 export default function FavorisPage() {
   const { data: session, status } = useSession()
@@ -46,7 +47,7 @@ export default function FavorisPage() {
 
       {favoris.length === 0 ? (
         <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-          <p className="text-5xl mb-4">🤍</p>
+          <Heart className="w-4 h-4" />
           <p className="text-lg">Vous n'avez pas encore de favoris.</p>
           <Link href="/produits" className="text-blue-600 dark:text-blue-400 hover:underline mt-4 inline-block">
             Parcourir les produits
@@ -62,7 +63,7 @@ export default function FavorisPage() {
                   {favori.product.images[0] ? (
                     <img src={favori.product.images[0]} alt={favori.product.nom} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <span className="text-4xl">📦</span>
+                    <Package className="w-14 h-14" />
                   )}
                 </div>
                 <div className="p-4">
@@ -77,8 +78,7 @@ export default function FavorisPage() {
               </Link>
               <div className="px-4 pb-4">
                 <button onClick={() => handleRetirer(favori.product.id)}
-                  className="w-full border border-red-300 dark:border-red-800 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 text-sm py-2 rounded-lg transition">
-                  ❌ Retirer des favoris
+                  className="w-full border border-red-300 dark:border-red-800 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 text-sm py-2 rounded-lg transition"><XCircle className="w-4 h-4 inline mr-1" />{' '}Retirer des favoris
                 </button>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { Tag } from 'lucide-react'
 
 export default async function CategoriesPage() {
   const categories = await prisma.category.findMany({
@@ -17,7 +18,7 @@ export default async function CategoriesPage() {
 
       {categories.length === 0 ? (
         <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-          <p className="text-5xl mb-4">🏷️</p>
+          <Tag className="w-4 h-4" />
           <p className="text-lg">Aucune catégorie disponible pour le moment.</p>
         </div>
       ) : (
@@ -29,7 +30,7 @@ export default async function CategoriesPage() {
                 {cat.image ? (
                   <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover rounded-full" />
                 ) : (
-                  <span className="text-3xl">🏷️</span>
+                  <span className="text-3xl"><Tag className="w-4 h-4" /></span>
                 )}
               </div>
               <div>

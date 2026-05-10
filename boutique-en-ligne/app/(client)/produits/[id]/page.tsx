@@ -5,6 +5,7 @@ import FavoriButton from '@/components/client/FavoriButton'
 import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
 import ProduitDetailClient from '@/components/client/ProduitDetailClient'
+import { Banknote, Package } from 'lucide-react'
 
 export default async function ProduitDetailPage({
   params,
@@ -82,33 +83,111 @@ async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: strin
   const produits = await prisma.product.findMany({
     where: { categoryId, actif: true, NOT: { id: produitId } },
     take: 4,
-    include: { category: true },
+    include: {
+      category: true,
+      variants: { select: { id: true, nom: true, couleur: true }, orderBy: { createdAt: 'asc' } },
+    },
   })
 
   if (produits.length === 0) return null
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-      {produits.map((produit) => (
-        <Link key={produit.id} href={`/produits/${produit.id}`}
-          className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300">
-          <div className="relative h-40 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-            {produit.images[0] ? (
-              <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            ) : (
-              <span className="text-3xl">📦</span>
-            )}
-            <div className="absolute top-2 right-2 flex flex-col gap-2">
-              <FavoriIconButton produitId={produit.id} />
-              <CartIconButton produitId={produit.id} stock={produit.stock} />
+      {produits.map((produit) => {
+        const tiers     = produit.prixVariables as { minQte: number; maxQte: number | null; prix: number }[] | null
+        const hasTiers  = Array.isArray(tiers) && tiers.length > 0
+        const prixMin   = hasTiers ? Math.min(...tiers!.map(t => t.prix), produit.prix) : produit.prix
+        const estReduit = hasTiers && prixMin < produit.prix
+
+        return (
+          <Link
+            key={produit.id}
+            href={`/produits/${produit.id}`}
+            className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300"
+          >
+            {/* Image */}
+            <div className="relative h-44 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+              {produit.images[0] ? (
+                <img
+                  src={produit.images[0]}
+                  alt={produit.nom}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <span className="text-3xl"><Package className="w-10 h-10" /></span>
+              )}
+
+              {/* Badge dégressif */}
+              {hasTiers && (
+                <div className="absolute top-2 left-2">
+                  <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow"><Banknote className="w-4 h-4 inline mr-1" />{' '}dégressif
+                  </span>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="absolute top-2 right-2 flex flex-col gap-2">
+                <FavoriIconButton produitId={produit.id} />
+                <CartIconButton produitId={produit.id} stock={produit.stock} />
+              </div>
             </div>
-          </div>
-          <div className="p-3">
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2">{produit.nom}</h3>
-            <p className="text-blue-600 dark:text-blue-400 font-bold mt-1">{produit.prix.toFixed(2)} DA</p>
-          </div>
-        </Link>
-      ))}
+
+            {/* Infos */}
+            <div className="p-3">
+              <p className="text-xs text-blue-600 dark:text-blue-400 mb-0.5">{produit.category.nom}</p>
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 mb-1.5">
+                {produit.nom}
+              </h3>
+
+              {/* Bloc prix */}
+              <div className="flex items-baseline gap-1.5 flex-wrap mb-1.5">
+                {hasTiers && (
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500">à partir de</span>
+                )}
+                <span className={`text-base font-bold ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                  {prixMin.toFixed(2)} DA
+                </span>
+                {estReduit && (
+                  <>
+                    <span className="text-xs text-gray-400 line-through font-normal">
+                      {produit.prix.toFixed(2)}
+                    </span>
+                    <span className="text-[9px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 font-bold px-1 py-0.5 rounded-full">
+                      −{Math.round((1 - prixMin / produit.prix) * 100)}%
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Swatches variantes */}
+              {produit.variants.length > 0 && (
+                <div className="flex items-center gap-1 flex-wrap">
+                  {produit.variants.slice(0, 5).map(v =>
+                    v.couleur ? (
+                      <span
+                        key={v.id}
+                        title={v.nom}
+                        className="w-3.5 h-3.5 rounded-full border border-gray-300 dark:border-gray-600 inline-block shrink-0"
+                        style={{ backgroundColor: v.couleur }}
+                      />
+                    ) : (
+                      <span
+                        key={v.id}
+                        className="text-[9px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-full"
+                      >
+                        {v.nom}
+                      </span>
+                    )
+                  )}
+                  {produit.variants.length > 5 && (
+                    <span className="text-[9px] text-gray-400">+{produit.variants.length - 5}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </Link>
+        )
+      })}
     </div>
   )
 }

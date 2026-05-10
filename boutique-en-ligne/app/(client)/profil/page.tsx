@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
+import { Check, Lock, X } from 'lucide-react'
 
 const WILAYAS = [
   'Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar','Blida','Bouira',
@@ -28,7 +29,7 @@ function PasswordStrength({ password }: { password: string }) {
         const ok = rule.test(password)
         return (
           <div key={rule.id} className="flex items-center gap-2">
-            <span className={`text-xs transition-colors ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'}`}>{ok ? '✓' : '○'}</span>
+            <span className={`text-xs transition-colors ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'}`}>{ok ? <Check className="w-4 h-4" /> : '○'}</span>
             <span className={`text-xs transition-colors ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}`}>{rule.label}</span>
           </div>
         )
@@ -60,8 +61,7 @@ function ConfirmPasswordBlock({
   return (
     <div className="border-t border-gray-200 dark:border-gray-800 pt-5 space-y-4">
       <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3">
-        <p className="text-xs text-amber-700 dark:text-amber-400">
-          🔒 Entrez votre mot de passe actuel pour confirmer les modifications
+        <p className="text-xs text-amber-700 dark:text-amber-400"><Lock className="w-4 h-4 inline mr-1" />{' '}Entrez votre mot de passe actuel pour confirmer les modifications
         </p>
       </div>
       <div>
@@ -365,7 +365,7 @@ export default function ProfilPage() {
       </div>
 
       {error   && <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-xs px-4 py-3 mb-5 rounded-lg">{error}</div>}
-      {success && <div className="border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 text-xs px-4 py-3 mb-5 rounded-lg">✓ {success}</div>}
+      {success && <div className="border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 text-xs px-4 py-3 mb-5 rounded-lg"><Check className="w-4 h-4 inline mr-1" />{' '}{success}</div>}
 
       {/* ══ Informations ══════════════════════════════════════════════════════ */}
       {section === 'infos' && (
@@ -472,14 +472,13 @@ export default function ProfilPage() {
               <p className="text-xs text-red-500 dark:text-red-400 mt-1">Les mots de passe ne correspondent pas</p>
             )}
             {pwd.confirmer && pwd.nouveau === pwd.confirmer && (
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Les mots de passe correspondent</p>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1"><Check className="w-4 h-4 inline mr-1" />{' '}Les mots de passe correspondent</p>
             )}
           </div>
 
           <div className="border-t border-gray-200 dark:border-gray-800 pt-5 space-y-4">
             <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3">
-              <p className="text-xs text-amber-700 dark:text-amber-400">
-                🔒 Entrez votre mot de passe actuel pour confirmer les modifications
+              <p className="text-xs text-amber-700 dark:text-amber-400"><Lock className="w-4 h-4 inline mr-1" />{' '}Entrez votre mot de passe actuel pour confirmer les modifications
               </p>
             </div>
             <div>
@@ -522,7 +521,7 @@ export default function ProfilPage() {
                       isActive ? 'bg-black dark:bg-white text-white dark:text-black' :
                                  'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                     }`}>
-                      {isDone ? '✓' : i + 1}
+                      {isDone ? <Check className="w-4 h-4" /> : i + 1}
                     </div>
                     {/* FIX 6 : labels toujours visibles, texte très court */}
                     <span className={`text-[10px] tracking-wide leading-none text-center ${
@@ -564,13 +563,13 @@ export default function ProfilPage() {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                       </svg>
                     )}
-                    {!emailChecking && emailStatus === 'available' && <span className="text-green-500 text-lg">✓</span>}
-                    {!emailChecking && (emailStatus === 'taken' || emailStatus === 'same') && <span className="text-red-500 text-lg">✗</span>}
+                    {!emailChecking && emailStatus === 'available' && <span className="text-green-500 text-lg"><Check className="w-4 h-4" /></span>}
+                    {!emailChecking && (emailStatus === 'taken' || emailStatus === 'same') && <span className="text-red-500 text-lg"><X className="w-4 h-4" /></span>}
                   </div>
                 </div>
-                {emailStatus === 'available' && <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Email disponible</p>}
-                {emailStatus === 'same'      && <p className="text-xs text-red-500 dark:text-red-400 mt-1">✗ Identique à votre email actuel</p>}
-                {emailStatus === 'taken'     && <p className="text-xs text-red-500 dark:text-red-400 mt-1">✗ Email déjà utilisé</p>}
+                {emailStatus === 'available' && <p className="text-xs text-green-600 dark:text-green-400 mt-1"><Check className="w-4 h-4 inline mr-1" />{' '}Email disponible</p>}
+                {emailStatus === 'same'      && <p className="text-xs text-red-500 dark:text-red-400 mt-1"><X className="w-4 h-4 inline mr-1" />{' '}Identique à votre email actuel</p>}
+                {emailStatus === 'taken'     && <p className="text-xs text-red-500 dark:text-red-400 mt-1"><X className="w-4 h-4 inline mr-1" />{' '}Email déjà utilisé</p>}
               </div>
 
               <ConfirmPasswordBlock

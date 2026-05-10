@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Calendar, CheckCircle2, Eye, Heart, Mail, Phone, RefreshCw, Search, Trash2, User, X } from 'lucide-react'
 
 type ReturnItem = {
   id:           string
@@ -112,7 +113,7 @@ export default function AdminClientsPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
-            ) : '🔍'}
+            ) : <Search className="w-4 h-4" />}
           </span>
           <input
             type="text"
@@ -125,7 +126,7 @@ export default function AdminClientsPage() {
             <button
               onClick={() => setSearch('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            >✕</button>
+            ><X className="w-4 h-4" /></button>
           )}
         </div>
         {debouncedSearch && (
@@ -180,7 +181,7 @@ export default function AdminClientsPage() {
                   <td className="px-6 py-4">
                     <p className="text-gray-700 dark:text-gray-200">{client.email || '—'}</p>
                     {client.telephone
-                      ? <a href={`tel:${client.telephone}`} className="text-xs text-purple-600 dark:text-purple-400 hover:underline">📞 {client.telephone}</a>
+                      ? <a href={`tel:${client.telephone}`} className="text-xs text-purple-600 dark:text-purple-400 hover:underline"><Phone className="w-4 h-4 inline mr-1" />{' '}{client.telephone}</a>
                       : <p className="text-xs text-gray-400 dark:text-gray-500">—</p>
                     }
                   </td>
@@ -200,15 +201,13 @@ export default function AdminClientsPage() {
                         : client._count.returns > 0
                         ? 'bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-                    }`}>
-                      🔄 {client._count.returns}
+                    }`}><RefreshCw className="w-4 h-4 inline mr-1" />{' '}{client._count.returns}
                     </span>
                   </td>
 
                   {/* Favoris */}
                   <td className="px-6 py-4">
-                    <span className="bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400 text-xs font-semibold px-2 py-1 rounded-full">
-                      ❤️ {client._count.favorites}
+                    <span className="bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400 text-xs font-semibold px-2 py-1 rounded-full"><Heart className="w-4 h-4 inline mr-1" />{' '}{client._count.favorites}
                     </span>
                   </td>
 
@@ -223,15 +222,12 @@ export default function AdminClientsPage() {
                       <button
                         onClick={() => openDetail(client)}
                         className="bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900 px-3 py-1 rounded-lg text-xs font-medium transition"
-                      >
-                        👁️ Détails
+                      ><Eye className="w-4 h-4 inline mr-1" />{' '}Détails
                       </button>
                       <button
                         onClick={() => setDeleteId(client.id)}
                         className="bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 px-3 py-1 rounded-lg text-xs font-medium transition"
-                      >
-                        🗑️
-                      </button>
+                      ><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -266,7 +262,7 @@ export default function AdminClientsPage() {
               <button
                 onClick={() => setSelectedClient(null)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl p-1"
-              >✕</button>
+              ><X className="w-4 h-4" /></button>
             </div>
 
             {/* Onglets */}
@@ -282,7 +278,7 @@ export default function AdminClientsPage() {
                   }`}
                 >
                   {tab === 'infos'
-                    ? '👤 Informations'
+                    ? <><User className="w-5 h-5" />{' '}Informations</>
                     : `🔄 Retours (${selectedClient._count?.returns ?? 0})`
                   }
                 </button>
@@ -305,12 +301,12 @@ export default function AdminClientsPage() {
                   {activeTab === 'infos' && (
                     <div className="space-y-3">
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">📧 Email</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1"><Mail className="w-4 h-4 inline mr-1" />{' '}Email</p>
                         <p className="text-sm text-gray-800 dark:text-gray-100">{selectedClient.email || '—'}</p>
                       </div>
 
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">📞 Téléphone</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1"><Phone className="w-4 h-4 inline mr-1" />{' '}Téléphone</p>
                         {selectedClient.telephone
                           ? <a href={`tel:${selectedClient.telephone}`} className="text-sm text-purple-600 dark:text-purple-400 hover:underline font-medium">{selectedClient.telephone}</a>
                           : <p className="text-sm text-gray-800 dark:text-gray-100">—</p>
@@ -338,7 +334,7 @@ export default function AdminClientsPage() {
                       </div>
 
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">📅 Inscrit le</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1"><Calendar className="w-4 h-4 inline mr-1" />{' '}Inscrit le</p>
                         <p className="text-sm text-gray-800 dark:text-gray-100">
                           {new Date(selectedClient.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
@@ -347,8 +343,7 @@ export default function AdminClientsPage() {
                       <button
                         onClick={() => setDeleteId(selectedClient.id)}
                         className="w-full bg-red-50 dark:bg-red-950 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-400 font-semibold py-2.5 rounded-xl text-sm transition"
-                      >
-                        🗑️ Supprimer ce client
+                      ><Trash2 className="w-4 h-4 inline mr-1" />{' '}Supprimer ce client
                       </button>
                     </div>
                   )}
@@ -358,7 +353,7 @@ export default function AdminClientsPage() {
                     <div>
                       {!selectedClient.returns || selectedClient.returns.length === 0 ? (
                         <div className="text-center py-10">
-                          <p className="text-3xl mb-2">✅</p>
+                          <p className="text-3xl mb-2"><CheckCircle2 className="w-10 h-10" /></p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Aucun retour pour ce client</p>
                         </div>
                       ) : (
@@ -402,7 +397,7 @@ export default function AdminClientsPage() {
       {deleteId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-gray-800">
-            <p className="text-5xl mb-4">🗑️</p>
+            <Trash2 className="w-4 h-4" />
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Supprimer ce client ?</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
               Toutes ses commandes, retours, favoris et messages seront supprimés.

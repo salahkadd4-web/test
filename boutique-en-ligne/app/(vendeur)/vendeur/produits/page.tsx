@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Banknote, ClipboardList, Heart, Package, Palette, Pause, Pencil, Play, Tag, Trash2, X } from 'lucide-react'
 
 interface Category { id: string; nom: string }
 interface Variant { id?: string; nom: string; couleur: string; stock: string; images: string[] }
@@ -169,7 +170,7 @@ export default function VendeurProduitsPage() {
         </div>
         <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
           className="border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          <option value="">🏷️ Toutes les catégories</option>
+          <option value=""><Tag className="w-4 h-4 inline mr-1" />{' '}Toutes les catégories</option>
           {categories.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
         </select>
       </div>
@@ -186,7 +187,7 @@ export default function VendeurProduitsPage() {
             }`}>
               {p.images[0]
                 ? <img src={p.images[0]} alt={p.nom} className="w-full h-36 object-cover" />
-                : <div className="w-full h-36 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl">📦</div>
+                : <div className="w-full h-36 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl"><Package className="w-10 h-10" /></div>
               }
               <div className="p-3">
                 <div className="flex items-start justify-between gap-2 mb-1">
@@ -203,8 +204,7 @@ export default function VendeurProduitsPage() {
                     {p.prix.toLocaleString('fr-DZ')} DA
                   </p>
                   {Array.isArray(p.prixVariables) && p.prixVariables.length > 0 && (
-                    <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300 font-semibold px-1.5 py-0.5 rounded-full">
-                      💰 {p.prixVariables.length} palier{p.prixVariables.length > 1 ? 's' : ''}
+                    <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300 font-semibold px-1.5 py-0.5 rounded-full"><Banknote className="w-4 h-4 inline mr-1" />{' '}{p.prixVariables.length} palier{p.prixVariables.length > 1 ? 's' : ''}
                     </span>
                   )}
                 </div>
@@ -226,14 +226,14 @@ export default function VendeurProduitsPage() {
                 <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
                   <span>Stock: {p.stock}</span>
                   <span>{p._count.orderItems} ventes</span>
-                  <span>♥ {p._count.favorites}</span>
+                  <span><Heart className="w-4 h-4 inline mr-1" />{' '}{p._count.favorites}</span>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => openEdit(p)} className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-2 py-1.5 rounded-lg transition-all">✏️ Modifier</button>
+                  <button onClick={() => openEdit(p)} className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-2 py-1.5 rounded-lg transition-all"><Pencil className="w-4 h-4 inline mr-1" />{' '}Modifier</button>
                   <button onClick={() => toggleActif(p)} className="flex-1 text-xs bg-yellow-50 dark:bg-yellow-950 hover:bg-yellow-100 dark:hover:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-2 py-1.5 rounded-lg transition-all">
-                    {p.actif ? '⏸ Désactiver' : '▶ Activer'}
+                    {p.actif ? <><Pause className="w-4 h-4" />{' '}Désactiver</> : <><Play className="w-4 h-4" />{' '}Activer</>}
                   </button>
-                  <button onClick={() => handleDelete(p)} className="text-xs bg-red-50 dark:bg-red-950 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-400 px-2 py-1.5 rounded-lg transition-all">🗑</button>
+                  <button onClick={() => handleDelete(p)} className="text-xs bg-red-50 dark:bg-red-950 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-400 px-2 py-1.5 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function VendeurProduitsPage() {
               <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">
                 {editing ? 'Modifier le produit' : 'Nouveau produit'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl">✕</button>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl"><X className="w-4 h-4" /></button>
             </div>
 
             {/* Onglets */}
@@ -267,7 +267,7 @@ export default function VendeurProduitsPage() {
                         ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}>
-                    {tab === 'infos' ? '📋 Infos' : tab === 'prix' ? '💰 Prix' : '🎨 Variantes'}
+                    {tab === 'infos' ? <><ClipboardList className="w-5 h-5" />{' '}Infos</> : tab === 'prix' ? <><Banknote className="w-5 h-5" />{' '}Prix</> : <><Palette className="w-5 h-5" />{' '}Variantes</>}
                     {tab === 'prix' && prixTiers.length > 0 && (
                       <span className="ml-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-[9px] px-1 rounded-full">{prixTiers.length}</span>
                     )}

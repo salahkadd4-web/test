@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
+import { Banknote, Package } from 'lucide-react'
 
 type PrixTier = { minQte: number; maxQte: number | null; prix: number }
 type Variant  = { id: string; nom: string; couleur: string | null }
@@ -167,7 +168,7 @@ export default function ProduitsSearch({
 
         {produits.length === 0 && !loading ? (
           <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-            <p className="text-5xl mb-4">📦</p>
+            <Package className="w-14 h-14" />
             <p className="text-lg">Aucun produit trouvé.</p>
             <button
               onClick={() => { setQuery(''); setCategorieActive('') }}
@@ -188,7 +189,7 @@ export default function ProduitsSearch({
                   {produit.images[0] ? (
                     <img src={produit.images[0]} alt={produit.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <span className="text-4xl">📦</span>
+                    <Package className="w-14 h-14" />
                   )}
                   <div className="absolute top-2 right-2 flex flex-col gap-2">
                     <FavoriIconButton produitId={produit.id} />
@@ -218,8 +219,7 @@ export default function ProduitsSearch({
                           </span>
                         )}
                         {hasTiers && (
-                          <span className="text-[9px] bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300 font-bold px-1.5 py-0.5 rounded-full">
-                            💰 dégressif
+                          <span className="text-[9px] bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300 font-bold px-1.5 py-0.5 rounded-full"><Banknote className="w-4 h-4 inline mr-1" />{' '}dégressif
                           </span>
                         )}
                       </div>

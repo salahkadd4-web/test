@@ -6,15 +6,16 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import VendeurDocumentsClient from './VendeurDocumentsClient'
+import { Ban, BarChart2, Loader2, Package, RefreshCw, ShoppingCart, Store, Tag, X } from 'lucide-react'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://test-rosy-omega-60.vercel.app'
 
 const navItems = [
-  { href: '/vendeur',            label: 'Tableau de bord', icon: '📊' },
-  { href: '/vendeur/produits',   label: 'Mes Produits',    icon: '📦' },
-  { href: '/vendeur/categories', label: 'Catégories',      icon: '🏷️' },
-  { href: '/vendeur/commandes',  label: 'Commandes',       icon: '🛒' },
-  { href: '/vendeur/retours',    label: 'Retours',         icon: '🔄' },
+  { href: '/vendeur',            label: 'Tableau de bord', icon: BarChart2 },
+  { href: '/vendeur/produits',   label: 'Mes Produits',    icon: Package },
+  { href: '/vendeur/categories', label: 'Catégories',      icon: Tag },
+  { href: '/vendeur/commandes',  label: 'Commandes',       icon: ShoppingCart },
+  { href: '/vendeur/retours',    label: 'Retours',         icon: RefreshCw },
 ]
 
 interface Doc {
@@ -137,7 +138,7 @@ function StatusPage({ statut, adminNote }: { statut: string; adminNote: string |
               : 'bg-red-50 dark:bg-red-950'
             }
           `}>
-            {isAttente ? '⏳' : '🚫'}
+            {isAttente ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-5 h-5" />}
           </div>
 
           {/* Titre */}
@@ -224,7 +225,7 @@ function ApprouveLayout({
         {/* En-tête sidebar */}
         <div className="p-5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between safe-top">
           <div>
-            <h1 className="text-sm font-bold text-emerald-600 dark:text-emerald-400">🏪 Espace Vendeur</h1>
+            <h1 className="text-sm font-bold text-emerald-600 dark:text-emerald-400"><Store className="w-4 h-4 inline mr-1" />{' '}Espace Vendeur</h1>
             {nomBoutique && (
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate max-w-[160px]">{nomBoutique}</p>
             )}
@@ -232,9 +233,7 @@ function ApprouveLayout({
           <button
             onClick={onMenuClose}
             className="lg:hidden text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-          >
-            ✕
-          </button>
+          ><X className="w-4 h-4" /></button>
         </div>
 
         {/* Navigation */}
@@ -255,7 +254,7 @@ function ApprouveLayout({
                   }
                 `}
               >
-                <span className="text-lg shrink-0">{item.icon}</span>
+                <span className="shrink-0">{(() => { const Icon = item.icon; return <Icon className="w-5 h-5" /> })()}</span>
                 <span>{item.label}</span>
                 {isActive && (
                   <span className="ml-auto w-1.5 h-1.5 bg-emerald-500 rounded-full" />

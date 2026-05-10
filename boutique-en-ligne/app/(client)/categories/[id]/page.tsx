@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
+import { Banknote, Package, Tag } from 'lucide-react'
 
 type PrixTier = { minQte: number; maxQte: number | null; prix: number }
 
@@ -52,7 +53,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
           {categorie.image ? (
             <img src={categorie.image} alt={categorie.nom} className="w-full h-full object-cover rounded-full" />
           ) : (
-            <span className="text-3xl">🏷️</span>
+            <span className="text-3xl"><Tag className="w-4 h-4" /></span>
           )}
         </div>
         <div>
@@ -69,7 +70,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
       {/* Produits */}
       {categorie.products.length === 0 ? (
         <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-          <p className="text-5xl mb-4">📦</p>
+          <Package className="w-14 h-14" />
           <p className="text-lg">Aucun produit dans cette catégorie.</p>
           <Link href="/categories" className="text-blue-600 dark:text-blue-400 hover:underline mt-4 inline-block">
             ← Retour aux catégories
@@ -97,14 +98,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <span className="text-4xl">📦</span>
+                    <Package className="w-14 h-14" />
                   )}
 
                   {/* Badge prix dégressif */}
                   {hasTiers && (
                     <div className="absolute top-2 left-2">
-                      <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow">
-                        💰 dégressif
+                      <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow"><Banknote className="w-4 h-4 inline mr-1" />{' '}dégressif
                       </span>
                     </div>
                   )}

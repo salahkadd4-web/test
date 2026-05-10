@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { CheckCircle2, ClipboardList, Loader2, Paperclip, Upload, XCircle } from 'lucide-react'
 
 interface Doc {
   id: string
@@ -81,9 +82,9 @@ export default function VendeurDocumentsClient({ vendeur }: { vendeur: VendeurPr
   }
 
   const statutLabel = (s: string) => {
-    if (s === 'ACCEPTE')    return '✅ Accepté'
-    if (s === 'REFUSE')     return '❌ Refusé'
-    if (s === 'EN_ATTENTE') return '⏳ En attente'
+    if (s === 'ACCEPTE')    return <><CheckCircle2 className="w-5 h-5" />{' '}Accepté</>
+    if (s === 'REFUSE')     return <><XCircle className="w-5 h-5" />{' '}Refusé</>
+    if (s === 'EN_ATTENTE') return <><Loader2 className="w-4 h-4 animate-spin" />{' '}En attente</>
     return s
   }
 
@@ -91,7 +92,7 @@ export default function VendeurDocumentsClient({ vendeur }: { vendeur: VendeurPr
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
       <div className="max-w-xl w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8">
         <div className="text-center mb-6">
-          <div className="text-4xl mb-3">📋</div>
+          <ClipboardList className="w-14 h-14" />
           <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">
             Pièces justificatives requises
           </h1>
@@ -147,8 +148,7 @@ export default function VendeurDocumentsClient({ vendeur }: { vendeur: VendeurPr
               {/* Indicateur fichier soumis (pas de lien public — l'admin voit dans son dashboard) */}
               {doc.fichier && (
                 <div className="mb-2">
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    📎 Fichier soumis — en cours de révision par l'équipe
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><Paperclip className="w-4 h-4 inline mr-1" />{' '}Fichier soumis — en cours de révision par l'équipe
                   </span>
                 </div>
               )}
@@ -182,7 +182,7 @@ export default function VendeurDocumentsClient({ vendeur }: { vendeur: VendeurPr
                         Envoi en cours...
                       </>
                     ) : (
-                      <>📤 {doc.fichier ? 'Remplacer le fichier' : 'Choisir un fichier'}</>
+                      <><Upload className="w-4 h-4 inline mr-1" />{' '}{doc.fichier ? 'Remplacer le fichier' : 'Choisir un fichier'}</>
                     )}
                   </span>
                 </label>

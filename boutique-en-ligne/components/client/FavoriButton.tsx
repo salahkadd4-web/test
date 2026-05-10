@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { Heart } from 'lucide-react'
 
 export default function FavoriButton({ produitId }: { produitId: string }) {
   const { data: session } = useSession()
@@ -55,7 +56,7 @@ export default function FavoriButton({ produitId }: { produitId: string }) {
           : 'border-blue-600 text-blue-600 hover:bg-blue-50'
       }`}
     >
-      {isFavori ? '❤️ Retiré des favoris' : '🤍 Ajouter aux favoris'}
+      {isFavori ? <><Heart className="w-4 h-4 fill-red-500 text-red-500" />{' '}Retiré des favoris</> : <><Heart className="w-4 h-4" />{' '}Ajouter aux favoris</>}
     </button>
   )
 }

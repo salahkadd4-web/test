@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Check, X } from 'lucide-react'
 
 type Etape = 'demande' | 'verification' | 'nouveau'
 
@@ -23,7 +24,7 @@ function PasswordStrength({ password }: { password: string }) {
         return (
           <div key={rule.id} className="flex items-center gap-2">
             <span className={`text-xs transition-colors ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'}`}>
-              {ok ? '✓' : '○'}
+              {ok ? <Check className="w-4 h-4" /> : '○'}
             </span>
             <span className={`text-xs transition-colors ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}`}>
               {rule.label}
@@ -158,7 +159,7 @@ export default function RecupererMotDePassePage() {
                   etapeIndex > i      ? 'bg-green-500 text-white' :
                   'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                 }`}>
-                  {etapeIndex > i ? '✓' : i + 1}
+                  {etapeIndex > i ? <Check className="w-4 h-4" /> : i + 1}
                 </div>
                 {i < 2 && <div className={`w-8 h-0.5 ${etapeIndex > i ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`} />}
               </div>
@@ -214,20 +215,20 @@ export default function RecupererMotDePassePage() {
                     </svg>
                   )}
                   {!checkingId && idStatus === 'found' && (
-                    <span className="text-green-500 text-lg">✓</span>
+                    <span className="text-green-500 text-lg"><Check className="w-4 h-4" /></span>
                   )}
                   {!checkingId && idStatus === 'notfound' && (
-                    <span className="text-red-500 text-lg">✗</span>
+                    <span className="text-red-500 text-lg"><X className="w-4 h-4" /></span>
                   )}
                 </div>
               </div>
 
               {/* Message sous le champ */}
               {idStatus === 'found' && (
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Compte trouvé</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1"><Check className="w-4 h-4 inline mr-1" />{' '}Compte trouvé</p>
               )}
               {idStatus === 'notfound' && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">✗ Aucun compte associé à cet identifiant</p>
+                <p className="text-xs text-red-500 dark:text-red-400 mt-1"><X className="w-4 h-4 inline mr-1" />{' '}Aucun compte associé à cet identifiant</p>
               )}
             </div>
 
@@ -295,7 +296,7 @@ export default function RecupererMotDePassePage() {
                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">Les mots de passe ne correspondent pas</p>
               )}
               {confirmerMotDePasse && nouveauMotDePasse === confirmerMotDePasse && (
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Les mots de passe correspondent</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1"><Check className="w-4 h-4 inline mr-1" />{' '}Les mots de passe correspondent</p>
               )}
             </div>
             <button type="submit" disabled={loading || !pwdRules.every(r => r.test(nouveauMotDePasse))}

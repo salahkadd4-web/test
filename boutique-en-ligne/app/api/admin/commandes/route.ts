@@ -53,9 +53,10 @@ export async function GET(req: NextRequest) {
         user: { select: { nom: true, prenom: true, email: true, telephone: true } },
         items: {
           include: {
+            variant: { select: { id: true, nom: true, couleur: true, images: true } },
             product: {
               include: {
-                vendeur: { select: { id: true, nomBoutique: true } }, // ← inclure vendeur
+                vendeur: { select: { id: true, nomBoutique: true } },
               },
             },
           },

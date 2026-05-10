@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Tag } from 'lucide-react'
 
 type Category = {
   id: string
@@ -23,7 +24,7 @@ export default function CategoriesCarousel({ categories }: { categories: Categor
             {cat.image ? (
               <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover rounded-full" />
             ) : (
-              <span className="text-3xl">🏷️</span>
+              <span className="text-3xl"><Tag className="w-4 h-4" /></span>
             )}
           </div>
           <div>

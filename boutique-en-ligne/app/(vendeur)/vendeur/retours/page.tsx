@@ -13,6 +13,7 @@ import { auth }     from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma }   from '@/lib/prisma'
 import Link         from 'next/link'
+import { AlertTriangle } from 'lucide-react'
 
 const FLOWMERCE_URL = (process.env.FLOWMERCE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 
@@ -113,8 +114,7 @@ export default async function VendeurRetoursPage() {
         {/* ── Cas 2 : clé API non configurée ── */}
         {!vendeur.flowmerceApiKey && (
           <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-xl p-4">
-            <p className="text-sm text-orange-700 dark:text-orange-400">
-              ⚠️ Votre accès Flowmerce n&apos;est pas encore activé.
+            <p className="text-sm text-orange-700 dark:text-orange-400"><AlertTriangle className="w-4 h-4 inline mr-1" />{' '}Votre accès Flowmerce n&apos;est pas encore activé.
               Contactez l&apos;administrateur de CabaStore.
             </p>
           </div>
@@ -123,8 +123,7 @@ export default async function VendeurRetoursPage() {
         {/* ── Cas 3 : clé présente mais Flowmerce inaccessible ── */}
         {vendeur.flowmerceApiKey && !portalUrl && (
           <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              ⚠️ Impossible de générer le lien pour le moment.
+            <p className="text-sm text-gray-600 dark:text-gray-400"><AlertTriangle className="w-4 h-4 inline mr-1" />{' '}Impossible de générer le lien pour le moment.
               Veuillez réessayer dans quelques instants.
             </p>
           </div>

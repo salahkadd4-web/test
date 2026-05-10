@@ -2,6 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import VendeurDocumentsClient from './VendeurDocumentsClient'
+import { Ban, Loader2 } from 'lucide-react'
 
 // Composant serveur qui protège toutes les pages vendeur
 // Si le vendeur n'est pas approuvé → on affiche la page de statut
@@ -31,7 +32,7 @@ export async function VendeurGuard({ children }: { children: React.ReactNode }) 
         <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 text-center">
           {vendeur.statut === 'EN_ATTENTE' ? (
             <>
-              <div className="text-5xl mb-4">⏳</div>
+              <Loader2 className="w-4 h-4 animate-spin" />
               <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 Compte en attente de validation
               </h1>
@@ -47,7 +48,7 @@ export async function VendeurGuard({ children }: { children: React.ReactNode }) 
             </>
           ) : (
             <>
-              <div className="text-5xl mb-4">🚫</div>
+              <Ban className="w-14 h-14" />
               <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 Compte suspendu
               </h1>

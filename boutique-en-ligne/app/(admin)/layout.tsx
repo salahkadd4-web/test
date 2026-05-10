@@ -3,18 +3,19 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { BarChart2, Package, RefreshCw, Settings, ShoppingCart, Store, Tag, TrendingUp, Users, X } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 const navItems = [
-  { href: '/admin',            label: 'Tableau de bord', icon: '📊' },
-  { href: '/admin/produits',   label: 'Produits',        icon: '📦' },
-  { href: '/admin/categories', label: 'Catégories',      icon: '🏷️' },
-  { href: '/admin/clients',    label: 'Clients',         icon: '👥' },
-  { href: '/admin/vendeurs',   label: 'Vendeurs',        icon: '🏪' },  // ← NOUVEAU
-  { href: '/admin/commandes',  label: 'Commandes',       icon: '🛒' },
-  { href: '/admin/retours',    label: 'Retours',         icon: '🔄' },
-  { href: '/admin/stats',      label: 'Statistiques',    icon: '📈' },  // ← NOUVEAU
+  { href: '/admin',            label: 'Tableau de bord', icon: BarChart2 },
+  { href: '/admin/produits',   label: 'Produits',        icon: Package },
+  { href: '/admin/categories', label: 'Catégories',      icon: Tag },
+  { href: '/admin/clients',    label: 'Clients',         icon: Users },
+  { href: '/admin/vendeurs',   label: 'Vendeurs',        icon: Store },  // ← NOUVEAU
+  { href: '/admin/commandes',  label: 'Commandes',       icon: ShoppingCart },
+  { href: '/admin/retours',    label: 'Retours',         icon: RefreshCw },
+  { href: '/admin/stats',      label: 'Statistiques',    icon: TrendingUp },  // ← NOUVEAU
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -41,13 +42,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         lg:translate-x-0
       `}>
         <div className="p-5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-          <h1 className="text-base font-bold text-purple-600 dark:text-purple-400">⚙️ Admin Panel</h1>
+          <h1 className="text-base font-bold text-purple-600 dark:text-purple-400"><Settings className="w-4 h-4 inline mr-1" />{' '}Admin Panel</h1>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-          >
-            ✕
-          </button>
+          ><X className="w-4 h-4" /></button>
         </div>
 
         <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100%-64px)]">
@@ -64,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
-                <span className="text-lg shrink-0">{item.icon}</span>
+                <span className="shrink-0">{(() => { const Icon = item.icon; return <Icon className="w-5 h-5" /> })()}</span>
                 <span>{item.label}</span>
               </Link>
             )

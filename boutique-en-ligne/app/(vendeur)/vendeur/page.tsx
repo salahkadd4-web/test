@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { countVendeurClaims } from '@/lib/flowmerceApi'
+import { Store } from 'lucide-react'
 
 export default async function VendeurDashboard() {
   const session = await auth()
@@ -76,7 +77,7 @@ export default async function VendeurDashboard() {
           Tableau de bord
         </h1>
         {vendeur.nomBoutique && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">🏪 {vendeur.nomBoutique}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1"><Store className="w-4 h-4 inline mr-1" />{' '}{vendeur.nomBoutique}</p>
         )}
       </div>
 

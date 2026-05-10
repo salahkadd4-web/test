@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { FolderOpen } from 'lucide-react'
 
 interface ImageUploadProps {
   value: string        // URL actuelle
@@ -69,7 +70,7 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: ImageU
           </div>
         ) : (
           <div className="py-6">
-            <p className="text-3xl mb-2">📁</p>
+            <p className="text-3xl mb-2"><FolderOpen className="w-6 h-6" /></p>
             <p className="text-sm text-gray-500">
               {uploading ? 'Upload en cours...' : 'Cliquez pour choisir une image'}
             </p>

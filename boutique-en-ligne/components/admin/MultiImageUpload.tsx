@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { FolderOpen, X } from 'lucide-react'
 
 interface MultiImageUploadProps {
   values: string[]
@@ -66,9 +67,7 @@ export default function MultiImageUpload({ values, onChange, label = 'Images' }:
                 type="button"
                 onClick={() => removeImage(index)}
                 className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                ✕
-              </button>
+              ><X className="w-4 h-4" /></button>
             </div>
           ))}
         </div>
@@ -79,7 +78,7 @@ export default function MultiImageUpload({ values, onChange, label = 'Images' }:
         onClick={() => inputRef.current?.click()}
         className="border-2 border-dashed border-gray-300 hover:border-purple-400 rounded-xl p-4 cursor-pointer transition-colors text-center"
       >
-        <p className="text-2xl mb-1">📁</p>
+        <p className="text-2xl mb-1"><FolderOpen className="w-6 h-6" /></p>
         <p className="text-sm text-gray-500">
           {uploading ? 'Upload en cours...' : 'Cliquez pour ajouter des images'}
         </p>

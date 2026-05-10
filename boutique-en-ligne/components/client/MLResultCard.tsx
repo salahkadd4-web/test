@@ -1,3 +1,4 @@
+import { Banknote, Handshake, Package, RefreshCw, Store, Wrench, XCircle } from 'lucide-react'
 'use client'
 
 type ShippingResult = {
@@ -57,16 +58,16 @@ type Props = {
 }
 
 const resolutionConfig: Record<string, { label: string; emoji: string; bg: string; border: string; text: string }> = {
-  Refund:   { label: 'REMBOURSEMENT', emoji: '💰', bg: 'bg-green-50',  border: 'border-green-300', text: 'text-green-700' },
-  Exchange: { label: 'ÉCHANGE',       emoji: '🔄', bg: 'bg-blue-50',   border: 'border-blue-300',  text: 'text-blue-700'  },
-  Repair:   { label: 'RÉPARATION',    emoji: '🔧', bg: 'bg-orange-50', border: 'border-orange-300',text: 'text-orange-700'},
-  Reject:   { label: 'REFUSÉ',        emoji: '❌', bg: 'bg-red-50',    border: 'border-red-300',   text: 'text-red-700'   },
+  Refund:   { label: 'REMBOURSEMENT', icon: Banknote, bg: 'bg-green-50',  border: 'border-green-300', text: 'text-green-700' },
+  Exchange: { label: 'ÉCHANGE',       icon: RefreshCw, bg: 'bg-blue-50',   border: 'border-blue-300',  text: 'text-blue-700'  },
+  Repair:   { label: 'RÉPARATION',    icon: Wrench, bg: 'bg-orange-50', border: 'border-orange-300',text: 'text-orange-700'},
+  Reject:   { label: 'REFUSÉ',        icon: XCircle, bg: 'bg-red-50',    border: 'border-red-300',   text: 'text-red-700'   },
 }
 
 const shippingConfig: Record<string, { label: string; emoji: string; color: string }> = {
-  Seller: { label: 'VENDEUR', emoji: '🏪', color: 'text-purple-700' },
-  Buyer:  { label: 'CLIENT',  emoji: '📦', color: 'text-blue-700'   },
-  Shared: { label: 'PARTAGÉ', emoji: '🤝', color: 'text-gray-700'   },
+  Seller: { label: 'VENDEUR', icon: Store, color: 'text-purple-700' },
+  Buyer:  { label: 'CLIENT',  icon: Package, color: 'text-blue-700'   },
+  Shared: { label: 'PARTAGÉ', icon: Handshake, color: 'text-gray-700'   },
 }
 
 const reasonLabels: Record<string, string> = {
@@ -212,7 +213,7 @@ export default function MLResultCard({ mlResult, formData }: Props) {
         {/* Remboursement partiel */}
         {mlResult.decision.partial_refund && (
           <div className="mt-4 bg-white/70 rounded-xl p-3 border border-green-200">
-            <p className="text-xs font-semibold text-green-700 mb-1">💰 Remboursement partiel</p>
+            <p className="text-xs font-semibold text-green-700 mb-1"><Banknote className="w-4 h-4 inline mr-1" />{' '}Remboursement partiel</p>
             <p className="text-xl font-bold text-green-700">
               {mlResult.decision.partial_refund.refund_amount_DA.toFixed(2)} DA
             </p>

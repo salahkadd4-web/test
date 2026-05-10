@@ -2,13 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import PusherJS from 'pusher-js'
+import { CheckCircle2, Eye, Loader2, MapPin, Package, RefreshCw, ShoppingCart, Store, Tag, Truck, User, Wrench, X, XCircle } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
 type OrderItem = {
-  id:       string
-  quantite: number
-  prix:     number
+  id:        string
+  quantite:  number
+  prix:      number
+  variantNom?: string | null
+  variant?: {
+    id:      string
+    nom:     string
+    couleur: string | null
+    images:  string[]
+  } | null
   product: {
     nom:     string
     images:  string[]
@@ -34,13 +42,13 @@ type VendeurOption = {
 
 // ── Config statuts ─────────────────────────────────────────────────────────
 
-const statutConfig: Record<string, { label: string; color: string; emoji: string }> = {
-  EN_ATTENTE:     { label: 'En attente',     color: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400', emoji: '⏳' },
-  CONFIRMEE:      { label: 'Confirmée',      color: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',         emoji: '✅' },
-  EN_PREPARATION: { label: 'En préparation', color: 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400', emoji: '🔧' },
-  EXPEDIEE:       { label: 'Expédiée',       color: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400', emoji: '🚚' },
-  LIVREE:         { label: 'Livrée',         color: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400',     emoji: '📦' },
-  ANNULEE:        { label: 'Annulée',        color: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400',             emoji: '❌' },
+const statutConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  EN_ATTENTE:     { label: 'En attente',     color: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400', icon: Loader2 },
+  CONFIRMEE:      { label: 'Confirmée',      color: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',         icon: CheckCircle2 },
+  EN_PREPARATION: { label: 'En préparation', color: 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400', icon: Wrench },
+  EXPEDIEE:       { label: 'Expédiée',       color: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400', icon: Truck },
+  LIVREE:         { label: 'Livrée',         color: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400',     icon: Package },
+  ANNULEE:        { label: 'Annulée',        color: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400',             icon: XCircle },
 }
 
 const ordreStatuts   = ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 'EXPEDIEE', 'LIVREE']
@@ -59,10 +67,10 @@ export default function AdminCommandesPage() {
   const [search,           setSearch]           = useState('')
   const [selectedCommande, setSelectedCommande] = useState<Order | null>(null)
   const [updatingId,       setUpdatingId]       = useState<string | null>(null)
-  const [toast,            setToast]            = useState<string | null>(null)
+  const [toast,            setToast]            = useState<React.ReactNode | null>(null)
   const [adminOnly,        setAdminOnly]        = useState(false)
 
-  const showToast = (msg: string) => {
+  const showToast = (msg: React.ReactNode) => {
     setToast(msg)
     setTimeout(() => setToast(null), 4000)
   }
@@ -114,7 +122,7 @@ export default function AdminCommandesPage() {
       setCommandes(prev =>
         prev.map(c => c.id === data.commandeId ? { ...c, statut: data.statut } : c)
       )
-      showToast(`📦 ${data.client} — ${data.message}`)
+      showToast(<><Package className="w-4 h-4 inline mr-1" />{' '}{`${data.client} — ${data.message}`}</>)
     })
 
     return () => {
@@ -170,7 +178,7 @@ export default function AdminCommandesPage() {
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 bg-green-600 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3">
           <p className="text-sm font-medium">{toast}</p>
-          <button onClick={() => setToast(null)} className="text-white/70 hover:text-white">✕</button>
+          <button onClick={() => setToast(null)} className="text-white/70 hover:text-white"><X className="w-4 h-4" /></button>
         </div>
       )}
 
@@ -199,7 +207,7 @@ export default function AdminCommandesPage() {
             disabled={adminOnly}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px]"
           >
-            <option value="">🏪 Tous les vendeurs</option>
+            <option value=""><Store className="w-4 h-4 inline mr-1" />{' '}Tous les vendeurs</option>
             {vendeurs.map(v => (
               <option key={v.id} value={v.id}>
                 {v.nomBoutique || `${v.user.prenom} ${v.user.nom}`}
@@ -212,7 +220,7 @@ export default function AdminCommandesPage() {
             onChange={e => setFilterCategory(e.target.value)}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[180px]"
           >
-            <option value="">🏷️ Toutes les catégories</option>
+            <option value=""><Tag className="w-4 h-4 inline mr-1" />{' '}Toutes les catégories</option>
             {categories.map(c => (
               <option key={c.id} value={c.id}>{c.nom}</option>
             ))}
@@ -224,8 +232,7 @@ export default function AdminCommandesPage() {
               true: 'bg-blue-600 text-white border-blue-600',
               false: 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700',
             }[String(adminOnly)]}`}
-          >
-            🛒 Admin seulement
+          ><ShoppingCart className="w-4 h-4 inline mr-1" />{' '}Admin seulement
           </button>
         </div>
 
@@ -251,7 +258,7 @@ export default function AdminCommandesPage() {
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
-              {statutConfig[s].emoji} {statutConfig[s].label}
+              {(() => { const Icon = statutConfig[s].icon; return <Icon className="w-3 h-3 inline mr-1" /> })()} {statutConfig[s].label}
             </button>
           ))}
         </div>
@@ -274,7 +281,7 @@ export default function AdminCommandesPage() {
             )}
             {filterStatut !== 'TOUS' && (
               <span className="text-xs bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full flex items-center gap-1">
-                {statutConfig[filterStatut]?.emoji} {statutConfig[filterStatut]?.label}
+                {(() => { const Icon = statutConfig[filterStatut]?.icon; return Icon ? <Icon className="w-3 h-3 inline mr-1" /> : null })()} {statutConfig[filterStatut]?.label}
                 <button onClick={() => setFilterStatut('TOUS')} className="ml-0.5 hover:text-purple-500 font-bold">×</button>
               </span>
             )}
@@ -305,7 +312,7 @@ export default function AdminCommandesPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <span className={`inline-block text-xs font-semibold px-2 py-1 rounded-full ${statut.color}`}>
-                    {statut.emoji} {statut.label}
+                    {(() => { const Icon = statut.icon; return <Icon className="w-3 h-3 inline mr-1" /> })()} {statut.label}
                   </span>
                   <p className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-1">
                     {commande.total.toFixed(2)} DA
@@ -315,10 +322,9 @@ export default function AdminCommandesPage() {
               {/* Vendeurs + date */}
               <div className="flex flex-wrap items-center gap-1.5 mb-3 text-xs">
                 {vendeursCommande.length === 0
-                  ? <span className="text-gray-400">🛒 Admin</span>
+                  ? <span className="text-gray-400"><ShoppingCart className="w-4 h-4 inline mr-1" />{' '}Admin</span>
                   : vendeursCommande.map(v => (
-                    <span key={v!.id} className="bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">
-                      🏪 {v!.nomBoutique || '—'}
+                    <span key={v!.id} className="bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full"><Store className="w-4 h-4 inline mr-1" />{' '}{v!.nomBoutique || '—'}
                     </span>
                   ))
                 }
@@ -331,8 +337,7 @@ export default function AdminCommandesPage() {
                 <button
                   onClick={() => setSelectedCommande(commande)}
                   className="flex-1 bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 px-3 py-2 rounded-lg text-xs font-medium transition"
-                >
-                  👁️ Détails
+                ><Eye className="w-4 h-4 inline mr-1" />{' '}Détails
                 </button>
                 {suivant && (
                   <button
@@ -340,7 +345,7 @@ export default function AdminCommandesPage() {
                     disabled={updatingId === commande.id}
                     className="flex-1 bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 px-3 py-2 rounded-lg text-xs font-medium transition disabled:opacity-50"
                   >
-                    {updatingId === commande.id ? '...' : `${statutConfig[suivant].emoji} ${statutConfig[suivant].label}`}
+                    {updatingId === commande.id ? '...' : statutConfig[suivant].label}
                   </button>
                 )}
                 {!['LIVREE', 'ANNULEE'].includes(commande.statut) && (
@@ -348,9 +353,7 @@ export default function AdminCommandesPage() {
                     onClick={() => handleStatutChange(commande.id, 'ANNULEE')}
                     disabled={updatingId === commande.id}
                     className="bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400 px-3 py-2 rounded-lg text-xs font-medium transition disabled:opacity-50"
-                  >
-                    ❌
-                  </button>
+                  ><XCircle className="w-5 h-5" /></button>
                 )}
               </div>
             </div>
@@ -407,8 +410,7 @@ export default function AdminCommandesPage() {
                         ) : (
                           <div className="flex flex-col gap-0.5">
                             {vendeursCommande.map(v => (
-                              <span key={v!.id} className="text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full truncate max-w-[130px]">
-                                🏪 {v!.nomBoutique || '—'}
+                              <span key={v!.id} className="text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full truncate max-w-[130px]"><Store className="w-4 h-4 inline mr-1" />{' '}{v!.nomBoutique || '—'}
                               </span>
                             ))}
                           </div>
@@ -419,7 +421,7 @@ export default function AdminCommandesPage() {
                       </td>
                       <td className="px-4 py-4">
                         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statut.color}`}>
-                          {statut.emoji} {statut.label}
+                          {(() => { const Icon = statut.icon; return <Icon className="w-3 h-3 inline mr-1" /> })()} {statut.label}
                         </span>
                       </td>
                       <td className="px-4 py-4 text-gray-500 dark:text-gray-400 text-xs">
@@ -427,19 +429,17 @@ export default function AdminCommandesPage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <button onClick={() => setSelectedCommande(commande)} className="bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                            👁️ Voir
+                          <button onClick={() => setSelectedCommande(commande)} className="bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900 px-3 py-1.5 rounded-lg text-xs font-medium transition"><Eye className="w-4 h-4 inline mr-1" />{' '}Voir
                           </button>
                           {suivant && (
                             <button onClick={() => handleStatutChange(commande.id, suivant)} disabled={updatingId === commande.id}
                               className="bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900 px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-50 whitespace-nowrap">
-                              {updatingId === commande.id ? '...' : `${statutConfig[suivant].emoji} → ${statutConfig[suivant].label}`}
+                              {updatingId === commande.id ? '...' : statutConfig[suivant].label}
                             </button>
                           )}
                           {!['LIVREE', 'ANNULEE'].includes(commande.statut) && (
                             <button onClick={() => handleStatutChange(commande.id, 'ANNULEE')} disabled={updatingId === commande.id}
-                              className="bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-50">
-                              ❌ Annuler
+                              className="bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-50"><XCircle className="w-4 h-4 inline mr-1" />{' '}Annuler
                             </button>
                           )}
                         </div>
@@ -474,13 +474,13 @@ export default function AdminCommandesPage() {
                 </p>
               </div>
               <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statutConfig[selectedCommande.statut].color}`}>
-                {statutConfig[selectedCommande.statut].emoji} {statutConfig[selectedCommande.statut].label}
+                {(() => { const Icon = statutConfig[selectedCommande.statut].icon; return <Icon className="w-3 h-3 inline mr-1" /> })()} {statutConfig[selectedCommande.statut].label}
               </span>
             </div>
 
             {/* Client */}
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">👤 Client</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1"><User className="w-4 h-4 inline mr-1" />{' '}Client</p>
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                 {selectedCommande.user.prenom} {selectedCommande.user.nom}
               </p>
@@ -491,31 +491,44 @@ export default function AdminCommandesPage() {
 
             {/* Adresse */}
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">📍 Adresse</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1"><MapPin className="w-4 h-4 inline mr-1" />{' '}Adresse</p>
               <p className="text-sm text-gray-800 dark:text-gray-200">{selectedCommande.adresse}</p>
             </div>
 
             {/* Articles */}
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3">📦 Articles</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3"><Package className="w-4 h-4 inline mr-1" />{' '}Articles</p>
               <div className="space-y-3">
                 {selectedCommande.items.map(item => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden shrink-0">
-                      {item.product.images[0]
-                        ? <img src={item.product.images[0]} alt={item.product.nom} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center text-lg">📦</div>
-                      }
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden shrink-0 relative">
+                      {(() => {
+                        const img = item.variant?.images?.[0] || item.product.images[0]
+                        return img
+                          ? <img src={img} alt={item.product.nom} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full flex items-center justify-center text-lg"><Package className="w-5 h-5" /></div>
+                      })()}
+                      {item.variant?.couleur && (
+                        <span className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-gray-700"
+                          style={{ backgroundColor: item.variant.couleur }} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{item.product.nom}</p>
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                        {item.variant && (
+                          <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                            {item.variant.couleur && (
+                              <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.variant.couleur }} />
+                            )}
+                            {item.variant.nom}
+                          </span>
+                        )}
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           ×{item.quantite} — {item.prix.toFixed(2)} DA
                         </p>
                         {item.product.vendeur && (
-                          <span className="text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">
-                            🏪 {item.product.vendeur.nomBoutique || '—'}
+                          <span className="text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full"><Store className="w-4 h-4 inline mr-1" />{' '}{item.product.vendeur.nomBoutique || '—'}
                           </span>
                         )}
                       </div>
@@ -536,7 +549,7 @@ export default function AdminCommandesPage() {
 
             {/* Changer statut */}
             <div className="mb-6">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">🔄 Changer le statut</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"><RefreshCw className="w-4 h-4 inline mr-1" />{' '}Changer le statut</p>
               <div className="grid grid-cols-2 gap-2">
                 {tousLesStatuts.map(s => (
                   <button
@@ -549,7 +562,7 @@ export default function AdminCommandesPage() {
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50'
                     }`}
                   >
-                    {statutConfig[s].emoji} {statutConfig[s].label}
+                    {(() => { const Icon = statutConfig[s].icon; return <Icon className="w-3 h-3 inline mr-1" /> })()} {statutConfig[s].label}
                     {selectedCommande.statut === s && ' ✓'}
                   </button>
                 ))}

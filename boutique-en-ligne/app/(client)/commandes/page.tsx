@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { AlertTriangle, Camera, Check, CheckCircle2, CreditCard, Loader2, Package, PartyPopper, Pin, RefreshCw, Truck, Wrench, X, XCircle, Zap } from 'lucide-react'
 
 type OrderItem = {
   id: string
@@ -35,13 +36,13 @@ type ScanResult = {
   error?: string
 }
 
-const statutConfig: Record<string, { label: string; color: string; emoji: string }> = {
-  EN_ATTENTE:     { label: 'En attente',     color: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400', emoji: '⏳' },
-  CONFIRMEE:      { label: 'Confirmée',      color: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',         emoji: '✅' },
-  EN_PREPARATION: { label: 'En préparation', color: 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400', emoji: '🔧' },
-  EXPEDIEE:       { label: 'Expédiée',       color: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400', emoji: '🚚' },
-  LIVREE:         { label: 'Livrée',         color: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400',     emoji: '📦' },
-  ANNULEE:        { label: 'Annulée',        color: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400',             emoji: '❌' },
+const statutConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  EN_ATTENTE:     { label: 'En attente',     color: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400', icon: Loader2 },
+  CONFIRMEE:      { label: 'Confirmée',      color: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',         icon: CheckCircle2 },
+  EN_PREPARATION: { label: 'En préparation', color: 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400', icon: Wrench },
+  EXPEDIEE:       { label: 'Expédiée',       color: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400', icon: Truck },
+  LIVREE:         { label: 'Livrée',         color: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400',     icon: Package },
+  ANNULEE:        { label: 'Annulée',        color: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400',             icon: XCircle },
 }
 
 
@@ -114,7 +115,7 @@ function CommandesContent() {
       {/* Succès commande */}
       {success && (
         <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-6 py-4 rounded-xl mb-6 flex items-center gap-3">
-          <span className="text-2xl">🎉</span>
+          <span className="text-2xl"><PartyPopper className="w-8 h-8" /></span>
           <div>
             <p className="font-semibold">Commande passée avec succès !</p>
             <p className="text-sm">Vous pouvez suivre votre commande ci-dessous.</p>
@@ -134,7 +135,7 @@ function CommandesContent() {
 
       {commandes.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-6xl mb-4">📦</p>
+          <p className="text-6xl mb-4"><Package className="w-5 h-5" /></p>
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Aucune commande</h2>
           <Link href="/produits" className="bg-black dark:bg-white text-white dark:text-black font-semibold px-8 py-3 rounded-xl hover:bg-gray-800 transition">
             Voir les produits
@@ -165,7 +166,7 @@ function CommandesContent() {
                       </p>
                     </div>
                     <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statut.color}`}>
-                      {statut.emoji} {statut.label}
+                      {(() => { const Icon = statut.icon; return <Icon className="w-3 h-3 inline mr-1" /> })()} {statut.label}
                     </span>
                   </div>
 
@@ -180,8 +181,7 @@ function CommandesContent() {
                           setShowScanModal(true)
                         }}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition animate-pulse"
-                      >
-                        📷 Scanner à la réception
+                      ><Camera className="w-4 h-4 inline mr-1" />{' '}Scanner à la réception
                       </button>
                     )}
                     {/* ── Bouton retour — visible directement sur la carte ── */}
@@ -190,8 +190,7 @@ function CommandesContent() {
                         <span
                           onClick={e => e.stopPropagation()}
                           className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-default"
-                        >
-                          ✓ Retour demandé
+                        ><Check className="w-4 h-4 inline mr-1" />{' '}Retour demandé
                         </span>
                       ) : (
                       <a
@@ -223,15 +222,14 @@ function CommandesContent() {
                           commande.scan2Result === 'CONFORME'
                             ? 'text-green-700 dark:text-green-400'
                             : 'text-orange-700 dark:text-orange-400'
-                        }`}>
-                          📷 Scan réception : {commande.scan2Result}
+                        }`}><Camera className="w-4 h-4 inline mr-1" />{' '}Scan réception : {commande.scan2Result}
                         </p>
                       </div>
                     )}
 
                     {/* Suivi */}
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3">🚀 Suivi</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3"><Zap className="w-4 h-4 inline mr-1" />{' '}Suivi</p>
                       <div className="flex items-center gap-1">
                         {['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 'EXPEDIEE', 'LIVREE'].map((s, i) => {
                           const list         = ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 'EXPEDIEE', 'LIVREE']
@@ -242,7 +240,7 @@ function CommandesContent() {
                             <div key={s} className="flex items-center flex-1">
                               <div className="flex flex-col items-center flex-1">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${isDone ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'}`}>
-                                  {cfg.emoji}
+                                  {(() => { const Icon = cfg.icon; return <Icon className="w-4 h-4" /> })()}
                                 </div>
                                 <p className={`text-xs mt-1 text-center hidden sm:block ${isDone ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-400'}`}>
                                   {cfg.label}
@@ -259,7 +257,7 @@ function CommandesContent() {
 
                     {/* Articles */}
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3">📦 Articles</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3"><Package className="w-4 h-4 inline mr-1" />{' '}Articles</p>
                       <div className="space-y-3">
                         {commande.items.map(item => (
                           <div key={item.id} className="flex items-start gap-3">
@@ -267,7 +265,7 @@ function CommandesContent() {
                               {item.product.images[0]
                                 // eslint-disable-next-line @next/next/no-img-element
                                 ? <img src={item.product.images[0]} alt={item.product.nom} className="w-full h-full object-cover" />
-                                : <div className="w-full h-full flex items-center justify-center">📦</div>
+                                : <div className="w-full h-full flex items-center justify-center"><Package className="w-5 h-5" /></div>
                               }
                             </div>
                             <div className="flex-1">
@@ -286,15 +284,15 @@ function CommandesContent() {
                     {/* Infos paiement & livraison */}
                     <div className="grid grid-cols-3 gap-2 text-xs">
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                        <p className="text-gray-400 mb-1">💳 Paiement</p>
+                        <p className="text-gray-400 mb-1"><CreditCard className="w-4 h-4 inline mr-1" />{' '}Paiement</p>
                         <p className="font-medium text-gray-700 dark:text-gray-300">{commande.modePaiement || 'Paiement à la livraison'}</p>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                        <p className="text-gray-400 mb-1">🚚 Expédition</p>
+                        <p className="text-gray-400 mb-1"><Truck className="w-4 h-4 inline mr-1" />{' '}Expédition</p>
                         <p className="font-medium text-gray-700 dark:text-gray-300">{commande.methodeExpedition || 'Livraison standard'}</p>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                        <p className="text-gray-400 mb-1">📦 Frais livraison</p>
+                        <p className="text-gray-400 mb-1"><Package className="w-4 h-4 inline mr-1" />{' '}Frais livraison</p>
                         <p className="font-medium text-gray-700 dark:text-gray-300">{(commande.fraisLivraison ?? 700).toFixed(2)} DA</p>
                       </div>
                     </div>
@@ -330,17 +328,16 @@ function CommandesContent() {
 
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">📷 Scanner à la réception</h2>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100"><Camera className="w-4 h-4 inline mr-1" />{' '}Scanner à la réception</h2>
                 <p className="text-xs text-gray-500">Commande #{scanCommande.id.slice(-8).toUpperCase()}</p>
               </div>
-              <button onClick={() => setShowScanModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <button onClick={() => setShowScanModal(false)} className="text-gray-400 hover:text-gray-600 text-xl"><X className="w-4 h-4" /></button>
             </div>
 
             {!scanResult ? (
               <>
                 <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 rounded-xl p-3 mb-4">
-                  <p className="text-xs text-indigo-700 dark:text-indigo-400">
-                    📌 Photographiez le colis/produit reçu. Le système va vérifier qu&apos;il correspond à votre commande et confirmer la livraison.
+                  <p className="text-xs text-indigo-700 dark:text-indigo-400"><Pin className="w-4 h-4 inline mr-1" />{' '}Photographiez le colis/produit reçu. Le système va vérifier qu&apos;il correspond à votre commande et confirmer la livraison.
                   </p>
                 </div>
 
@@ -357,7 +354,7 @@ function CommandesContent() {
                     </div>
                   ) : (
                     <>
-                      <p className="text-3xl mb-2">📸</p>
+                      <p className="text-3xl mb-2"><Camera className="w-5 h-5" /></p>
                       <p className="text-sm text-gray-500">Photographiez le produit reçu</p>
                     </>
                   )}
@@ -377,7 +374,7 @@ function CommandesContent() {
                     disabled={scanLoading || scanImages.length === 0}
                     className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50"
                   >
-                    {scanLoading ? '🔄 Vérification...' : '✅ Confirmer réception'}
+                    {scanLoading ? <><RefreshCw className="w-4 h-4" />{' '}Vérification...</> : <><CheckCircle2 className="w-5 h-5" />{' '}Confirmer réception</>}
                   </button>
                 </div>
               </>
@@ -388,7 +385,7 @@ function CommandesContent() {
                     ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800'
                     : 'bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800'
                 }`}>
-                  <p className="text-3xl mb-2">{scanResult.delivery_confirmed ? '✅' : '⚠️'}</p>
+                  <p className="text-3xl mb-2">{scanResult.delivery_confirmed ? <CheckCircle2 className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}</p>
                   <p className={`text-sm font-bold ${scanResult.delivery_confirmed ? 'text-green-700 dark:text-green-400' : 'text-orange-700 dark:text-orange-400'}`}>
                     {scanResult.message}
                   </p>
@@ -399,8 +396,7 @@ function CommandesContent() {
 
                 {!scanResult.delivery_confirmed && (
                   <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-xl p-3 mb-4">
-                    <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                      ⚠️ Si le produit reçu ne correspond pas à votre commande, vous pouvez contacter le support ou faire une demande de retour.
+                    <p className="text-xs text-yellow-700 dark:text-yellow-400"><AlertTriangle className="w-4 h-4 inline mr-1" />{' '}Si le produit reçu ne correspond pas à votre commande, vous pouvez contacter le support ou faire une demande de retour.
                     </p>
                   </div>
                 )}

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { CheckCircle2, ShoppingCart, XCircle } from 'lucide-react'
 
 export default function AddToCartButton({
   produitId,
@@ -52,12 +53,12 @@ export default function AddToCartButton({
       }`}
     >
       {stock === 0
-        ? '❌ Indisponible'
+        ? <><XCircle className="w-5 h-5" />{' '}Indisponible</>
         : loading
         ? 'Ajout en cours...'
         : success
-        ? '✅ Ajouté au panier !'
-        : '🛒 Ajouter au panier'}
+        ? <><CheckCircle2 className="w-5 h-5" />{' '}Ajouté au panier !</>
+        : <><ShoppingCart className="w-5 h-5" />{' '}Ajouter au panier</>}
     </button>
   )
 }

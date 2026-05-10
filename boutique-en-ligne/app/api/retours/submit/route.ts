@@ -3,8 +3,7 @@
 // Flux complet :
 //   1. Vérifie auth + commande LIVREE
 //   2. Résout la clé API Flowmerce (vendeur ou fallback admin)
-//   3. Appelle POST /api/predict  → obtient la décision ML
-//   4. Appelle POST /api/claims/external → crée le claim avec la décision IA
+//   3. Appelle POST /api/claims/external → crée le claim (statut EN_ATTENTE, sans décision ML)
 //
 // Variables .env requises :
 //   FLOWMERCE_URL=http://localhost:3000
@@ -31,22 +30,8 @@ const REASON_MAP: Record<string, string> = {
   'Allergie/Réaction':           'CHANGE_MIND',
 }
 
-// ── Raisons FR → libellés ML (Return_Reason accepté par le modèle) ────────
-const REASON_ML_MAP: Record<string, string> = {
-  'Produit défectueux':          'Defective Product',
-  'Produit endommagé livraison': 'Defective Product',
-  'Panne après utilisation':     'Defective Product',
-  'Produit contrefait':          'Product Not as Described',
-  'Mauvaise taille':             'Wrong Size',
-  'Ne correspond pas':           'Product Not as Described',
-  'Erreur de commande vendeur':  'Wrong Item Sent',
-  'Pièces manquantes':           'Wrong Item Sent',
-  "Changement d'avis":           'Changed Mind',
-  'Allergie/Réaction':           'Changed Mind',
-}
-
-// ── Catégories CabaStore → catégories ML ──────────────────────────────────
-const CATEGORY_ML_MAP: Record<string, string> = {
+// ── Catégories CabaStore → catégories Flowmerce ───────────────────────────
+const CATEGORY_MAP: Record<string, string> = {
   'Électronique':   'Electronics',
   'Électroménager': 'Appliances',
   'Vêtements':      'Clothing',
@@ -59,8 +44,8 @@ const CATEGORY_ML_MAP: Record<string, string> = {
   'Alimentation':   'Food',
 }
 
-// ── Méthodes paiement/livraison → libellés ML ─────────────────────────────
-const PAYMENT_ML_MAP: Record<string, string> = {
+// ── Méthodes paiement/livraison → libellés Flowmerce ─────────────────────
+const PAYMENT_MAP: Record<string, string> = {
   'CARTE':         'Credit Card',
   'ESPECES':       'Cash on Delivery',
   'VIREMENT':      'Bank Transfer',
@@ -68,7 +53,7 @@ const PAYMENT_ML_MAP: Record<string, string> = {
   'EDAHABIA':      'Credit Card',
 }
 
-const SHIPPING_ML_MAP: Record<string, string> = {
+const SHIPPING_MAP: Record<string, string> = {
   'DOMICILE':    'Home Delivery',
   'BUREAU':      'Office Delivery',
   'POINT_RELAY': 'Relay Point',
@@ -163,81 +148,14 @@ export async function POST(req: NextRequest) {
     Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 86_400_000)
   )
 
-  // ── 6. Compter les retours passés du client ──────────────────────────────
-  // (utilisé par le ML pour le score fraude)
-  let pastReturns = 0
-  try {
-    const claimsRes = await fetch(
-      `${FLOWMERCE_URL}/api/claims/external?limit=200`,
-      { headers: { Authorization: `Bearer ${flowmerceApiKey}` } }
-    )
-    if (claimsRes.ok) {
-      const claimsData = await claimsRes.json() as { claims: Array<{ customerEmail: string }> }
-      const email = user.email?.toLowerCase() ?? ''
-      pastReturns = claimsData.claims.filter(c => c.customerEmail === email).length
-    }
-  } catch { /* non bloquant */ }
-
-  // ── 7. Appel ML : POST /api/predict ─────────────────────────────────────
-  const mlPayload = {
-    Customer_Gender:          user.genre === 'FEMME' ? 'Female' : user.genre === 'HOMME' ? 'Male' : 'Male',
-    Customer_Age:             user.age ?? 30,
-    Customer_Wilaya:          user.wilaya ?? 'Alger',
-    Customer_Past_Returns:    pastReturns,
-    Shop_Name:                shopName,
-    Product_Category:         CATEGORY_ML_MAP[item?.product?.category?.nom ?? ''] ?? 'Other',
-    Product_Price_DA:         item?.prix ?? 0,
-    Order_Quantity:           item?.quantite ?? 1,
-    Total_Amount_DA:          order.total,
-    Payment_Method:           PAYMENT_ML_MAP[order.modePaiement ?? ''] ?? 'Cash on Delivery',
-    Shipping_Method:          SHIPPING_ML_MAP[order.methodeExpedition ?? ''] ?? 'Home Delivery',
-    Shipping_Cost_DA:         order.fraisLivraison ?? 0,
-    Return_Reason:            REASON_ML_MAP[reason] ?? 'Changed Mind',
-    Days_to_Return:           daysToReturn,
-    Shop_Return_Window_Days:  14,   // enrichi par Flowmerce côté predict
-    Within_Return_Policy:     daysToReturn <= 14 ? 1 : 0,
-    Fraud_Score:              0,    // recalculé par Flowmerce
-    Customer_Satisfaction:    3,    // valeur neutre (non collectée côté client)
-    Is_Suspicious:            0,    // recalculé par Flowmerce
-  }
-
-  let aiDecision: string | null = null
-  let aiScore:    number | null = null
-
-  try {
-    const mlRes = await fetch(`${FLOWMERCE_URL}/api/predict`, {
-      method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${flowmerceApiKey}`,
-      },
-      body:    JSON.stringify(mlPayload),
-      signal:  AbortSignal.timeout(10_000),
-    })
-
-    if (mlRes.ok) {
-      const mlData = await mlRes.json() as {
-        refused?: boolean
-        resolution?: { prediction: string; probabilities: Record<string, number> }
-      }
-
-      if (!mlData.refused && mlData.resolution?.prediction) {
-        aiDecision = mlData.resolution.prediction  // ex: "Refund", "Exchange", "Repair", "Reject"
-        const probs = mlData.resolution.probabilities
-        aiScore = probs ? Math.round((probs[aiDecision] ?? 0) * 100) / 100 : null
-      }
-    }
-    // Si ML indisponible → on continue sans décision (le claim sera PENDING sans aiDecision)
-  } catch { /* ML timeout ou indisponible — non bloquant */ }
-
-  // ── 8. Appel Flowmerce : POST /api/claims/external ──────────────────────
+  // ── 6. Appel Flowmerce : POST /api/claims/external ──────────────────────
   const claimPayload = {
     customer_name:      `${user.nom} ${user.prenom}`,
     customer_email:     user.email ?? '',
     customer_phone:     user.telephone ?? '',
     product_name:       productName,
     product_price:      item?.prix ?? 0,
-    product_category:   CATEGORY_ML_MAP[item?.product?.category?.nom ?? ''] ?? 'Other',
+    product_category:   CATEGORY_MAP[item?.product?.category?.nom ?? ''] ?? 'Other',
     order_id:           orderId,
     order_date:         order.createdAt.toISOString().split('T')[0],
     order_total:        order.total,
@@ -245,14 +163,11 @@ export async function POST(req: NextRequest) {
     description:        description || `${reason} — CabaStore`,
     desired_resolution: desiredResolution,
     shop_name:          shopName,
-    payment_method:     PAYMENT_ML_MAP[order.modePaiement ?? '']      ?? 'Cash on Delivery',
-    shipping_method:    SHIPPING_ML_MAP[order.methodeExpedition ?? ''] ?? 'Home Delivery',
+    payment_method:     PAYMENT_MAP[order.modePaiement ?? '']      ?? 'Cash on Delivery',
+    shipping_method:    SHIPPING_MAP[order.methodeExpedition ?? ''] ?? 'Home Delivery',
     shipping_cost:      order.fraisLivraison ?? 0,
     external_return_id: `cabastore-${orderId}-${Date.now()}`,
     external_source:    'CabaStore',
-    // ↓ Décision ML obtenue à l'étape 7
-    ai_decision:        aiDecision,
-    ai_confidence:      aiScore,
   }
 
   let flowmerceRes: Response
@@ -302,7 +217,6 @@ export async function POST(req: NextRequest) {
       success:        true,
       claimId:        data.claim?.id,
       processingDays: data.policy_applied?.processing_days ?? 5,
-      aiDecision,   // affiché dans la page de confirmation
       message:       'Votre demande de retour a été enregistrée. Vous recevrez une décision sous peu.',
     },
     { status: 201 }

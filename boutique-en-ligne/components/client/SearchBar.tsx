@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Package, Tag } from 'lucide-react'
 
 type SearchResult = {
   categories: { id: string; nom: string; image: string | null }[]
@@ -112,7 +113,7 @@ export default function SearchBar({ onClose }: { onClose?: () => void }) {
                     {cat.image ? (
                       <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-sm">🏷️</span>
+                      <span className="text-sm"><Tag className="w-4 h-4" /></span>
                     )}
                   </div>
                   <span className="text-sm text-gray-700 dark:text-gray-300">{cat.nom}</span>
@@ -138,7 +139,7 @@ export default function SearchBar({ onClose }: { onClose?: () => void }) {
                     {prod.images[0] ? (
                       <img src={prod.images[0]} alt={prod.nom} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-lg flex items-center justify-center h-full">📦</span>
+                      <span className="text-lg flex items-center justify-center h-full"><Package className="w-5 h-5" /></span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

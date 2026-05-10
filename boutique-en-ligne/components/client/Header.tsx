@@ -7,6 +7,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useIsMobile, useHideOnScroll } from '@/app/hooks/useIsMobile'
 import SearchBar from '@/components/client/SearchBar'
+import { Heart, LogOut, Menu, Package, RefreshCw, ShoppingCart, Store, User, X } from 'lucide-react'
 
 const APP_URL = 'https://test-rosy-omega-60.vercel.app'
 
@@ -21,11 +22,11 @@ function ChevronDown({ open }: { open: boolean }) {
 }
 
 const userMenuItems = [
-  { href: '/profil',    label: 'Mon Profil',   icon: '👤' },
-  { href: '/favoris',   label: 'Mes Favoris',  icon: '🤍' },
-  { href: '/panier',    label: 'Mon Panier',    icon: '🛒' },
-  { href: '/commandes', label: 'Mes Commandes', icon: '📦' },
-  { href: '/retours',   label: 'Mes Retours',   icon: '🔄' },
+  { href: '/profil',    label: 'Mon Profil',   icon: User },
+  { href: '/favoris',   label: 'Mes Favoris',  icon: Heart },
+  { href: '/panier',    label: 'Mon Panier',    icon: ShoppingCart },
+  { href: '/commandes', label: 'Mes Commandes', icon: Package },
+  { href: '/retours',   label: 'Mes Retours',   icon: RefreshCw },
 ]
 
 export default function Header() {
@@ -118,7 +119,7 @@ export default function Header() {
             {isVendeur && (
               <Link href="/vendeur"
                 className="flex items-center gap-1 text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-full font-medium active:scale-95 transition-all">
-                <span>🏪</span>
+                <span><Store className="w-5 h-5" /></span>
                 <span>Vendeur</span>
               </Link>
             )}
@@ -145,19 +146,19 @@ export default function Header() {
                       {userMenuItems.map((item) => (
                         <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors uppercase tracking-widest">
-                          <span>{item.icon}</span><span>{item.label}</span>
+                          <span>{(() => { const Icon = item.icon; return <Icon className="w-4 h-4" /> })()}</span><span>{item.label}</span>
                         </Link>
                       ))}
                       {isVendeur && (
                         <Link href="/vendeur" onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors uppercase tracking-widest font-medium">
-                          <span>🏪</span><span>Espace Vendeur</span>
+                          <span><Store className="w-5 h-5" /></span><span>Espace Vendeur</span>
                         </Link>
                       )}
                     </div>
                     <div className="border-t border-gray-100 dark:border-gray-800 py-1">
                       <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
-                        <span>🚪</span><span className="text-xs uppercase tracking-widest">Déconnexion</span>
+                        <span><LogOut className="w-4 h-4" /></span><span className="text-xs uppercase tracking-widest">Déconnexion</span>
                       </button>
                     </div>
                   </div>
@@ -188,7 +189,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
 
           <button className="md:hidden text-black dark:text-white" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? '✕' : '☰'}
+            {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-5 h-5" />}
           </button>
 
           <Link href="/" className="shrink-0">
@@ -215,7 +216,7 @@ export default function Header() {
             {isVendeur && (
               <Link href="/vendeur"
                 className="hidden md:flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-3 py-2 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-all">
-                <span>🏪</span>
+                <span><Store className="w-5 h-5" /></span>
                 <span className="uppercase tracking-widest">Espace Vendeur</span>
               </Link>
             )}
@@ -245,14 +246,14 @@ export default function Header() {
                       {userMenuItems.map((item) => (
                         <Link key={item.href} href={item.href} onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                          <span>{item.icon}</span>
+                          <span>{(() => { const Icon = item.icon; return <Icon className="w-4 h-4" /> })()}</span>
                           <span className="text-xs uppercase tracking-[0.15em]">{item.label}</span>
                         </Link>
                       ))}
                       {isVendeur && (
                         <Link href="/vendeur" onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors">
-                          <span>🏪</span>
+                          <span><Store className="w-5 h-5" /></span>
                           <span className="text-xs uppercase tracking-[0.15em] font-medium">Espace Vendeur</span>
                         </Link>
                       )}
@@ -260,7 +261,7 @@ export default function Header() {
                     <div className="border-t border-gray-100 dark:border-gray-800 py-1">
                       <button onClick={handleSignOut}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors">
-                        <span>🚪</span>
+                        <span><LogOut className="w-4 h-4" /></span>
                         <span className="text-xs uppercase tracking-[0.15em]">Déconnexion</span>
                       </button>
                     </div>
@@ -302,8 +303,7 @@ export default function Header() {
             ))}
             {isVendeur && (
               <Link href="/vendeur" onClick={() => setMenuOpen(false)}
-                className="block text-emerald-600 dark:text-emerald-400 text-xs uppercase tracking-[0.2em] font-medium">
-                🏪 Espace Vendeur
+                className="block text-emerald-600 dark:text-emerald-400 text-xs uppercase tracking-[0.2em] font-medium"><Store className="w-4 h-4 inline mr-1" />{' '}Espace Vendeur
               </Link>
             )}
             {session ? (

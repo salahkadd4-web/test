@@ -1,8 +1,3 @@
-// ═══════════════════════════════════════════════════════════════
-//  Caba Store — prisma/schema.prisma
-//  Corrigé : generator prisma-client (Prisma 7), Message ajouté
-// ═══════════════════════════════════════════════════════════════
-
 generator client {
   provider        = "prisma-client-js"
   output          = "../generated/prisma/client"
@@ -13,9 +8,190 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─────────────────────────────────────────────
-//  ENUMS
-// ─────────────────────────────────────────────
+model User {
+  id             String          @id @default(cuid())
+  nom            String
+  prenom         String
+  email          String?         @unique
+  telephone      String?         @unique
+  motDePasse     String?
+  role           Role            @default(CLIENT)
+  avatar         String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  age            Int?
+  genre          Genre?
+  wilaya         String?
+  cart           Cart?
+  favorites      Favorite[]
+  orders         Order[]
+  resetTokens    ResetToken[]
+  vendeurProfile VendeurProfile?
+}
+
+model VendeurProfile {
+  id              String            @id @default(cuid())
+  userId          String            @unique
+  statut          VendeurStatut     @default(EN_ATTENTE)
+  nomBoutique     String?
+  description     String?
+  adminNote       String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  flowmerceApiKey String?
+  categories      Category[]
+  products        Product[]
+  documents       VendeurDocument[]
+  user            User              @relation(fields: [userId], references: [id])
+}
+
+model VendeurDocument {
+  id          String         @id @default(cuid())
+  vendeurId   String
+  type        String
+  label       String
+  description String?
+  fichier     String?
+  statut      DocumentStatut @default(EN_ATTENTE)
+  adminNote   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  vendeur     VendeurProfile @relation(fields: [vendeurId], references: [id])
+}
+
+model Category {
+  id          String          @id @default(cuid())
+  nom         String          @unique
+  description String?
+  image       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  statut      CategoryStatut  @default(APPROUVEE)
+  vendeurId   String?
+  vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
+  products    Product[]
+}
+
+model Product {
+  id            String           @id @default(cuid())
+  nom           String
+  description   String?
+  prix          Float
+  stock         Int              @default(0)
+  images        String[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  categoryId    String
+  actif         Boolean          @default(true)
+  vendeurId     String?
+  prixVariables Json?
+  cartItems     CartItem[]
+  favorites     Favorite[]
+  orderItems    OrderItem[]
+  category      Category         @relation(fields: [categoryId], references: [id])
+  vendeur       VendeurProfile?  @relation(fields: [vendeurId], references: [id])
+  variants      ProductVariant[]
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  productId  String
+  nom        String
+  couleur    String?
+  stock      Int         @default(0)
+  images     String[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String          @id @default(cuid())
+  quantite  Int             @default(1)
+  cartId    String
+  productId String
+  variantId String?
+  cart      Cart            @relation(fields: [cartId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id                   String      @id @default(cuid())
+  statut               OrderStatus @default(EN_ATTENTE)
+  total                Float
+  adresse              String
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  userId               String
+  scan1Done            Boolean     @default(false)
+  scan1Result          String?
+  scan1ShippingAllowed Boolean     @default(false)
+  scan2Done            Boolean     @default(false)
+  scan2Result          String?
+  fraisLivraison       Float       @default(700)
+  methodeExpedition    String      @default("Livraison standard")
+  modePaiement         String      @default("Paiement à la livraison")
+  retourDemande        Boolean     @default(false)
+  user                 User        @relation(fields: [userId], references: [id])
+  items                OrderItem[]
+}
+
+model OrderItem {
+  id         String          @id @default(cuid())
+  quantite   Int
+  prix       Float
+  orderId    String
+  productId  String
+  variantId  String?
+  variantNom String?
+  order      Order           @relation(fields: [orderId], references: [id])
+  product    Product         @relation(fields: [productId], references: [id])
+  variant    ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model ResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  verified  Boolean  @default(false)
+  code      String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model OtpToken {
+  id          String   @id @default(cuid())
+  identifiant String
+  token       String
+  data        String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
 
 enum Role {
   CLIENT
@@ -55,193 +231,3 @@ enum CategoryStatut {
   APPROUVEE
   REFUSEE
 }
-
-// ─────────────────────────────────────────────
-//  MODELS
-// ─────────────────────────────────────────────
-
-model User {
-  id             String          @id @default(cuid())
-  nom            String
-  prenom         String
-  email          String?         @unique
-  telephone      String?         @unique
-  motDePasse     String?
-  role           Role            @default(CLIENT)
-  avatar         String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  age            Int?
-  genre          Genre?
-  wilaya         String?
-  cart           Cart?
-  favorites      Favorite[]
-  orders         Order[]
-  resetTokens    ResetToken[]
-  vendeurProfile VendeurProfile?
-}
-
-model VendeurProfile {
-  id          String            @id @default(cuid())
-  userId      String            @unique
-  statut      VendeurStatut     @default(EN_ATTENTE)
-  nomBoutique String?
-  description String?
-  adminNote   String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  user        User              @relation(fields: [userId], references: [id])
-  documents   VendeurDocument[]
-  products    Product[]
-  categories  Category[]
-  flowmerceApiKey  String?
-}
-
-model VendeurDocument {
-  id          String         @id @default(cuid())
-  vendeurId   String
-  type        String
-  label       String
-  description String?
-  fichier     String?
-  statut      DocumentStatut @default(EN_ATTENTE)
-  adminNote   String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  vendeur     VendeurProfile @relation(fields: [vendeurId], references: [id])
-}
-
-model Category {
-  id          String         @id @default(cuid())
-  nom         String         @unique
-  description String?
-  image       String?
-  statut      CategoryStatut @default(APPROUVEE)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  vendeurId   String?
-  vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
-  products    Product[]
-}
-
-model Product {
-  id          String          @id @default(cuid())
-  nom         String
-  description String?
-  prix        Float
-  stock       Int             @default(0)
-  images      String[]
-  prixVariables Json?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  categoryId  String
-  actif       Boolean         @default(true)
-  vendeurId   String?
-  cartItems   CartItem[]
-  favorites   Favorite[]
-  orderItems  OrderItem[]
-  category    Category        @relation(fields: [categoryId], references: [id])
-  vendeur     VendeurProfile? @relation(fields: [vendeurId], references: [id])
-  variants      ProductVariant[]
-}
-
-model ProductVariant {
-  id        String     @id @default(cuid())
-  productId String
-  nom       String
-  couleur   String?
-  stock     Int        @default(0)
-  images    String[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  cartItems CartItem[]
-  orderItems OrderItem[]
-}
-
-model Cart {
-  id        String     @id @default(cuid())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id])
-  items     CartItem[]
-}
-
-model CartItem {
-  id        String  @id @default(cuid())
-  quantite  Int     @default(1)
-  cartId    String
-  productId String
-  variantId String?
-  cart      Cart    @relation(fields: [cartId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
-  variant   ProductVariant? @relation(fields: [variantId], references: [id])
-}
-
-model Favorite {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  userId    String
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@unique([userId, productId])
-}
-
-model Order {
-  id                   String      @id @default(cuid())
-  statut               OrderStatus @default(EN_ATTENTE)
-  total                Float
-  adresse              String
-  modePaiement         String      @default("Paiement à la livraison")
-  methodeExpedition    String      @default("Livraison standard")
-  fraisLivraison       Float       @default(700)
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
-  userId               String
-  scan1Done            Boolean     @default(false)
-  scan1Result          String?
-  scan1ShippingAllowed Boolean     @default(false)
-  scan2Done            Boolean     @default(false)
-  scan2Result          String?
-  retourDemande        Boolean     @default(false)
-  user                 User        @relation(fields: [userId], references: [id])
-  items                OrderItem[]
-}
-
-model OrderItem {
-  id        String  @id @default(cuid())
-  quantite  Int
-  prix      Float
-  orderId   String
-  productId String
-  variantId  String?
-  variantNom String?
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
-  variant    ProductVariant? @relation(fields: [variantId], references: [id])
-}
-
-model ResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  verified  Boolean  @default(false)
-  code      String
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-model OtpToken {
-  id          String   @id @default(cuid())
-  identifiant String
-  token       String
-  data        String
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-}
-

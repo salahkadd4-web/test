@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import ImageUpload from '@/components/admin/ImageUpload'
+import { CheckCircle2, Pencil, Store, Tag, Trash2, XCircle } from 'lucide-react'
 
 type Category = {
   id: string
@@ -65,7 +66,7 @@ export default function AdminCategoriesPage() {
       })
       const data = await res.json()
       if (res.ok) {
-        showToast(action === 'approuver' ? '✅ Catégorie approuvée' : '❌ Catégorie refusée')
+        showToast(action === 'approuver' ? <><CheckCircle2 className="w-5 h-5" />{' '}Catégorie approuvée</> : <><XCircle className="w-5 h-5" />{' '}Catégorie refusée</>)
         fetchCategories()
       } else {
         showToast(data.error || 'Erreur')
@@ -171,7 +172,7 @@ export default function AdminCategoriesPage() {
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                   {cat.image
                     ? <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover" />
-                    : <span className="text-xl">🏷️</span>
+                    : <span className="text-xl"><Tag className="w-4 h-4" /></span>
                   }
                 </div>
 
@@ -185,7 +186,7 @@ export default function AdminCategoriesPage() {
                     Proposée par :{' '}
                     <span className="font-semibold">
                       {cat.vendeur?.nomBoutique
-                        ? `🏪 ${cat.vendeur.nomBoutique}`
+                        ? <><Store className="w-4 h-4 inline mr-1" />{' '}{`${cat.vendeur.nomBoutique}`}</>
                         : `${cat.vendeur?.user.prenom} ${cat.vendeur?.user.nom}`
                       }
                     </span>
@@ -199,14 +200,14 @@ export default function AdminCategoriesPage() {
                     disabled={approvingId === cat.id}
                     className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-semibold px-4 py-2 rounded-lg transition flex items-center gap-1.5"
                   >
-                    {approvingId === cat.id ? '...' : '✅ Approuver'}
+                    {approvingId === cat.id ? '...' : <><CheckCircle2 className="w-5 h-5" />{' '}Approuver</>}
                   </button>
                   <button
                     onClick={() => handleCatAction(cat.id, 'refuser')}
                     disabled={approvingId === cat.id}
                     className="bg-red-100 dark:bg-red-950 hover:bg-red-200 dark:hover:bg-red-900 disabled:opacity-50 text-red-600 dark:text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition flex items-center gap-1.5"
                   >
-                    {approvingId === cat.id ? '...' : '❌ Refuser'}
+                    {approvingId === cat.id ? '...' : <><XCircle className="w-5 h-5" />{' '}Refuser</>}
                   </button>
                 </div>
               </div>
@@ -220,7 +221,7 @@ export default function AdminCategoriesPage() {
       {/* ── Grille catégories approuvées ───────────────────── */}
       {categories.length === 0 ? (
         <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-          <p className="text-5xl mb-4">🏷️</p>
+          <Tag className="w-4 h-4" />
           <p className="text-lg">Aucune catégorie approuvée</p>
         </div>
       ) : (
@@ -232,7 +233,7 @@ export default function AdminCategoriesPage() {
               <div className="w-14 h-14 bg-purple-100 dark:bg-purple-950 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                 {cat.image
                   ? <img src={cat.image} alt={cat.nom} className="w-full h-full object-cover" />
-                  : <span className="text-2xl">🏷️</span>
+                  : <span className="text-2xl"><Tag className="w-4 h-4" /></span>
                 }
               </div>
 
@@ -259,14 +260,12 @@ export default function AdminCategoriesPage() {
                 <button
                   onClick={() => openEdit(cat)}
                   className="bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 px-3 py-1 rounded-lg text-xs font-medium transition"
-                >
-                  ✏️ Modifier
+                ><Pencil className="w-4 h-4 inline mr-1" />{' '}Modifier
                 </button>
                 <button
                   onClick={() => { setDeleteId(cat.id); setDeleteError('') }}
                   className="bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 px-3 py-1 rounded-lg text-xs font-medium transition"
-                >
-                  🗑️ Supprimer
+                ><Trash2 className="w-4 h-4 inline mr-1" />{' '}Supprimer
                 </button>
               </div>
             </div>
@@ -279,7 +278,7 @@ export default function AdminCategoriesPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-gray-100 dark:border-gray-800">
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">
-              {editCategory ? '✏️ Modifier la catégorie' : '+ Ajouter une catégorie'}
+              {editCategory ? <><Pencil className="w-4 h-4" />{' '}Modifier la catégorie</> : '+ Ajouter une catégorie'}
             </h2>
 
             {error && (
@@ -345,7 +344,7 @@ export default function AdminCategoriesPage() {
       {deleteId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-gray-800">
-            <p className="text-5xl mb-4">🗑️</p>
+            <Trash2 className="w-4 h-4" />
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Supprimer cette catégorie ?</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Cette action est irréversible.</p>
 

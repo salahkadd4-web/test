@@ -11,6 +11,7 @@
 // ──────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { AlertTriangle, Ban, Banknote, CheckCircle2, ClipboardList, KeyRound, Loader2, Package, Paperclip, Phone, Play, Search, ShoppingCart, X, XCircle } from 'lucide-react'
 
 interface Doc {
   id: string; type: string; label: string; description: string | null
@@ -26,11 +27,11 @@ interface Vendeur {
   flowmerceApiKey: string | null
 }
 
-const statutConfig: Record<string, { label: string; color: string; icon: string }> = {
-  EN_ATTENTE:      { label: 'En attente',      color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300',   icon: '⏳' },
-  APPROUVE:        { label: 'Approuvé',        color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',       icon: '✅' },
-  SUSPENDU:        { label: 'Suspendu',        color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',               icon: '🚫' },
-  PIECES_REQUISES: { label: 'Pièces requises', color: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',   icon: '📋' },
+const statutConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  EN_ATTENTE:      { label: 'En attente',      color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300',   icon: Loader2 },
+  APPROUVE:        { label: 'Approuvé',        color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',       icon: CheckCircle2 },
+  SUSPENDU:        { label: 'Suspendu',        color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',               icon: Ban },
+  PIECES_REQUISES: { label: 'Pièces requises', color: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',   icon: ClipboardList },
 }
 
 const DOC_TYPES = [
@@ -114,7 +115,7 @@ export default function AdminVendeursPage() {
       body:    JSON.stringify({ action: 'set_flowmerce_key', flowmerceApiKey: flowmerceKey.trim() }),
     })
     const data = await res.json()
-    showToast(res.ok ? '🔑 Clé Flowmerce enregistrée' : (data.error || 'Erreur'))
+    showToast(res.ok ? <><KeyRound className="w-5 h-5" />{' '}Clé Flowmerce enregistrée</> : (data.error || 'Erreur'))
     if (res.ok) setSelected(prev => prev ? { ...prev, flowmerceApiKey: flowmerceKey.trim() || null } : prev)
     setSavingKey(false)
   }
@@ -197,7 +198,7 @@ export default function AdminVendeursPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
-            ) : '🔍'}
+            ) : <Search className="w-4 h-4" />}
           </span>
           <input
             type="text"
@@ -210,7 +211,7 @@ export default function AdminVendeursPage() {
             <button
               onClick={() => setSearch('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            >✕</button>
+            ><X className="w-4 h-4" /></button>
           )}
         </div>
 
@@ -221,7 +222,7 @@ export default function AdminVendeursPage() {
         >
           <option value="">Tous les statuts</option>
           {Object.entries(statutConfig).map(([k, v]) => (
-            <option key={k} value={k}>{v.icon} {v.label}</option>
+            <option key={k} value={k}>{v.label}</option>
           ))}
         </select>
       </div>
@@ -236,7 +237,7 @@ export default function AdminVendeursPage() {
               filterStatut === k ? 'border-purple-400 dark:border-purple-600' : 'border-gray-100 dark:border-gray-800'
             }`}
           >
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{v.icon} {v.label}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{(() => { const Icon = v.icon; return Icon ? <Icon className="w-3 h-3 inline mr-1" /> : null })()} {v.label}</p>
             <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
               {vendeurs.filter((vd) => vd.statut === k).length}
             </p>
@@ -254,7 +255,7 @@ export default function AdminVendeursPage() {
       ) : (
         <div className="space-y-3">
           {vendeurs.map((v) => {
-            const sc = statutConfig[v.statut] || { label: v.statut, color: '', icon: '' }
+            const sc = statutConfig[v.statut] || { label: v.statut, color: '', icon: null as unknown as React.ElementType }
             return (
               <div
                 key={v.id}
@@ -274,16 +275,16 @@ export default function AdminVendeursPage() {
                     <p className="text-xs text-gray-400 dark:text-gray-500">{v.user.email || v.user.telephone}</p>
                     {/* Téléphone visible directement dans la liste */}
                     {v.user.telephone && v.user.email && (
-                      <p className="text-xs text-gray-400 dark:text-gray-500">📞 {v.user.telephone}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500"><Phone className="w-4 h-4 inline mr-1" />{' '}{v.user.telephone}</p>
                     )}
                     <div className="flex flex-wrap gap-2 mt-1 text-xs text-gray-400 dark:text-gray-500">
-                      <span>📦 {v._count.products} produits</span>
-                      <span>🛒 {v.totalCommandes} cmd</span>
-                      <span>💰 {v.chiffreAffaire.toLocaleString('fr-DZ')} DA</span>
+                      <span><Package className="w-4 h-4 inline mr-1" />{' '}{v._count.products} produits</span>
+                      <span><ShoppingCart className="w-4 h-4 inline mr-1" />{' '}{v.totalCommandes} cmd</span>
+                      <span><Banknote className="w-4 h-4 inline mr-1" />{' '}{v.chiffreAffaire.toLocaleString('fr-DZ')} DA</span>
                     </div>
                   </div>
                   <span className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${sc.color}`}>
-                    {sc.icon} {sc.label}
+                    {(() => { const Icon = sc.icon; return Icon ? <Icon className="w-3 h-3 inline mr-1" /> : null })()} {sc.label}
                   </span>
                 </div>
                 {v.documents.length > 0 && (
@@ -314,10 +315,10 @@ export default function AdminVendeursPage() {
                   {selected.nomBoutique || `${selected.user.prenom} ${selected.user.nom}`}
                 </h2>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statutConfig[selected.statut]?.color}`}>
-                  {statutConfig[selected.statut]?.icon} {statutConfig[selected.statut]?.label}
+                  {(() => { const Icon = statutConfig[selected.statut]?.icon; return Icon ? <Icon className="w-3 h-3 inline mr-1" /> : null })()} {statutConfig[selected.statut]?.label}
                 </span>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl p-1">✕</button>
+              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl p-1"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="p-5 space-y-5">
@@ -366,18 +367,15 @@ export default function AdminVendeursPage() {
                         {doc.fichier ? (
                           <div className="flex items-center gap-3">
                             <a href={`/api/admin/documents/${doc.fichier}`} target="_blank" rel="noopener noreferrer"
-                              className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
-                              📎 Voir le fichier
+                              className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"><Paperclip className="w-4 h-4 inline mr-1" />{' '}Voir le fichier
                             </a>
                             {doc.statut === 'EN_ATTENTE' && (
                               <div className="flex gap-2 ml-auto">
                                 <button onClick={() => setDocAction({ docId: doc.id, action: 'accepter', note: '' })}
-                                  className="text-xs bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 px-3 py-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900 transition-all">
-                                  ✅ Accepter
+                                  className="text-xs bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 px-3 py-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900 transition-all"><CheckCircle2 className="w-4 h-4 inline mr-1" />{' '}Accepter
                                 </button>
                                 <button onClick={() => setDocAction({ docId: doc.id, action: 'refuser', note: '' })}
-                                  className="text-xs bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 px-3 py-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-900 transition-all">
-                                  ❌ Refuser
+                                  className="text-xs bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 px-3 py-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-900 transition-all"><XCircle className="w-4 h-4 inline mr-1" />{' '}Refuser
                                 </button>
                               </div>
                             )}
@@ -402,7 +400,7 @@ export default function AdminVendeursPage() {
               {selected.statut === 'APPROUVE' && (
                 <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-900 rounded-xl p-4 space-y-3">
                   <div>
-                    <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-0.5">🔑 Clé API Flowmerce</p>
+                    <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-0.5"><KeyRound className="w-4 h-4 inline mr-1" />{' '}Clé API Flowmerce</p>
                     <p className="text-xs text-indigo-500 dark:text-indigo-400">
                       Permet d'activer la gestion des retours pour ce vendeur.
                     </p>
@@ -429,7 +427,7 @@ export default function AdminVendeursPage() {
                     </p>
                   )}
                   {!selected.flowmerceApiKey && (
-                    <p className="text-xs text-orange-500">⚠️ Aucune clé — les retours sont désactivés pour ce vendeur</p>
+                    <p className="text-xs text-orange-500"><AlertTriangle className="w-4 h-4 inline mr-1" />{' '}Aucune clé — les retours sont désactivés pour ce vendeur</p>
                   )}
                 </div>
               )}
@@ -437,26 +435,22 @@ export default function AdminVendeursPage() {
               <div className="grid grid-cols-2 gap-3">
                 {(selected.statut === 'EN_ATTENTE' || selected.statut === 'PIECES_REQUISES') && (
                   <button onClick={() => doAction(selected.id, 'approuver')} disabled={saving}
-                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm py-3 rounded-xl font-medium transition-all">
-                    ✅ Approuver
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm py-3 rounded-xl font-medium transition-all"><CheckCircle2 className="w-4 h-4 inline mr-1" />{' '}Approuver
                   </button>
                 )}
                 {selected.statut === 'APPROUVE' && (
                   <button onClick={() => doAction(selected.id, 'suspendre')} disabled={saving}
-                    className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm py-3 rounded-xl font-medium transition-all">
-                    🚫 Suspendre
+                    className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm py-3 rounded-xl font-medium transition-all"><Ban className="w-4 h-4 inline mr-1" />{' '}Suspendre
                   </button>
                 )}
                 {selected.statut === 'SUSPENDU' && (
                   <button onClick={() => doAction(selected.id, 'reactiver')} disabled={saving}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm py-3 rounded-xl font-medium transition-all">
-                    ▶ Réactiver
+                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm py-3 rounded-xl font-medium transition-all"><Play className="w-4 h-4 inline mr-1" />{' '}Réactiver
                   </button>
                 )}
                 {selected.statut !== 'SUSPENDU' && (
                   <button onClick={() => { setNewDocs([]); setShowDocModal(true) }}
-                    className="bg-orange-500 hover:bg-orange-600 text-white text-sm py-3 rounded-xl font-medium transition-all">
-                    📋 Demander des pièces
+                    className="bg-orange-500 hover:bg-orange-600 text-white text-sm py-3 rounded-xl font-medium transition-all"><ClipboardList className="w-4 h-4 inline mr-1" />{' '}Demander des pièces
                   </button>
                 )}
               </div>
@@ -470,7 +464,7 @@ export default function AdminVendeursPage() {
         <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-5">
             <h3 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-3">
-              {docAction.action === 'accepter' ? '✅ Accepter le document' : '❌ Refuser le document'}
+              {docAction.action === 'accepter' ? <><CheckCircle2 className="w-5 h-5" />{' '}Accepter le document</> : <><XCircle className="w-5 h-5" />{' '}Refuser le document</>}
             </h3>
             {docAction.action === 'refuser' && (
               <div className="mb-4">
@@ -500,8 +494,8 @@ export default function AdminVendeursPage() {
         <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white dark:bg-gray-900 flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-              <h3 className="text-base font-bold text-gray-800 dark:text-gray-100">📋 Demander des pièces jointes</h3>
-              <button onClick={() => setShowDocModal(false)} className="text-gray-400 text-xl">✕</button>
+              <h3 className="text-base font-bold text-gray-800 dark:text-gray-100"><ClipboardList className="w-4 h-4 inline mr-1" />{' '}Demander des pièces jointes</h3>
+              <button onClick={() => setShowDocModal(false)} className="text-gray-400 text-xl"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <p className="text-xs text-gray-500 dark:text-gray-400">

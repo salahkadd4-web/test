@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { CheckCircle2, Flower2, Package, Palette, ShoppingCart, XCircle } from 'lucide-react'
 
 type PrixTier = { minQte: number; maxQte: number | null; prix: number }
 type Variant = {
@@ -112,7 +113,7 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
               className="w-full h-full object-cover transition-opacity duration-300"
             />
           ) : (
-            <span className="text-8xl">📦</span>
+            <span className="text-8xl"><Package className="w-5 h-5" /></span>
           )}
           {/* Badge variante */}
           {selectedVariant && (
@@ -258,7 +259,7 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
         {hasVariants && (
           <div>
             <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {produit.variants.some(v => v.couleur) ? '🎨 Couleur' : '🌸 Parfum / Variante'}
+              {produit.variants.some(v => v.couleur) ? <><Palette className="w-5 h-5" />{' '}Couleur</> : <><Flower2 className="w-5 h-5" />{' '}Parfum / Variante</>}
               {selectedVariant && (
                 <span className="ml-2 text-gray-400 font-normal">— {selectedVariant.nom}</span>
               )}
@@ -305,7 +306,7 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
 
         {/* ── Stock ── */}
         <div className={`flex items-center gap-2 text-sm font-medium ${stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
-          <span>{stock > 0 ? '✅' : '❌'}</span>
+          <span>{stock > 0 ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}</span>
           <span>{stock > 0 ? `En stock (${stock} disponibles)` : 'Rupture de stock'}</span>
         </div>
 
@@ -353,14 +354,14 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
           }`}
         >
           {stock === 0
-            ? '❌ Indisponible'
+            ? <><XCircle className="w-5 h-5" />{' '}Indisponible</>
             : loading
               ? 'Ajout en cours...'
               : success
-                ? '✅ Ajouté au panier !'
+                ? <><CheckCircle2 className="w-5 h-5" />{' '}Ajouté au panier !</>
                 : quantite > 1
                   ? `🛒 Ajouter ×${quantite} — ${prixTotal.toFixed(2)} DA`
-                  : '🛒 Ajouter au panier'}
+                  : <><ShoppingCart className="w-5 h-5" />{' '}Ajouter au panier</>}
         </button>
 
       </div>

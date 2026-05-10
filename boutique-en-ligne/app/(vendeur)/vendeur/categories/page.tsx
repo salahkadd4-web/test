@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { CheckCircle2, Loader2, X, XCircle } from 'lucide-react'
 
 interface Category {
   id: string; nom: string; statut: string; createdAt: string
@@ -54,10 +55,10 @@ export default function VendeurCategoriesPage() {
     }
   }
 
-  const statutInfo: Record<string, { label: string; color: string; icon: string }> = {
-    EN_ATTENTE: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300', icon: '⏳' },
-    APPROUVEE:  { label: 'Approuvée',  color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',   icon: '✅' },
-    REFUSEE:    { label: 'Refusée',    color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',           icon: '❌' },
+  const statutInfo: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+    EN_ATTENTE: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300', icon: Loader2 },
+    APPROUVEE:  { label: 'Approuvée',  color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',   icon: CheckCircle2 },
+    REFUSEE:    { label: 'Refusée',    color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',           icon: XCircle },
   }
 
   return (
@@ -113,7 +114,7 @@ export default function VendeurCategoriesPage() {
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-gray-800">
             {mesCats.map((c) => {
-              const info = statutInfo[c.statut] || { label: c.statut, color: '', icon: '' }
+              const info = statutInfo[c.statut] || { label: c.statut, color: '', icon: null as unknown as React.ElementType }
               return (
                 <div key={c.id} className="p-4 flex items-center justify-between gap-3">
                   <div>
@@ -128,7 +129,7 @@ export default function VendeurCategoriesPage() {
                     )}
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${info.color}`}>
-                    {info.icon} {info.label}
+                    {(() => { const Icon = info.icon; return Icon ? <Icon className="w-3 h-3 inline mr-1" /> : null })()} {info.label}
                   </span>
                 </div>
               )
@@ -146,7 +147,7 @@ export default function VendeurCategoriesPage() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
               <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">Proposer une catégorie</h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl">✕</button>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               {error && (

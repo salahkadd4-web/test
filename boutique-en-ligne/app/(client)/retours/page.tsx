@@ -7,6 +7,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter }    from 'next/navigation'
 import Link from 'next/link'
+import { Banknote, Check, CheckCircle2, Loader2, Package, RefreshCw, Wrench, XCircle } from 'lucide-react'
 
 type OrderItem = {
   id: string; quantite: number; prix: number
@@ -31,9 +32,9 @@ const REASONS = [
 ]
 
 const RESOLUTIONS = [
-  { value: 'REFUND',   label: 'Remboursement', emoji: '💰', desc: 'Recevoir le remboursement du montant payé' },
-  { value: 'EXCHANGE', label: 'Échange',        emoji: '🔄', desc: 'Recevoir un produit de remplacement'      },
-  { value: 'REPAIR',   label: 'Réparation',     emoji: '🔧', desc: 'Faire réparer le produit défectueux'      },
+  { value: 'REFUND',   label: 'Remboursement', icon: Banknote, desc: 'Recevoir le remboursement du montant payé' },
+  { value: 'EXCHANGE', label: 'Échange',        icon: RefreshCw, desc: 'Recevoir un produit de remplacement'      },
+  { value: 'REPAIR',   label: 'Réparation',     icon: Wrench, desc: 'Faire réparer le produit défectueux'      },
 ]
 
 const STEPS = ['Commande', 'Produit', 'Motif', 'Confirmation']
@@ -51,7 +52,7 @@ function Stepper({ current }: { current: number }) {
               : i === current ? 'bg-white dark:bg-gray-900 border-indigo-600 text-indigo-600'
               : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-400'
             }`}>
-              {i < current ? '✓' : i + 1}
+              {i < current ? <Check className="w-4 h-4" /> : i + 1}
             </div>
             <span className={`text-xs mt-1 whitespace-nowrap ${
               i === current ? 'text-indigo-600 font-semibold'
@@ -86,7 +87,7 @@ function RetourContent() {
   const [submitting, setSubmitting]       = useState(false)
   const [result, setResult]               = useState<{
     success?: boolean; message?: string; claimId?: string
-    processingDays?: number; aiDecision?: string; error?: string
+    processingDays?: number; error?: string
   } | null>(null)
 
   useEffect(() => {
@@ -143,26 +144,20 @@ function RetourContent() {
 
   // ── Succès ───────────────────────────────────────────────────
   if (result?.success) {
-    const aiLabels: Record<string, string> = {
-      Refund: 'Remboursement', Exchange: 'Échange',
-      Repair: 'Réparation',   Reject: 'Rejeté',
-    }
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
         <div className="bg-green-50 dark:bg-green-950 rounded-2xl p-8 border border-green-200 dark:border-green-800">
-          <p className="text-5xl mb-4">✅</p>
+          <CheckCircle2 className="w-14 h-14" />
           <h2 className="text-xl font-bold text-green-800 dark:text-green-300 mb-2">
             Demande enregistrée
           </h2>
           <p className="text-sm text-green-700 dark:text-green-400 mb-4">{result.message}</p>
-          {result.aiDecision && (
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-3 mb-4 border border-green-100 dark:border-green-900">
-              <p className="text-xs text-gray-500 mb-1">Décision préliminaire IA</p>
-              <p className="font-bold text-indigo-600 dark:text-indigo-400 text-lg">
-                {aiLabels[result.aiDecision] ?? result.aiDecision}
-              </p>
-            </div>
-          )}
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-3 mb-4 border border-green-100 dark:border-green-900">
+            <p className="text-xs text-gray-500 mb-1">Statut</p>
+            <p className="font-bold text-amber-600 dark:text-amber-400 text-lg">
+              En attente de traitement
+            </p>
+          </div>
           {result.processingDays && (
             <p className="text-xs text-gray-400 mb-2">
               Délai estimé : {result.processingDays} jours ouvrés
@@ -184,7 +179,7 @@ function RetourContent() {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
         <div className="bg-red-50 dark:bg-red-950 rounded-2xl p-8 border border-red-200 dark:border-red-800">
-          <p className="text-5xl mb-4">❌</p>
+          <XCircle className="w-14 h-14" />
           <h2 className="text-xl font-bold text-red-800 dark:text-red-300 mb-2">Erreur</h2>
           <p className="text-sm text-red-700 dark:text-red-400 mb-6">{result.error}</p>
           <div className="flex gap-3 justify-center">
@@ -208,7 +203,7 @@ function RetourContent() {
 
   if (!loading && commandes.length === 0) return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">
-      <p className="text-5xl mb-4">📦</p>
+      <Package className="w-14 h-14" />
       <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Aucune commande livrée</h2>
       <p className="text-sm text-gray-500 mb-6">Les retours ne sont disponibles que pour les commandes livrées.</p>
       <Link href="/commandes" className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline">← Mes commandes</Link>
@@ -285,7 +280,7 @@ function RetourContent() {
                   {item.product.images[0]
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={item.product.images[0]} alt={item.product.nom} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-xl">📦</div>
+                    : <div className="w-full h-full flex items-center justify-center text-xl"><Package className="w-8 h-8" /></div>
                   }
                 </div>
                 <div className="flex-1 min-w-0">
@@ -330,7 +325,7 @@ function RetourContent() {
                   <input type="radio" name="resolution" checked={resolution === res.value}
                     onChange={() => setResolution(res.value as typeof resolution)}
                     className="sr-only" />
-                  <span className="text-2xl mb-1">{res.emoji}</span>
+                  {(() => { const Icon = res.icon; return <Icon className="w-6 h-6 mb-1" /> })()}
                   <span className={`text-xs font-semibold ${resolution === res.value ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-200'}`}>
                     {res.label}
                   </span>
@@ -395,7 +390,7 @@ function RetourContent() {
         {step === 3 && (
           <button onClick={handleSubmit} disabled={submitting}
             className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold py-3 rounded-xl transition">
-            {submitting ? '⏳ Envoi...' : '↩ Confirmer le retour'}
+            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" />{' '}Envoi...</> : '↩ Confirmer le retour'}
           </button>
         )}
       </div>
