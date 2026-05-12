@@ -9,11 +9,12 @@ async function getVendeur() {
   return v?.statut === 'APPROUVE' ? v : null
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const vendeur = await getVendeur()
   if (!vendeur) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  const { id } = await params
   const produit = await prisma.product.findFirst({
-    where: { id: params.id, vendeurId: vendeur.id },
+    where: { id, vendeurId: vendeur.id },
     include: {
       category: true,
       variants: { include: { options: { orderBy: { createdAt: 'asc' } } } },
@@ -24,16 +25,17 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(produit)
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const vendeur = await getVendeur()
   if (!vendeur) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
-  const produit = await prisma.product.findFirst({ where: { id: params.id, vendeurId: vendeur.id } })
+  const { id } = await params
+  const produit = await prisma.product.findFirst({ where: { id, vendeurId: vendeur.id } })
   if (!produit) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
 
   const { nom, description, prix, stock, images, categoryId, actif, prixVariables, typeOption, variants } = await req.json()
 
   const updated = await prisma.product.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       ...(nom         !== undefined && { nom: nom.trim() }),
       ...(description !== undefined && { description: description?.trim() || null }),
@@ -49,12 +51,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   })
 
   if (variants !== undefined) {
-    await prisma.productVariant.deleteMany({ where: { productId: params.id } })
+    await prisma.productVariant.deleteMany({ where: { productId: id } })
     if (variants.length > 0) {
       for (const v of variants) {
         await prisma.productVariant.create({
           data: {
-            productId: params.id,
+            productId: id,
             nom: v.nom, couleur: v.couleur || null,
             stock: parseInt(v.stock) || 0, images: v.images || [],
             options: v.options?.length > 0 ? {
@@ -70,19 +72,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json(updated)
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const vendeur = await getVendeur()
   if (!vendeur) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  const { id } = await params
   const produit = await prisma.product.findFirst({
-    where: { id: params.id, vendeurId: vendeur.id },
+    where: { id, vendeurId: vendeur.id },
     include: { _count: { select: { orderItems: true } } },
   })
   if (!produit) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
 
   if (produit._count.orderItems > 0) {
-    await prisma.product.update({ where: { id: params.id }, data: { actif: false } })
+    await prisma.product.update({ where: { id }, data: { actif: false } })
     return NextResponse.json({ message: 'Produit désactivé (commandes existantes)' })
   }
-  await prisma.product.delete({ where: { id: params.id } })
+  await prisma.product.delete({ where: { id } })
   return NextResponse.json({ message: 'Produit supprimé' })
 }
