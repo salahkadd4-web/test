@@ -2,9 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { countVendeurClaims } from '@/lib/flowmerceApi'
 import { Store } from 'lucide-react'
-import { CreditCard } from 'lucide-react'
 
 export default async function VendeurDashboard() {
   const session = await auth()
@@ -15,8 +13,6 @@ export default async function VendeurDashboard() {
     include: { documents: true },
   })
 
-  // Si pas approuvé → le layout (VendeurLayoutClient) gère l'affichage du message de statut.
-  // On retourne null pour éviter les requêtes DB inutiles et les boucles de redirection.
   if (!vendeur || vendeur.statut !== 'APPROUVE') return null
 
   const vid = vendeur.id
@@ -26,7 +22,6 @@ export default async function VendeurDashboard() {
     totalCommandes, commandesEnAttente,
     caData,
     top5,
-    flowmerceCounts,
   ] = await Promise.all([
     prisma.product.count({ where: { vendeurId: vid } }),
     prisma.product.count({ where: { vendeurId: vid, actif: true } }),
@@ -42,14 +37,9 @@ export default async function VendeurDashboard() {
       orderBy: { orderItems: { _count: 'desc' } },
       take:    5,
     }),
-    // Retours via Flowmerce
-    countVendeurClaims(vendeur.flowmerceApiKey ?? ''),
   ])
 
-  const totalRetours     = flowmerceCounts.total
-
-  const ca         = caData._sum.prix ?? 0
-  const tauxRetour = totalCommandes > 0 ? Math.round((totalRetours / totalCommandes) * 1000) / 10 : 0
+  const ca = caData._sum.prix ?? 0
 
   const dernieresCommandes = await prisma.order.findMany({
     where:   { items: { some: { product: { vendeurId: vid } } } },
@@ -99,13 +89,12 @@ export default async function VendeurDashboard() {
 
         <Link href="/vendeur/retours" className="group bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800 hover:border-red-200 dark:hover:border-red-800 transition-all">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Retours</p>
-          <p className="text-2xl font-bold text-red-500">{totalRetours}</p>
-          <span className="text-xs text-indigo-500 mt-1 inline-block">Voir les retours →</span>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tauxRetour}% taux →</p>
+          <p className="text-2xl font-bold text-red-500">↗</p>
+          <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-1 group-hover:text-indigo-600">Flowmerce →</p>
         </Link>
 
         <div className="bg-gray-900 dark:bg-gray-800 text-white rounded-xl p-4 border border-gray-800">
-          <p className="text-xs text-gray-400 mb-1">Chiffre d'affaires</p>
+          <p className="text-xs text-gray-400 mb-1">Chiffre d&apos;affaires</p>
           <p className="text-xl font-bold">{ca.toLocaleString('fr-DZ')} DA</p>
           <p className="text-xs text-gray-400 mt-1">Commandes livrées</p>
         </div>
