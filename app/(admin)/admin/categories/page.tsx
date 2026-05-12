@@ -66,7 +66,7 @@ export default function AdminCategoriesPage() {
       })
       const data = await res.json()
       if (res.ok) {
-        showToast(action === 'approuver' ? <><CheckCircle2 className="w-5 h-5" />{' '}Catégorie approuvée</> : <><XCircle className="w-5 h-5" />{' '}Catégorie refusée</>)
+        showToast(action === 'approuver' ? '✅ Catégorie approuvée' : '❌ Catégorie refusée')
         fetchCategories()
       } else {
         showToast(data.error || 'Erreur')
