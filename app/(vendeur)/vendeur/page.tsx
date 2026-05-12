@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Store } from 'lucide-react'
+import { ArrowUpRight, Store } from 'lucide-react'
 
 export default async function VendeurDashboard() {
   const session = await auth()
@@ -89,7 +89,7 @@ export default async function VendeurDashboard() {
 
         <Link href="/vendeur/retours" className="group bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800 hover:border-red-200 dark:hover:border-red-800 transition-all">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Retours</p>
-          <p className="text-2xl font-bold text-red-500">↗</p>
+          <ArrowUpRight className="w-7 h-7 text-red-500" />
           <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-1 group-hover:text-indigo-600">Flowmerce →</p>
         </Link>
 
