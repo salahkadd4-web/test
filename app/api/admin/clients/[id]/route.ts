@@ -36,13 +36,8 @@ export async function GET(
 
     if (!client) return NextResponse.json({ error: 'Client introuvable' }, { status: 404 })
 
-    // Les retours sont gérés par Flowmerce — on renvoie des valeurs neutres
-    return NextResponse.json({
-      ...client,
-      _count: { ...client._count, returns: 0 },
-      returns: [] as never[],
-      maxFraudScore: null as null,
-    })
+    // Les retours sont gérés par Flowmerce — aucun champ local lié aux retours
+    return NextResponse.json(client)
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }

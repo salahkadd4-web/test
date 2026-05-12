@@ -33,26 +33,13 @@ export async function GET(req: NextRequest) {
           select: {
             orders:    true,
             favorites: true,
-            returns:   true,   // ← FIXÉ : était absent → _count.returns était undefined
           },
-        },
-        // Score de fraude max parmi les retours du client
-        returns: {
-          select:   { fraudScore: true },
-          orderBy:  { fraudScore: 'desc' },
-          take:     1,
         },
       },
     })
 
-    // Aplatir le maxFraudScore pour plus de commodité côté frontend
-    const result = clients.map(c => ({
-      ...c,
-      maxFraudScore: c.returns[0]?.fraudScore ?? null,
-      returns: undefined, // on n'expose pas la liste complète ici
-    }))
-
-    return NextResponse.json(result)
+    // Les retours sont gérés par Flowmerce — aucun champ local lié aux retours
+    return NextResponse.json(clients)
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
