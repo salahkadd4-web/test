@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/check-abonnements",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/notif-abonnements",
+      "schedule": "0 8 * * *"
     }
   ]
 }

@@ -4,8 +4,10 @@ import FavoriIconButton from '@/components/client/FavoriIconButton'
 import CartIconButton from '@/components/client/CartIconButton'
 import SuitcaseAnimationBg from '@/components/client/SuitcaseAnimationBg'
 import { Banknote, Package, Tag } from 'lucide-react'
+import { auth } from '@/auth'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth()
   return (
     <div className="bg-white dark:bg-gray-950 transition-colors duration-300">
 
@@ -106,23 +108,25 @@ export default function HomePage() {
             <div>
               <h4 className="text-xs uppercase tracking-[0.3em] text-gray-400 mb-4">Navigation</h4>
               <div className="space-y-2">
-                {['/produits', '/categories', '/commandes', '/messages'].map((href, i) => (
+                {['/produits', '/categories'].map((href, i) => (
                   <Link key={href} href={href} className="block text-gray-500 hover:text-white text-xs uppercase tracking-widest transition-colors duration-300">
-                    {['Produits', 'Catégories', 'Mes Commandes', 'Contact'][i]}
+                    {['Produits', 'Catégories'][i]}
                   </Link>
                 ))}
               </div>
             </div>
-            <div>
-              <h4 className="text-xs uppercase tracking-[0.3em] text-gray-400 mb-4">Mon Compte</h4>
-              <div className="space-y-2">
-                {['/connexion', '/inscription', '/favoris', '/panier'].map((href, i) => (
-                  <Link key={href} href={href} className="block text-gray-500 hover:text-white text-xs uppercase tracking-widest transition-colors duration-300">
-                    {['Connexion', 'Inscription', 'Favoris', 'Panier'][i]}
-                  </Link>
-                ))}
+            {!session?.user && (
+              <div>
+                <h4 className="text-xs uppercase tracking-[0.3em] text-gray-400 mb-4">Mon Compte</h4>
+                <div className="space-y-2">
+                  {['/connexion', '/inscription'].map((href, i) => (
+                    <Link key={href} href={href} className="block text-gray-500 hover:text-white text-xs uppercase tracking-widest transition-colors duration-300">
+                      {['Connexion', 'Inscription'][i]}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-600 text-xs">© 2026 CabaStore. Tous droits réservés.</p>

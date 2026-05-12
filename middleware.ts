@@ -6,13 +6,29 @@
 import NextAuth from 'next-auth'
 import { authConfig } from '@/auth.config'
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 
 const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
   const session = req.auth
+
+   // ── Pages client protégées ───────────────────────────────
+    const protectedClientRoutes = [
+      '/panier',
+      '/commandes',
+      '/favoris',
+      '/profil',
+      '/retours',
+    ]
+  
+    const isProtectedClientRoute = protectedClientRoutes.some((route) =>
+      pathname.startsWith(route)
+    )
+  
+    if (isProtectedClientRoute && !session?.user) {
+      return NextResponse.redirect(new URL('/connexion', req.url))
+    }
 
   // ── Routes admin ──────────────────────────────────────────
   if (pathname.startsWith('/admin')) {

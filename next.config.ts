@@ -1,11 +1,22 @@
-const nextConfig = {
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
   trailingSlash: true,
   images: { unoptimized: true },
 
-  // ── Résolution du schéma "node:" non géré par Webpack ──────────────────
-  // bcryptjs et certaines dépendances importent via "node:crypto", "node:stream", etc.
-  // On redirige vers les modules natifs sans préfixe.
-  webpack: (config: any, { isServer }: { isServer: boolean }) => {
+  // ── Résolution des alias "node:" pour Turbopack (Next.js 16+) ──────────
+  turbopack: {
+    resolveAlias: {
+      'node:crypto': 'crypto',
+      'node:stream': 'stream',
+      'node:buffer': 'buffer',
+      'node:util':   'util',
+      'node:events': 'events',
+    },
+  },
+
+  // ── Fallback webpack ────────────────────────────────────────────────────
+  webpack(config, { isServer }) {
     if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
@@ -20,4 +31,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+export default nextConfig

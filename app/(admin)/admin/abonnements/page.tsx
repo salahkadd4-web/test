@@ -1,5 +1,5 @@
 'use client'
-
+import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
 import { AlertTriangle, CheckCircle2, Clock, CreditCard, RefreshCw, XCircle } from 'lucide-react'
 
@@ -161,12 +161,12 @@ export default function AdminAbonnementsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      
+                      <Link
                         href={`/admin/vendeurs?id=${r.vendeurId}`}
                         className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline"
-                      <a>
+                      >
                         <CreditCard size={13} /> Gérer
-                      </a>
+                      </Link>
                     </td>
                   </tr>
                 )

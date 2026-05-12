@@ -131,6 +131,7 @@ model Abonnement {
   dateDebut    DateTime         @default(now())
   dateFin      DateTime
   periodicite  String?          // "mensuel" | "annuel"
+  notifsSent   String[]   @default([])
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   vendeur      VendeurProfile   @relation(fields: [vendeurId], references: [id])
