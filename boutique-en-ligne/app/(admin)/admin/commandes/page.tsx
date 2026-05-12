@@ -208,7 +208,7 @@ export default function AdminCommandesPage() {
             disabled={adminOnly}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px]"
           >
-            <option value=""><Store className="w-4 h-4 inline mr-1" />{' '}Tous les vendeurs</option>
+            <option value="">Tous les vendeurs</option>
             {vendeurs.map(v => (
               <option key={v.id} value={v.id}>
                 {v.nomBoutique || `${v.user.prenom} ${v.user.nom}`}
@@ -221,7 +221,7 @@ export default function AdminCommandesPage() {
             onChange={e => setFilterCategory(e.target.value)}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[180px]"
           >
-            <option value=""><Tag className="w-4 h-4 inline mr-1" />{' '}Toutes les catégories</option>
+            <option value="">Toutes les catégories</option>
             {categories.map(c => (
               <option key={c.id} value={c.id}>{c.nom}</option>
             ))}

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { BarChart2, Package, RefreshCw, Settings, ShoppingCart, Store, Tag, TrendingUp, Users, X } from 'lucide-react'
+import { BarChart2, CreditCard, Package, RefreshCw, Settings, ShoppingCart, Store, Tag, TrendingUp, Users, X } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +13,7 @@ const navItems = [
   { href: '/admin/categories', label: 'Catégories',      icon: Tag },
   { href: '/admin/clients',    label: 'Clients',         icon: Users },
   { href: '/admin/vendeurs',   label: 'Vendeurs',        icon: Store },  // ← NOUVEAU
+  { href: '/admin/abonnements',   label: 'Abonnements',     icon: CreditCard },
   { href: '/admin/commandes',  label: 'Commandes',       icon: ShoppingCart },
   { href: '/admin/retours',    label: 'Retours',         icon: RefreshCw },
   { href: '/admin/stats',      label: 'Statistiques',    icon: TrendingUp },  // ← NOUVEAU

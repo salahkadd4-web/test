@@ -17,9 +17,12 @@ export default async function CategoriesPage() {
       <p className="text-gray-500 dark:text-gray-400 mb-8">Parcourez nos catégories de produits</p>
 
       {categories.length === 0 ? (
-        <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-          <Tag className="w-4 h-4" />
-          <p className="text-lg">Aucune catégorie disponible pour le moment.</p>
+        <div className="flex flex-col items-center justify-center text-center py-20 text-gray-400 dark:text-gray-500">
+          <Tag className="w-14 h-14 mb-4" />
+
+          <p className="text-lg">
+            Aucune catégorie disponible pour le moment.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

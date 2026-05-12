@@ -145,7 +145,8 @@ exports.Prisma.VendeurProfileScalarFieldEnum = {
   adminNote: 'adminNote',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  flowmerceApiKey: 'flowmerceApiKey'
+  flowmerceApiKey: 'flowmerceApiKey',
+  prioriteAffichage: 'prioriteAffichage'
 };
 
 exports.Prisma.VendeurDocumentScalarFieldEnum = {
@@ -206,6 +207,30 @@ exports.Prisma.VariantOptionScalarFieldEnum = {
   stock: 'stock',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AbonnementScalarFieldEnum = {
+  id: 'id',
+  vendeurId: 'vendeurId',
+  niveau: 'niveau',
+  statut: 'statut',
+  dateDebut: 'dateDebut',
+  dateFin: 'dateFin',
+  periodicite: 'periodicite',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaiementScalarFieldEnum = {
+  id: 'id',
+  abonnementId: 'abonnementId',
+  montant: 'montant',
+  dateReglement: 'dateReglement',
+  methode: 'methode',
+  reference: 'reference',
+  note: 'note',
+  confirmeParAdmin: 'confirmeParAdmin',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.CartScalarFieldEnum = {
@@ -338,6 +363,20 @@ exports.CategoryStatut = exports.$Enums.CategoryStatut = {
   REFUSEE: 'REFUSEE'
 };
 
+exports.NiveauAbonnement = exports.$Enums.NiveauAbonnement = {
+  NIVEAU_0: 'NIVEAU_0',
+  NIVEAU_1: 'NIVEAU_1',
+  NIVEAU_2: 'NIVEAU_2',
+  NIVEAU_3: 'NIVEAU_3'
+};
+
+exports.StatutAbonnement = exports.$Enums.StatutAbonnement = {
+  GRATUIT: 'GRATUIT',
+  ACTIF: 'ACTIF',
+  EXPIRE: 'EXPIRE',
+  SUSPENDU: 'SUSPENDU'
+};
+
 exports.OrderStatus = exports.$Enums.OrderStatus = {
   EN_ATTENTE: 'EN_ATTENTE',
   CONFIRMEE: 'CONFIRMEE',
@@ -355,6 +394,8 @@ exports.Prisma.ModelName = {
   Product: 'Product',
   ProductVariant: 'ProductVariant',
   VariantOption: 'VariantOption',
+  Abonnement: 'Abonnement',
+  Paiement: 'Paiement',
   Cart: 'Cart',
   CartItem: 'CartItem',
   Favorite: 'Favorite',

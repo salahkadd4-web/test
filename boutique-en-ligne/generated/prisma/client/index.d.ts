@@ -49,6 +49,16 @@ export type ProductVariant = $Result.DefaultSelection<Prisma.$ProductVariantPayl
  */
 export type VariantOption = $Result.DefaultSelection<Prisma.$VariantOptionPayload>
 /**
+ * Model Abonnement
+ * 
+ */
+export type Abonnement = $Result.DefaultSelection<Prisma.$AbonnementPayload>
+/**
+ * Model Paiement
+ * 
+ */
+export type Paiement = $Result.DefaultSelection<Prisma.$PaiementPayload>
+/**
  * Model Cart
  * 
  */
@@ -144,6 +154,26 @@ export const CategoryStatut: {
 
 export type CategoryStatut = (typeof CategoryStatut)[keyof typeof CategoryStatut]
 
+
+export const NiveauAbonnement: {
+  NIVEAU_0: 'NIVEAU_0',
+  NIVEAU_1: 'NIVEAU_1',
+  NIVEAU_2: 'NIVEAU_2',
+  NIVEAU_3: 'NIVEAU_3'
+};
+
+export type NiveauAbonnement = (typeof NiveauAbonnement)[keyof typeof NiveauAbonnement]
+
+
+export const StatutAbonnement: {
+  GRATUIT: 'GRATUIT',
+  ACTIF: 'ACTIF',
+  EXPIRE: 'EXPIRE',
+  SUSPENDU: 'SUSPENDU'
+};
+
+export type StatutAbonnement = (typeof StatutAbonnement)[keyof typeof StatutAbonnement]
+
 }
 
 export type Role = $Enums.Role
@@ -169,6 +199,14 @@ export const DocumentStatut: typeof $Enums.DocumentStatut
 export type CategoryStatut = $Enums.CategoryStatut
 
 export const CategoryStatut: typeof $Enums.CategoryStatut
+
+export type NiveauAbonnement = $Enums.NiveauAbonnement
+
+export const NiveauAbonnement: typeof $Enums.NiveauAbonnement
+
+export type StatutAbonnement = $Enums.StatutAbonnement
+
+export const StatutAbonnement: typeof $Enums.StatutAbonnement
 
 /**
  * ##  Prisma Client ʲˢ
@@ -360,6 +398,26 @@ export class PrismaClient<
     * ```
     */
   get variantOption(): Prisma.VariantOptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.abonnement`: Exposes CRUD operations for the **Abonnement** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Abonnements
+    * const abonnements = await prisma.abonnement.findMany()
+    * ```
+    */
+  get abonnement(): Prisma.AbonnementDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.paiement`: Exposes CRUD operations for the **Paiement** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Paiements
+    * const paiements = await prisma.paiement.findMany()
+    * ```
+    */
+  get paiement(): Prisma.PaiementDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.cart`: Exposes CRUD operations for the **Cart** model.
@@ -871,6 +929,8 @@ export namespace Prisma {
     Product: 'Product',
     ProductVariant: 'ProductVariant',
     VariantOption: 'VariantOption',
+    Abonnement: 'Abonnement',
+    Paiement: 'Paiement',
     Cart: 'Cart',
     CartItem: 'CartItem',
     Favorite: 'Favorite',
@@ -893,7 +953,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "vendeurProfile" | "vendeurDocument" | "category" | "product" | "productVariant" | "variantOption" | "cart" | "cartItem" | "favorite" | "order" | "orderItem" | "resetToken" | "otpToken"
+      modelProps: "user" | "vendeurProfile" | "vendeurDocument" | "category" | "product" | "productVariant" | "variantOption" | "abonnement" | "paiement" | "cart" | "cartItem" | "favorite" | "order" | "orderItem" | "resetToken" | "otpToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1412,6 +1472,154 @@ export namespace Prisma {
           count: {
             args: Prisma.VariantOptionCountArgs<ExtArgs>
             result: $Utils.Optional<VariantOptionCountAggregateOutputType> | number
+          }
+        }
+      }
+      Abonnement: {
+        payload: Prisma.$AbonnementPayload<ExtArgs>
+        fields: Prisma.AbonnementFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AbonnementFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AbonnementFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>
+          }
+          findFirst: {
+            args: Prisma.AbonnementFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AbonnementFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>
+          }
+          findMany: {
+            args: Prisma.AbonnementFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>[]
+          }
+          create: {
+            args: Prisma.AbonnementCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>
+          }
+          createMany: {
+            args: Prisma.AbonnementCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AbonnementCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>[]
+          }
+          delete: {
+            args: Prisma.AbonnementDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>
+          }
+          update: {
+            args: Prisma.AbonnementUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>
+          }
+          deleteMany: {
+            args: Prisma.AbonnementDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AbonnementUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AbonnementUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>[]
+          }
+          upsert: {
+            args: Prisma.AbonnementUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AbonnementPayload>
+          }
+          aggregate: {
+            args: Prisma.AbonnementAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAbonnement>
+          }
+          groupBy: {
+            args: Prisma.AbonnementGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AbonnementGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AbonnementCountArgs<ExtArgs>
+            result: $Utils.Optional<AbonnementCountAggregateOutputType> | number
+          }
+        }
+      }
+      Paiement: {
+        payload: Prisma.$PaiementPayload<ExtArgs>
+        fields: Prisma.PaiementFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PaiementFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PaiementFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>
+          }
+          findFirst: {
+            args: Prisma.PaiementFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PaiementFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>
+          }
+          findMany: {
+            args: Prisma.PaiementFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>[]
+          }
+          create: {
+            args: Prisma.PaiementCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>
+          }
+          createMany: {
+            args: Prisma.PaiementCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PaiementCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>[]
+          }
+          delete: {
+            args: Prisma.PaiementDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>
+          }
+          update: {
+            args: Prisma.PaiementUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>
+          }
+          deleteMany: {
+            args: Prisma.PaiementDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PaiementUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PaiementUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>[]
+          }
+          upsert: {
+            args: Prisma.PaiementUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaiementPayload>
+          }
+          aggregate: {
+            args: Prisma.PaiementAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePaiement>
+          }
+          groupBy: {
+            args: Prisma.PaiementGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PaiementGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PaiementCountArgs<ExtArgs>
+            result: $Utils.Optional<PaiementCountAggregateOutputType> | number
           }
         }
       }
@@ -2048,6 +2256,8 @@ export namespace Prisma {
     product?: ProductOmit
     productVariant?: ProductVariantOmit
     variantOption?: VariantOptionOmit
+    abonnement?: AbonnementOmit
+    paiement?: PaiementOmit
     cart?: CartOmit
     cartItem?: CartItemOmit
     favorite?: FavoriteOmit
@@ -2403,6 +2613,37 @@ export namespace Prisma {
    */
   export type VariantOptionCountOutputTypeCountOrderItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderItemWhereInput
+  }
+
+
+  /**
+   * Count Type AbonnementCountOutputType
+   */
+
+  export type AbonnementCountOutputType = {
+    paiements: number
+  }
+
+  export type AbonnementCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    paiements?: boolean | AbonnementCountOutputTypeCountPaiementsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AbonnementCountOutputType without action
+   */
+  export type AbonnementCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AbonnementCountOutputType
+     */
+    select?: AbonnementCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AbonnementCountOutputType without action
+   */
+  export type AbonnementCountOutputTypeCountPaiementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaiementWhereInput
   }
 
 
@@ -3793,8 +4034,18 @@ export namespace Prisma {
 
   export type AggregateVendeurProfile = {
     _count: VendeurProfileCountAggregateOutputType | null
+    _avg: VendeurProfileAvgAggregateOutputType | null
+    _sum: VendeurProfileSumAggregateOutputType | null
     _min: VendeurProfileMinAggregateOutputType | null
     _max: VendeurProfileMaxAggregateOutputType | null
+  }
+
+  export type VendeurProfileAvgAggregateOutputType = {
+    prioriteAffichage: number | null
+  }
+
+  export type VendeurProfileSumAggregateOutputType = {
+    prioriteAffichage: number | null
   }
 
   export type VendeurProfileMinAggregateOutputType = {
@@ -3807,6 +4058,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     flowmerceApiKey: string | null
+    prioriteAffichage: number | null
   }
 
   export type VendeurProfileMaxAggregateOutputType = {
@@ -3819,6 +4071,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     flowmerceApiKey: string | null
+    prioriteAffichage: number | null
   }
 
   export type VendeurProfileCountAggregateOutputType = {
@@ -3831,9 +4084,18 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     flowmerceApiKey: number
+    prioriteAffichage: number
     _all: number
   }
 
+
+  export type VendeurProfileAvgAggregateInputType = {
+    prioriteAffichage?: true
+  }
+
+  export type VendeurProfileSumAggregateInputType = {
+    prioriteAffichage?: true
+  }
 
   export type VendeurProfileMinAggregateInputType = {
     id?: true
@@ -3845,6 +4107,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     flowmerceApiKey?: true
+    prioriteAffichage?: true
   }
 
   export type VendeurProfileMaxAggregateInputType = {
@@ -3857,6 +4120,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     flowmerceApiKey?: true
+    prioriteAffichage?: true
   }
 
   export type VendeurProfileCountAggregateInputType = {
@@ -3869,6 +4133,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     flowmerceApiKey?: true
+    prioriteAffichage?: true
     _all?: true
   }
 
@@ -3910,6 +4175,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: VendeurProfileAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: VendeurProfileSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: VendeurProfileMinAggregateInputType
@@ -3940,6 +4217,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: VendeurProfileCountAggregateInputType | true
+    _avg?: VendeurProfileAvgAggregateInputType
+    _sum?: VendeurProfileSumAggregateInputType
     _min?: VendeurProfileMinAggregateInputType
     _max?: VendeurProfileMaxAggregateInputType
   }
@@ -3954,7 +4233,10 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     flowmerceApiKey: string | null
+    prioriteAffichage: number
     _count: VendeurProfileCountAggregateOutputType | null
+    _avg: VendeurProfileAvgAggregateOutputType | null
+    _sum: VendeurProfileSumAggregateOutputType | null
     _min: VendeurProfileMinAggregateOutputType | null
     _max: VendeurProfileMaxAggregateOutputType | null
   }
@@ -3983,9 +4265,11 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     flowmerceApiKey?: boolean
+    prioriteAffichage?: boolean
     categories?: boolean | VendeurProfile$categoriesArgs<ExtArgs>
     products?: boolean | VendeurProfile$productsArgs<ExtArgs>
     documents?: boolean | VendeurProfile$documentsArgs<ExtArgs>
+    abonnement?: boolean | VendeurProfile$abonnementArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | VendeurProfileCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vendeurProfile"]>
@@ -4000,6 +4284,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     flowmerceApiKey?: boolean
+    prioriteAffichage?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vendeurProfile"]>
 
@@ -4013,6 +4298,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     flowmerceApiKey?: boolean
+    prioriteAffichage?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vendeurProfile"]>
 
@@ -4026,13 +4312,15 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     flowmerceApiKey?: boolean
+    prioriteAffichage?: boolean
   }
 
-  export type VendeurProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "statut" | "nomBoutique" | "description" | "adminNote" | "createdAt" | "updatedAt" | "flowmerceApiKey", ExtArgs["result"]["vendeurProfile"]>
+  export type VendeurProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "statut" | "nomBoutique" | "description" | "adminNote" | "createdAt" | "updatedAt" | "flowmerceApiKey" | "prioriteAffichage", ExtArgs["result"]["vendeurProfile"]>
   export type VendeurProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     categories?: boolean | VendeurProfile$categoriesArgs<ExtArgs>
     products?: boolean | VendeurProfile$productsArgs<ExtArgs>
     documents?: boolean | VendeurProfile$documentsArgs<ExtArgs>
+    abonnement?: boolean | VendeurProfile$abonnementArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | VendeurProfileCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -4049,6 +4337,7 @@ export namespace Prisma {
       categories: Prisma.$CategoryPayload<ExtArgs>[]
       products: Prisma.$ProductPayload<ExtArgs>[]
       documents: Prisma.$VendeurDocumentPayload<ExtArgs>[]
+      abonnement: Prisma.$AbonnementPayload<ExtArgs> | null
       user: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -4061,6 +4350,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       flowmerceApiKey: string | null
+      prioriteAffichage: number
     }, ExtArgs["result"]["vendeurProfile"]>
     composites: {}
   }
@@ -4458,6 +4748,7 @@ export namespace Prisma {
     categories<T extends VendeurProfile$categoriesArgs<ExtArgs> = {}>(args?: Subset<T, VendeurProfile$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     products<T extends VendeurProfile$productsArgs<ExtArgs> = {}>(args?: Subset<T, VendeurProfile$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends VendeurProfile$documentsArgs<ExtArgs> = {}>(args?: Subset<T, VendeurProfile$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendeurDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    abonnement<T extends VendeurProfile$abonnementArgs<ExtArgs> = {}>(args?: Subset<T, VendeurProfile$abonnementArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4497,6 +4788,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"VendeurProfile", 'DateTime'>
     readonly updatedAt: FieldRef<"VendeurProfile", 'DateTime'>
     readonly flowmerceApiKey: FieldRef<"VendeurProfile", 'String'>
+    readonly prioriteAffichage: FieldRef<"VendeurProfile", 'Int'>
   }
     
 
@@ -4967,6 +5259,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: VendeurDocumentScalarFieldEnum | VendeurDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * VendeurProfile.abonnement
+   */
+  export type VendeurProfile$abonnementArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    where?: AbonnementWhereInput
   }
 
   /**
@@ -10988,6 +11299,2300 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: VariantOptionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Abonnement
+   */
+
+  export type AggregateAbonnement = {
+    _count: AbonnementCountAggregateOutputType | null
+    _min: AbonnementMinAggregateOutputType | null
+    _max: AbonnementMaxAggregateOutputType | null
+  }
+
+  export type AbonnementMinAggregateOutputType = {
+    id: string | null
+    vendeurId: string | null
+    niveau: $Enums.NiveauAbonnement | null
+    statut: $Enums.StatutAbonnement | null
+    dateDebut: Date | null
+    dateFin: Date | null
+    periodicite: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AbonnementMaxAggregateOutputType = {
+    id: string | null
+    vendeurId: string | null
+    niveau: $Enums.NiveauAbonnement | null
+    statut: $Enums.StatutAbonnement | null
+    dateDebut: Date | null
+    dateFin: Date | null
+    periodicite: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AbonnementCountAggregateOutputType = {
+    id: number
+    vendeurId: number
+    niveau: number
+    statut: number
+    dateDebut: number
+    dateFin: number
+    periodicite: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AbonnementMinAggregateInputType = {
+    id?: true
+    vendeurId?: true
+    niveau?: true
+    statut?: true
+    dateDebut?: true
+    dateFin?: true
+    periodicite?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AbonnementMaxAggregateInputType = {
+    id?: true
+    vendeurId?: true
+    niveau?: true
+    statut?: true
+    dateDebut?: true
+    dateFin?: true
+    periodicite?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AbonnementCountAggregateInputType = {
+    id?: true
+    vendeurId?: true
+    niveau?: true
+    statut?: true
+    dateDebut?: true
+    dateFin?: true
+    periodicite?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AbonnementAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Abonnement to aggregate.
+     */
+    where?: AbonnementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Abonnements to fetch.
+     */
+    orderBy?: AbonnementOrderByWithRelationInput | AbonnementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AbonnementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Abonnements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Abonnements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Abonnements
+    **/
+    _count?: true | AbonnementCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AbonnementMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AbonnementMaxAggregateInputType
+  }
+
+  export type GetAbonnementAggregateType<T extends AbonnementAggregateArgs> = {
+        [P in keyof T & keyof AggregateAbonnement]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAbonnement[P]>
+      : GetScalarType<T[P], AggregateAbonnement[P]>
+  }
+
+
+
+
+  export type AbonnementGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AbonnementWhereInput
+    orderBy?: AbonnementOrderByWithAggregationInput | AbonnementOrderByWithAggregationInput[]
+    by: AbonnementScalarFieldEnum[] | AbonnementScalarFieldEnum
+    having?: AbonnementScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AbonnementCountAggregateInputType | true
+    _min?: AbonnementMinAggregateInputType
+    _max?: AbonnementMaxAggregateInputType
+  }
+
+  export type AbonnementGroupByOutputType = {
+    id: string
+    vendeurId: string
+    niveau: $Enums.NiveauAbonnement
+    statut: $Enums.StatutAbonnement
+    dateDebut: Date
+    dateFin: Date
+    periodicite: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AbonnementCountAggregateOutputType | null
+    _min: AbonnementMinAggregateOutputType | null
+    _max: AbonnementMaxAggregateOutputType | null
+  }
+
+  type GetAbonnementGroupByPayload<T extends AbonnementGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AbonnementGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AbonnementGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AbonnementGroupByOutputType[P]>
+            : GetScalarType<T[P], AbonnementGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AbonnementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    vendeurId?: boolean
+    niveau?: boolean
+    statut?: boolean
+    dateDebut?: boolean
+    dateFin?: boolean
+    periodicite?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    vendeur?: boolean | VendeurProfileDefaultArgs<ExtArgs>
+    paiements?: boolean | Abonnement$paiementsArgs<ExtArgs>
+    _count?: boolean | AbonnementCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["abonnement"]>
+
+  export type AbonnementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    vendeurId?: boolean
+    niveau?: boolean
+    statut?: boolean
+    dateDebut?: boolean
+    dateFin?: boolean
+    periodicite?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    vendeur?: boolean | VendeurProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["abonnement"]>
+
+  export type AbonnementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    vendeurId?: boolean
+    niveau?: boolean
+    statut?: boolean
+    dateDebut?: boolean
+    dateFin?: boolean
+    periodicite?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    vendeur?: boolean | VendeurProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["abonnement"]>
+
+  export type AbonnementSelectScalar = {
+    id?: boolean
+    vendeurId?: boolean
+    niveau?: boolean
+    statut?: boolean
+    dateDebut?: boolean
+    dateFin?: boolean
+    periodicite?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AbonnementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "vendeurId" | "niveau" | "statut" | "dateDebut" | "dateFin" | "periodicite" | "createdAt" | "updatedAt", ExtArgs["result"]["abonnement"]>
+  export type AbonnementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    vendeur?: boolean | VendeurProfileDefaultArgs<ExtArgs>
+    paiements?: boolean | Abonnement$paiementsArgs<ExtArgs>
+    _count?: boolean | AbonnementCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AbonnementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    vendeur?: boolean | VendeurProfileDefaultArgs<ExtArgs>
+  }
+  export type AbonnementIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    vendeur?: boolean | VendeurProfileDefaultArgs<ExtArgs>
+  }
+
+  export type $AbonnementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Abonnement"
+    objects: {
+      vendeur: Prisma.$VendeurProfilePayload<ExtArgs>
+      paiements: Prisma.$PaiementPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      vendeurId: string
+      niveau: $Enums.NiveauAbonnement
+      statut: $Enums.StatutAbonnement
+      dateDebut: Date
+      dateFin: Date
+      periodicite: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["abonnement"]>
+    composites: {}
+  }
+
+  type AbonnementGetPayload<S extends boolean | null | undefined | AbonnementDefaultArgs> = $Result.GetResult<Prisma.$AbonnementPayload, S>
+
+  type AbonnementCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AbonnementFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AbonnementCountAggregateInputType | true
+    }
+
+  export interface AbonnementDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Abonnement'], meta: { name: 'Abonnement' } }
+    /**
+     * Find zero or one Abonnement that matches the filter.
+     * @param {AbonnementFindUniqueArgs} args - Arguments to find a Abonnement
+     * @example
+     * // Get one Abonnement
+     * const abonnement = await prisma.abonnement.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AbonnementFindUniqueArgs>(args: SelectSubset<T, AbonnementFindUniqueArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Abonnement that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AbonnementFindUniqueOrThrowArgs} args - Arguments to find a Abonnement
+     * @example
+     * // Get one Abonnement
+     * const abonnement = await prisma.abonnement.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AbonnementFindUniqueOrThrowArgs>(args: SelectSubset<T, AbonnementFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Abonnement that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AbonnementFindFirstArgs} args - Arguments to find a Abonnement
+     * @example
+     * // Get one Abonnement
+     * const abonnement = await prisma.abonnement.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AbonnementFindFirstArgs>(args?: SelectSubset<T, AbonnementFindFirstArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Abonnement that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AbonnementFindFirstOrThrowArgs} args - Arguments to find a Abonnement
+     * @example
+     * // Get one Abonnement
+     * const abonnement = await prisma.abonnement.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AbonnementFindFirstOrThrowArgs>(args?: SelectSubset<T, AbonnementFindFirstOrThrowArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Abonnements that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AbonnementFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Abonnements
+     * const abonnements = await prisma.abonnement.findMany()
+     * 
+     * // Get first 10 Abonnements
+     * const abonnements = await prisma.abonnement.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const abonnementWithIdOnly = await prisma.abonnement.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AbonnementFindManyArgs>(args?: SelectSubset<T, AbonnementFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Abonnement.
+     * @param {AbonnementCreateArgs} args - Arguments to create a Abonnement.
+     * @example
+     * // Create one Abonnement
+     * const Abonnement = await prisma.abonnement.create({
+     *   data: {
+     *     // ... data to create a Abonnement
+     *   }
+     * })
+     * 
+     */
+    create<T extends AbonnementCreateArgs>(args: SelectSubset<T, AbonnementCreateArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Abonnements.
+     * @param {AbonnementCreateManyArgs} args - Arguments to create many Abonnements.
+     * @example
+     * // Create many Abonnements
+     * const abonnement = await prisma.abonnement.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AbonnementCreateManyArgs>(args?: SelectSubset<T, AbonnementCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Abonnements and returns the data saved in the database.
+     * @param {AbonnementCreateManyAndReturnArgs} args - Arguments to create many Abonnements.
+     * @example
+     * // Create many Abonnements
+     * const abonnement = await prisma.abonnement.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Abonnements and only return the `id`
+     * const abonnementWithIdOnly = await prisma.abonnement.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AbonnementCreateManyAndReturnArgs>(args?: SelectSubset<T, AbonnementCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Abonnement.
+     * @param {AbonnementDeleteArgs} args - Arguments to delete one Abonnement.
+     * @example
+     * // Delete one Abonnement
+     * const Abonnement = await prisma.abonnement.delete({
+     *   where: {
+     *     // ... filter to delete one Abonnement
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AbonnementDeleteArgs>(args: SelectSubset<T, AbonnementDeleteArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Abonnement.
+     * @param {AbonnementUpdateArgs} args - Arguments to update one Abonnement.
+     * @example
+     * // Update one Abonnement
+     * const abonnement = await prisma.abonnement.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AbonnementUpdateArgs>(args: SelectSubset<T, AbonnementUpdateArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Abonnements.
+     * @param {AbonnementDeleteManyArgs} args - Arguments to filter Abonnements to delete.
+     * @example
+     * // Delete a few Abonnements
+     * const { count } = await prisma.abonnement.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AbonnementDeleteManyArgs>(args?: SelectSubset<T, AbonnementDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Abonnements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AbonnementUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Abonnements
+     * const abonnement = await prisma.abonnement.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AbonnementUpdateManyArgs>(args: SelectSubset<T, AbonnementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Abonnements and returns the data updated in the database.
+     * @param {AbonnementUpdateManyAndReturnArgs} args - Arguments to update many Abonnements.
+     * @example
+     * // Update many Abonnements
+     * const abonnement = await prisma.abonnement.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Abonnements and only return the `id`
+     * const abonnementWithIdOnly = await prisma.abonnement.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AbonnementUpdateManyAndReturnArgs>(args: SelectSubset<T, AbonnementUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Abonnement.
+     * @param {AbonnementUpsertArgs} args - Arguments to update or create a Abonnement.
+     * @example
+     * // Update or create a Abonnement
+     * const abonnement = await prisma.abonnement.upsert({
+     *   create: {
+     *     // ... data to create a Abonnement
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Abonnement we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AbonnementUpsertArgs>(args: SelectSubset<T, AbonnementUpsertArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Abonnements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AbonnementCountArgs} args - Arguments to filter Abonnements to count.
+     * @example
+     * // Count the number of Abonnements
+     * const count = await prisma.abonnement.count({
+     *   where: {
+     *     // ... the filter for the Abonnements we want to count
+     *   }
+     * })
+    **/
+    count<T extends AbonnementCountArgs>(
+      args?: Subset<T, AbonnementCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AbonnementCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Abonnement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AbonnementAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AbonnementAggregateArgs>(args: Subset<T, AbonnementAggregateArgs>): Prisma.PrismaPromise<GetAbonnementAggregateType<T>>
+
+    /**
+     * Group by Abonnement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AbonnementGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AbonnementGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AbonnementGroupByArgs['orderBy'] }
+        : { orderBy?: AbonnementGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AbonnementGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAbonnementGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Abonnement model
+   */
+  readonly fields: AbonnementFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Abonnement.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AbonnementClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    vendeur<T extends VendeurProfileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, VendeurProfileDefaultArgs<ExtArgs>>): Prisma__VendeurProfileClient<$Result.GetResult<Prisma.$VendeurProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    paiements<T extends Abonnement$paiementsArgs<ExtArgs> = {}>(args?: Subset<T, Abonnement$paiementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Abonnement model
+   */
+  interface AbonnementFieldRefs {
+    readonly id: FieldRef<"Abonnement", 'String'>
+    readonly vendeurId: FieldRef<"Abonnement", 'String'>
+    readonly niveau: FieldRef<"Abonnement", 'NiveauAbonnement'>
+    readonly statut: FieldRef<"Abonnement", 'StatutAbonnement'>
+    readonly dateDebut: FieldRef<"Abonnement", 'DateTime'>
+    readonly dateFin: FieldRef<"Abonnement", 'DateTime'>
+    readonly periodicite: FieldRef<"Abonnement", 'String'>
+    readonly createdAt: FieldRef<"Abonnement", 'DateTime'>
+    readonly updatedAt: FieldRef<"Abonnement", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Abonnement findUnique
+   */
+  export type AbonnementFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * Filter, which Abonnement to fetch.
+     */
+    where: AbonnementWhereUniqueInput
+  }
+
+  /**
+   * Abonnement findUniqueOrThrow
+   */
+  export type AbonnementFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * Filter, which Abonnement to fetch.
+     */
+    where: AbonnementWhereUniqueInput
+  }
+
+  /**
+   * Abonnement findFirst
+   */
+  export type AbonnementFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * Filter, which Abonnement to fetch.
+     */
+    where?: AbonnementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Abonnements to fetch.
+     */
+    orderBy?: AbonnementOrderByWithRelationInput | AbonnementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Abonnements.
+     */
+    cursor?: AbonnementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Abonnements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Abonnements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Abonnements.
+     */
+    distinct?: AbonnementScalarFieldEnum | AbonnementScalarFieldEnum[]
+  }
+
+  /**
+   * Abonnement findFirstOrThrow
+   */
+  export type AbonnementFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * Filter, which Abonnement to fetch.
+     */
+    where?: AbonnementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Abonnements to fetch.
+     */
+    orderBy?: AbonnementOrderByWithRelationInput | AbonnementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Abonnements.
+     */
+    cursor?: AbonnementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Abonnements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Abonnements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Abonnements.
+     */
+    distinct?: AbonnementScalarFieldEnum | AbonnementScalarFieldEnum[]
+  }
+
+  /**
+   * Abonnement findMany
+   */
+  export type AbonnementFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * Filter, which Abonnements to fetch.
+     */
+    where?: AbonnementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Abonnements to fetch.
+     */
+    orderBy?: AbonnementOrderByWithRelationInput | AbonnementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Abonnements.
+     */
+    cursor?: AbonnementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Abonnements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Abonnements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Abonnements.
+     */
+    distinct?: AbonnementScalarFieldEnum | AbonnementScalarFieldEnum[]
+  }
+
+  /**
+   * Abonnement create
+   */
+  export type AbonnementCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Abonnement.
+     */
+    data: XOR<AbonnementCreateInput, AbonnementUncheckedCreateInput>
+  }
+
+  /**
+   * Abonnement createMany
+   */
+  export type AbonnementCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Abonnements.
+     */
+    data: AbonnementCreateManyInput | AbonnementCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Abonnement createManyAndReturn
+   */
+  export type AbonnementCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * The data used to create many Abonnements.
+     */
+    data: AbonnementCreateManyInput | AbonnementCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Abonnement update
+   */
+  export type AbonnementUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Abonnement.
+     */
+    data: XOR<AbonnementUpdateInput, AbonnementUncheckedUpdateInput>
+    /**
+     * Choose, which Abonnement to update.
+     */
+    where: AbonnementWhereUniqueInput
+  }
+
+  /**
+   * Abonnement updateMany
+   */
+  export type AbonnementUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Abonnements.
+     */
+    data: XOR<AbonnementUpdateManyMutationInput, AbonnementUncheckedUpdateManyInput>
+    /**
+     * Filter which Abonnements to update
+     */
+    where?: AbonnementWhereInput
+    /**
+     * Limit how many Abonnements to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Abonnement updateManyAndReturn
+   */
+  export type AbonnementUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * The data used to update Abonnements.
+     */
+    data: XOR<AbonnementUpdateManyMutationInput, AbonnementUncheckedUpdateManyInput>
+    /**
+     * Filter which Abonnements to update
+     */
+    where?: AbonnementWhereInput
+    /**
+     * Limit how many Abonnements to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Abonnement upsert
+   */
+  export type AbonnementUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Abonnement to update in case it exists.
+     */
+    where: AbonnementWhereUniqueInput
+    /**
+     * In case the Abonnement found by the `where` argument doesn't exist, create a new Abonnement with this data.
+     */
+    create: XOR<AbonnementCreateInput, AbonnementUncheckedCreateInput>
+    /**
+     * In case the Abonnement was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AbonnementUpdateInput, AbonnementUncheckedUpdateInput>
+  }
+
+  /**
+   * Abonnement delete
+   */
+  export type AbonnementDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+    /**
+     * Filter which Abonnement to delete.
+     */
+    where: AbonnementWhereUniqueInput
+  }
+
+  /**
+   * Abonnement deleteMany
+   */
+  export type AbonnementDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Abonnements to delete
+     */
+    where?: AbonnementWhereInput
+    /**
+     * Limit how many Abonnements to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Abonnement.paiements
+   */
+  export type Abonnement$paiementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    where?: PaiementWhereInput
+    orderBy?: PaiementOrderByWithRelationInput | PaiementOrderByWithRelationInput[]
+    cursor?: PaiementWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaiementScalarFieldEnum | PaiementScalarFieldEnum[]
+  }
+
+  /**
+   * Abonnement without action
+   */
+  export type AbonnementDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Abonnement
+     */
+    select?: AbonnementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Abonnement
+     */
+    omit?: AbonnementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AbonnementInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Paiement
+   */
+
+  export type AggregatePaiement = {
+    _count: PaiementCountAggregateOutputType | null
+    _avg: PaiementAvgAggregateOutputType | null
+    _sum: PaiementSumAggregateOutputType | null
+    _min: PaiementMinAggregateOutputType | null
+    _max: PaiementMaxAggregateOutputType | null
+  }
+
+  export type PaiementAvgAggregateOutputType = {
+    montant: number | null
+  }
+
+  export type PaiementSumAggregateOutputType = {
+    montant: number | null
+  }
+
+  export type PaiementMinAggregateOutputType = {
+    id: string | null
+    abonnementId: string | null
+    montant: number | null
+    dateReglement: Date | null
+    methode: string | null
+    reference: string | null
+    note: string | null
+    confirmeParAdmin: boolean | null
+    createdAt: Date | null
+  }
+
+  export type PaiementMaxAggregateOutputType = {
+    id: string | null
+    abonnementId: string | null
+    montant: number | null
+    dateReglement: Date | null
+    methode: string | null
+    reference: string | null
+    note: string | null
+    confirmeParAdmin: boolean | null
+    createdAt: Date | null
+  }
+
+  export type PaiementCountAggregateOutputType = {
+    id: number
+    abonnementId: number
+    montant: number
+    dateReglement: number
+    methode: number
+    reference: number
+    note: number
+    confirmeParAdmin: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PaiementAvgAggregateInputType = {
+    montant?: true
+  }
+
+  export type PaiementSumAggregateInputType = {
+    montant?: true
+  }
+
+  export type PaiementMinAggregateInputType = {
+    id?: true
+    abonnementId?: true
+    montant?: true
+    dateReglement?: true
+    methode?: true
+    reference?: true
+    note?: true
+    confirmeParAdmin?: true
+    createdAt?: true
+  }
+
+  export type PaiementMaxAggregateInputType = {
+    id?: true
+    abonnementId?: true
+    montant?: true
+    dateReglement?: true
+    methode?: true
+    reference?: true
+    note?: true
+    confirmeParAdmin?: true
+    createdAt?: true
+  }
+
+  export type PaiementCountAggregateInputType = {
+    id?: true
+    abonnementId?: true
+    montant?: true
+    dateReglement?: true
+    methode?: true
+    reference?: true
+    note?: true
+    confirmeParAdmin?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PaiementAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Paiement to aggregate.
+     */
+    where?: PaiementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Paiements to fetch.
+     */
+    orderBy?: PaiementOrderByWithRelationInput | PaiementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PaiementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Paiements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Paiements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Paiements
+    **/
+    _count?: true | PaiementCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PaiementAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PaiementSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PaiementMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PaiementMaxAggregateInputType
+  }
+
+  export type GetPaiementAggregateType<T extends PaiementAggregateArgs> = {
+        [P in keyof T & keyof AggregatePaiement]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePaiement[P]>
+      : GetScalarType<T[P], AggregatePaiement[P]>
+  }
+
+
+
+
+  export type PaiementGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaiementWhereInput
+    orderBy?: PaiementOrderByWithAggregationInput | PaiementOrderByWithAggregationInput[]
+    by: PaiementScalarFieldEnum[] | PaiementScalarFieldEnum
+    having?: PaiementScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PaiementCountAggregateInputType | true
+    _avg?: PaiementAvgAggregateInputType
+    _sum?: PaiementSumAggregateInputType
+    _min?: PaiementMinAggregateInputType
+    _max?: PaiementMaxAggregateInputType
+  }
+
+  export type PaiementGroupByOutputType = {
+    id: string
+    abonnementId: string
+    montant: number
+    dateReglement: Date
+    methode: string
+    reference: string | null
+    note: string | null
+    confirmeParAdmin: boolean
+    createdAt: Date
+    _count: PaiementCountAggregateOutputType | null
+    _avg: PaiementAvgAggregateOutputType | null
+    _sum: PaiementSumAggregateOutputType | null
+    _min: PaiementMinAggregateOutputType | null
+    _max: PaiementMaxAggregateOutputType | null
+  }
+
+  type GetPaiementGroupByPayload<T extends PaiementGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PaiementGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PaiementGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PaiementGroupByOutputType[P]>
+            : GetScalarType<T[P], PaiementGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PaiementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    abonnementId?: boolean
+    montant?: boolean
+    dateReglement?: boolean
+    methode?: boolean
+    reference?: boolean
+    note?: boolean
+    confirmeParAdmin?: boolean
+    createdAt?: boolean
+    abonnement?: boolean | AbonnementDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paiement"]>
+
+  export type PaiementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    abonnementId?: boolean
+    montant?: boolean
+    dateReglement?: boolean
+    methode?: boolean
+    reference?: boolean
+    note?: boolean
+    confirmeParAdmin?: boolean
+    createdAt?: boolean
+    abonnement?: boolean | AbonnementDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paiement"]>
+
+  export type PaiementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    abonnementId?: boolean
+    montant?: boolean
+    dateReglement?: boolean
+    methode?: boolean
+    reference?: boolean
+    note?: boolean
+    confirmeParAdmin?: boolean
+    createdAt?: boolean
+    abonnement?: boolean | AbonnementDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paiement"]>
+
+  export type PaiementSelectScalar = {
+    id?: boolean
+    abonnementId?: boolean
+    montant?: boolean
+    dateReglement?: boolean
+    methode?: boolean
+    reference?: boolean
+    note?: boolean
+    confirmeParAdmin?: boolean
+    createdAt?: boolean
+  }
+
+  export type PaiementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "abonnementId" | "montant" | "dateReglement" | "methode" | "reference" | "note" | "confirmeParAdmin" | "createdAt", ExtArgs["result"]["paiement"]>
+  export type PaiementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    abonnement?: boolean | AbonnementDefaultArgs<ExtArgs>
+  }
+  export type PaiementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    abonnement?: boolean | AbonnementDefaultArgs<ExtArgs>
+  }
+  export type PaiementIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    abonnement?: boolean | AbonnementDefaultArgs<ExtArgs>
+  }
+
+  export type $PaiementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Paiement"
+    objects: {
+      abonnement: Prisma.$AbonnementPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      abonnementId: string
+      montant: number
+      dateReglement: Date
+      methode: string
+      reference: string | null
+      note: string | null
+      confirmeParAdmin: boolean
+      createdAt: Date
+    }, ExtArgs["result"]["paiement"]>
+    composites: {}
+  }
+
+  type PaiementGetPayload<S extends boolean | null | undefined | PaiementDefaultArgs> = $Result.GetResult<Prisma.$PaiementPayload, S>
+
+  type PaiementCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PaiementFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PaiementCountAggregateInputType | true
+    }
+
+  export interface PaiementDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Paiement'], meta: { name: 'Paiement' } }
+    /**
+     * Find zero or one Paiement that matches the filter.
+     * @param {PaiementFindUniqueArgs} args - Arguments to find a Paiement
+     * @example
+     * // Get one Paiement
+     * const paiement = await prisma.paiement.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PaiementFindUniqueArgs>(args: SelectSubset<T, PaiementFindUniqueArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Paiement that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PaiementFindUniqueOrThrowArgs} args - Arguments to find a Paiement
+     * @example
+     * // Get one Paiement
+     * const paiement = await prisma.paiement.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PaiementFindUniqueOrThrowArgs>(args: SelectSubset<T, PaiementFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Paiement that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaiementFindFirstArgs} args - Arguments to find a Paiement
+     * @example
+     * // Get one Paiement
+     * const paiement = await prisma.paiement.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PaiementFindFirstArgs>(args?: SelectSubset<T, PaiementFindFirstArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Paiement that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaiementFindFirstOrThrowArgs} args - Arguments to find a Paiement
+     * @example
+     * // Get one Paiement
+     * const paiement = await prisma.paiement.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PaiementFindFirstOrThrowArgs>(args?: SelectSubset<T, PaiementFindFirstOrThrowArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Paiements that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaiementFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Paiements
+     * const paiements = await prisma.paiement.findMany()
+     * 
+     * // Get first 10 Paiements
+     * const paiements = await prisma.paiement.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const paiementWithIdOnly = await prisma.paiement.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PaiementFindManyArgs>(args?: SelectSubset<T, PaiementFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Paiement.
+     * @param {PaiementCreateArgs} args - Arguments to create a Paiement.
+     * @example
+     * // Create one Paiement
+     * const Paiement = await prisma.paiement.create({
+     *   data: {
+     *     // ... data to create a Paiement
+     *   }
+     * })
+     * 
+     */
+    create<T extends PaiementCreateArgs>(args: SelectSubset<T, PaiementCreateArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Paiements.
+     * @param {PaiementCreateManyArgs} args - Arguments to create many Paiements.
+     * @example
+     * // Create many Paiements
+     * const paiement = await prisma.paiement.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PaiementCreateManyArgs>(args?: SelectSubset<T, PaiementCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Paiements and returns the data saved in the database.
+     * @param {PaiementCreateManyAndReturnArgs} args - Arguments to create many Paiements.
+     * @example
+     * // Create many Paiements
+     * const paiement = await prisma.paiement.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Paiements and only return the `id`
+     * const paiementWithIdOnly = await prisma.paiement.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PaiementCreateManyAndReturnArgs>(args?: SelectSubset<T, PaiementCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Paiement.
+     * @param {PaiementDeleteArgs} args - Arguments to delete one Paiement.
+     * @example
+     * // Delete one Paiement
+     * const Paiement = await prisma.paiement.delete({
+     *   where: {
+     *     // ... filter to delete one Paiement
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PaiementDeleteArgs>(args: SelectSubset<T, PaiementDeleteArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Paiement.
+     * @param {PaiementUpdateArgs} args - Arguments to update one Paiement.
+     * @example
+     * // Update one Paiement
+     * const paiement = await prisma.paiement.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PaiementUpdateArgs>(args: SelectSubset<T, PaiementUpdateArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Paiements.
+     * @param {PaiementDeleteManyArgs} args - Arguments to filter Paiements to delete.
+     * @example
+     * // Delete a few Paiements
+     * const { count } = await prisma.paiement.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PaiementDeleteManyArgs>(args?: SelectSubset<T, PaiementDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Paiements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaiementUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Paiements
+     * const paiement = await prisma.paiement.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PaiementUpdateManyArgs>(args: SelectSubset<T, PaiementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Paiements and returns the data updated in the database.
+     * @param {PaiementUpdateManyAndReturnArgs} args - Arguments to update many Paiements.
+     * @example
+     * // Update many Paiements
+     * const paiement = await prisma.paiement.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Paiements and only return the `id`
+     * const paiementWithIdOnly = await prisma.paiement.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PaiementUpdateManyAndReturnArgs>(args: SelectSubset<T, PaiementUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Paiement.
+     * @param {PaiementUpsertArgs} args - Arguments to update or create a Paiement.
+     * @example
+     * // Update or create a Paiement
+     * const paiement = await prisma.paiement.upsert({
+     *   create: {
+     *     // ... data to create a Paiement
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Paiement we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PaiementUpsertArgs>(args: SelectSubset<T, PaiementUpsertArgs<ExtArgs>>): Prisma__PaiementClient<$Result.GetResult<Prisma.$PaiementPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Paiements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaiementCountArgs} args - Arguments to filter Paiements to count.
+     * @example
+     * // Count the number of Paiements
+     * const count = await prisma.paiement.count({
+     *   where: {
+     *     // ... the filter for the Paiements we want to count
+     *   }
+     * })
+    **/
+    count<T extends PaiementCountArgs>(
+      args?: Subset<T, PaiementCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PaiementCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Paiement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaiementAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PaiementAggregateArgs>(args: Subset<T, PaiementAggregateArgs>): Prisma.PrismaPromise<GetPaiementAggregateType<T>>
+
+    /**
+     * Group by Paiement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaiementGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PaiementGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PaiementGroupByArgs['orderBy'] }
+        : { orderBy?: PaiementGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PaiementGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPaiementGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Paiement model
+   */
+  readonly fields: PaiementFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Paiement.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PaiementClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    abonnement<T extends AbonnementDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AbonnementDefaultArgs<ExtArgs>>): Prisma__AbonnementClient<$Result.GetResult<Prisma.$AbonnementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Paiement model
+   */
+  interface PaiementFieldRefs {
+    readonly id: FieldRef<"Paiement", 'String'>
+    readonly abonnementId: FieldRef<"Paiement", 'String'>
+    readonly montant: FieldRef<"Paiement", 'Float'>
+    readonly dateReglement: FieldRef<"Paiement", 'DateTime'>
+    readonly methode: FieldRef<"Paiement", 'String'>
+    readonly reference: FieldRef<"Paiement", 'String'>
+    readonly note: FieldRef<"Paiement", 'String'>
+    readonly confirmeParAdmin: FieldRef<"Paiement", 'Boolean'>
+    readonly createdAt: FieldRef<"Paiement", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Paiement findUnique
+   */
+  export type PaiementFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * Filter, which Paiement to fetch.
+     */
+    where: PaiementWhereUniqueInput
+  }
+
+  /**
+   * Paiement findUniqueOrThrow
+   */
+  export type PaiementFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * Filter, which Paiement to fetch.
+     */
+    where: PaiementWhereUniqueInput
+  }
+
+  /**
+   * Paiement findFirst
+   */
+  export type PaiementFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * Filter, which Paiement to fetch.
+     */
+    where?: PaiementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Paiements to fetch.
+     */
+    orderBy?: PaiementOrderByWithRelationInput | PaiementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Paiements.
+     */
+    cursor?: PaiementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Paiements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Paiements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Paiements.
+     */
+    distinct?: PaiementScalarFieldEnum | PaiementScalarFieldEnum[]
+  }
+
+  /**
+   * Paiement findFirstOrThrow
+   */
+  export type PaiementFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * Filter, which Paiement to fetch.
+     */
+    where?: PaiementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Paiements to fetch.
+     */
+    orderBy?: PaiementOrderByWithRelationInput | PaiementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Paiements.
+     */
+    cursor?: PaiementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Paiements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Paiements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Paiements.
+     */
+    distinct?: PaiementScalarFieldEnum | PaiementScalarFieldEnum[]
+  }
+
+  /**
+   * Paiement findMany
+   */
+  export type PaiementFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * Filter, which Paiements to fetch.
+     */
+    where?: PaiementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Paiements to fetch.
+     */
+    orderBy?: PaiementOrderByWithRelationInput | PaiementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Paiements.
+     */
+    cursor?: PaiementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Paiements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Paiements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Paiements.
+     */
+    distinct?: PaiementScalarFieldEnum | PaiementScalarFieldEnum[]
+  }
+
+  /**
+   * Paiement create
+   */
+  export type PaiementCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Paiement.
+     */
+    data: XOR<PaiementCreateInput, PaiementUncheckedCreateInput>
+  }
+
+  /**
+   * Paiement createMany
+   */
+  export type PaiementCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Paiements.
+     */
+    data: PaiementCreateManyInput | PaiementCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Paiement createManyAndReturn
+   */
+  export type PaiementCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * The data used to create many Paiements.
+     */
+    data: PaiementCreateManyInput | PaiementCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Paiement update
+   */
+  export type PaiementUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Paiement.
+     */
+    data: XOR<PaiementUpdateInput, PaiementUncheckedUpdateInput>
+    /**
+     * Choose, which Paiement to update.
+     */
+    where: PaiementWhereUniqueInput
+  }
+
+  /**
+   * Paiement updateMany
+   */
+  export type PaiementUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Paiements.
+     */
+    data: XOR<PaiementUpdateManyMutationInput, PaiementUncheckedUpdateManyInput>
+    /**
+     * Filter which Paiements to update
+     */
+    where?: PaiementWhereInput
+    /**
+     * Limit how many Paiements to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Paiement updateManyAndReturn
+   */
+  export type PaiementUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * The data used to update Paiements.
+     */
+    data: XOR<PaiementUpdateManyMutationInput, PaiementUncheckedUpdateManyInput>
+    /**
+     * Filter which Paiements to update
+     */
+    where?: PaiementWhereInput
+    /**
+     * Limit how many Paiements to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Paiement upsert
+   */
+  export type PaiementUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Paiement to update in case it exists.
+     */
+    where: PaiementWhereUniqueInput
+    /**
+     * In case the Paiement found by the `where` argument doesn't exist, create a new Paiement with this data.
+     */
+    create: XOR<PaiementCreateInput, PaiementUncheckedCreateInput>
+    /**
+     * In case the Paiement was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PaiementUpdateInput, PaiementUncheckedUpdateInput>
+  }
+
+  /**
+   * Paiement delete
+   */
+  export type PaiementDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
+    /**
+     * Filter which Paiement to delete.
+     */
+    where: PaiementWhereUniqueInput
+  }
+
+  /**
+   * Paiement deleteMany
+   */
+  export type PaiementDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Paiements to delete
+     */
+    where?: PaiementWhereInput
+    /**
+     * Limit how many Paiements to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Paiement without action
+   */
+  export type PaiementDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Paiement
+     */
+    select?: PaiementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Paiement
+     */
+    omit?: PaiementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaiementInclude<ExtArgs> | null
   }
 
 
@@ -18956,7 +21561,8 @@ export namespace Prisma {
     adminNote: 'adminNote',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    flowmerceApiKey: 'flowmerceApiKey'
+    flowmerceApiKey: 'flowmerceApiKey',
+    prioriteAffichage: 'prioriteAffichage'
   };
 
   export type VendeurProfileScalarFieldEnum = (typeof VendeurProfileScalarFieldEnum)[keyof typeof VendeurProfileScalarFieldEnum]
@@ -19035,6 +21641,36 @@ export namespace Prisma {
   };
 
   export type VariantOptionScalarFieldEnum = (typeof VariantOptionScalarFieldEnum)[keyof typeof VariantOptionScalarFieldEnum]
+
+
+  export const AbonnementScalarFieldEnum: {
+    id: 'id',
+    vendeurId: 'vendeurId',
+    niveau: 'niveau',
+    statut: 'statut',
+    dateDebut: 'dateDebut',
+    dateFin: 'dateFin',
+    periodicite: 'periodicite',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AbonnementScalarFieldEnum = (typeof AbonnementScalarFieldEnum)[keyof typeof AbonnementScalarFieldEnum]
+
+
+  export const PaiementScalarFieldEnum: {
+    id: 'id',
+    abonnementId: 'abonnementId',
+    montant: 'montant',
+    dateReglement: 'dateReglement',
+    methode: 'methode',
+    reference: 'reference',
+    note: 'note',
+    confirmeParAdmin: 'confirmeParAdmin',
+    createdAt: 'createdAt'
+  };
+
+  export type PaiementScalarFieldEnum = (typeof PaiementScalarFieldEnum)[keyof typeof PaiementScalarFieldEnum]
 
 
   export const CartScalarFieldEnum: {
@@ -19327,6 +21963,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'NiveauAbonnement'
+   */
+  export type EnumNiveauAbonnementFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NiveauAbonnement'>
+    
+
+
+  /**
+   * Reference to a field of type 'NiveauAbonnement[]'
+   */
+  export type ListEnumNiveauAbonnementFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NiveauAbonnement[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatutAbonnement'
+   */
+  export type EnumStatutAbonnementFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatutAbonnement'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatutAbonnement[]'
+   */
+  export type ListEnumStatutAbonnementFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatutAbonnement[]'>
+    
+
+
+  /**
    * Reference to a field of type 'OrderStatus'
    */
   export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus'>
@@ -19465,9 +22129,11 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VendeurProfile"> | Date | string
     updatedAt?: DateTimeFilter<"VendeurProfile"> | Date | string
     flowmerceApiKey?: StringNullableFilter<"VendeurProfile"> | string | null
+    prioriteAffichage?: IntFilter<"VendeurProfile"> | number
     categories?: CategoryListRelationFilter
     products?: ProductListRelationFilter
     documents?: VendeurDocumentListRelationFilter
+    abonnement?: XOR<AbonnementNullableScalarRelationFilter, AbonnementWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
@@ -19481,9 +22147,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     flowmerceApiKey?: SortOrderInput | SortOrder
+    prioriteAffichage?: SortOrder
     categories?: CategoryOrderByRelationAggregateInput
     products?: ProductOrderByRelationAggregateInput
     documents?: VendeurDocumentOrderByRelationAggregateInput
+    abonnement?: AbonnementOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
   }
 
@@ -19500,9 +22168,11 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VendeurProfile"> | Date | string
     updatedAt?: DateTimeFilter<"VendeurProfile"> | Date | string
     flowmerceApiKey?: StringNullableFilter<"VendeurProfile"> | string | null
+    prioriteAffichage?: IntFilter<"VendeurProfile"> | number
     categories?: CategoryListRelationFilter
     products?: ProductListRelationFilter
     documents?: VendeurDocumentListRelationFilter
+    abonnement?: XOR<AbonnementNullableScalarRelationFilter, AbonnementWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "userId">
 
@@ -19516,9 +22186,12 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     flowmerceApiKey?: SortOrderInput | SortOrder
+    prioriteAffichage?: SortOrder
     _count?: VendeurProfileCountOrderByAggregateInput
+    _avg?: VendeurProfileAvgOrderByAggregateInput
     _max?: VendeurProfileMaxOrderByAggregateInput
     _min?: VendeurProfileMinOrderByAggregateInput
+    _sum?: VendeurProfileSumOrderByAggregateInput
   }
 
   export type VendeurProfileScalarWhereWithAggregatesInput = {
@@ -19534,6 +22207,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"VendeurProfile"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"VendeurProfile"> | Date | string
     flowmerceApiKey?: StringNullableWithAggregatesFilter<"VendeurProfile"> | string | null
+    prioriteAffichage?: IntWithAggregatesFilter<"VendeurProfile"> | number
   }
 
   export type VendeurDocumentWhereInput = {
@@ -19948,6 +22622,161 @@ export namespace Prisma {
     stock?: IntWithAggregatesFilter<"VariantOption"> | number
     createdAt?: DateTimeWithAggregatesFilter<"VariantOption"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"VariantOption"> | Date | string
+  }
+
+  export type AbonnementWhereInput = {
+    AND?: AbonnementWhereInput | AbonnementWhereInput[]
+    OR?: AbonnementWhereInput[]
+    NOT?: AbonnementWhereInput | AbonnementWhereInput[]
+    id?: StringFilter<"Abonnement"> | string
+    vendeurId?: StringFilter<"Abonnement"> | string
+    niveau?: EnumNiveauAbonnementFilter<"Abonnement"> | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFilter<"Abonnement"> | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFilter<"Abonnement"> | Date | string
+    dateFin?: DateTimeFilter<"Abonnement"> | Date | string
+    periodicite?: StringNullableFilter<"Abonnement"> | string | null
+    createdAt?: DateTimeFilter<"Abonnement"> | Date | string
+    updatedAt?: DateTimeFilter<"Abonnement"> | Date | string
+    vendeur?: XOR<VendeurProfileScalarRelationFilter, VendeurProfileWhereInput>
+    paiements?: PaiementListRelationFilter
+  }
+
+  export type AbonnementOrderByWithRelationInput = {
+    id?: SortOrder
+    vendeurId?: SortOrder
+    niveau?: SortOrder
+    statut?: SortOrder
+    dateDebut?: SortOrder
+    dateFin?: SortOrder
+    periodicite?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    vendeur?: VendeurProfileOrderByWithRelationInput
+    paiements?: PaiementOrderByRelationAggregateInput
+  }
+
+  export type AbonnementWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    vendeurId?: string
+    AND?: AbonnementWhereInput | AbonnementWhereInput[]
+    OR?: AbonnementWhereInput[]
+    NOT?: AbonnementWhereInput | AbonnementWhereInput[]
+    niveau?: EnumNiveauAbonnementFilter<"Abonnement"> | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFilter<"Abonnement"> | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFilter<"Abonnement"> | Date | string
+    dateFin?: DateTimeFilter<"Abonnement"> | Date | string
+    periodicite?: StringNullableFilter<"Abonnement"> | string | null
+    createdAt?: DateTimeFilter<"Abonnement"> | Date | string
+    updatedAt?: DateTimeFilter<"Abonnement"> | Date | string
+    vendeur?: XOR<VendeurProfileScalarRelationFilter, VendeurProfileWhereInput>
+    paiements?: PaiementListRelationFilter
+  }, "id" | "vendeurId">
+
+  export type AbonnementOrderByWithAggregationInput = {
+    id?: SortOrder
+    vendeurId?: SortOrder
+    niveau?: SortOrder
+    statut?: SortOrder
+    dateDebut?: SortOrder
+    dateFin?: SortOrder
+    periodicite?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AbonnementCountOrderByAggregateInput
+    _max?: AbonnementMaxOrderByAggregateInput
+    _min?: AbonnementMinOrderByAggregateInput
+  }
+
+  export type AbonnementScalarWhereWithAggregatesInput = {
+    AND?: AbonnementScalarWhereWithAggregatesInput | AbonnementScalarWhereWithAggregatesInput[]
+    OR?: AbonnementScalarWhereWithAggregatesInput[]
+    NOT?: AbonnementScalarWhereWithAggregatesInput | AbonnementScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Abonnement"> | string
+    vendeurId?: StringWithAggregatesFilter<"Abonnement"> | string
+    niveau?: EnumNiveauAbonnementWithAggregatesFilter<"Abonnement"> | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementWithAggregatesFilter<"Abonnement"> | $Enums.StatutAbonnement
+    dateDebut?: DateTimeWithAggregatesFilter<"Abonnement"> | Date | string
+    dateFin?: DateTimeWithAggregatesFilter<"Abonnement"> | Date | string
+    periodicite?: StringNullableWithAggregatesFilter<"Abonnement"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Abonnement"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Abonnement"> | Date | string
+  }
+
+  export type PaiementWhereInput = {
+    AND?: PaiementWhereInput | PaiementWhereInput[]
+    OR?: PaiementWhereInput[]
+    NOT?: PaiementWhereInput | PaiementWhereInput[]
+    id?: StringFilter<"Paiement"> | string
+    abonnementId?: StringFilter<"Paiement"> | string
+    montant?: FloatFilter<"Paiement"> | number
+    dateReglement?: DateTimeFilter<"Paiement"> | Date | string
+    methode?: StringFilter<"Paiement"> | string
+    reference?: StringNullableFilter<"Paiement"> | string | null
+    note?: StringNullableFilter<"Paiement"> | string | null
+    confirmeParAdmin?: BoolFilter<"Paiement"> | boolean
+    createdAt?: DateTimeFilter<"Paiement"> | Date | string
+    abonnement?: XOR<AbonnementScalarRelationFilter, AbonnementWhereInput>
+  }
+
+  export type PaiementOrderByWithRelationInput = {
+    id?: SortOrder
+    abonnementId?: SortOrder
+    montant?: SortOrder
+    dateReglement?: SortOrder
+    methode?: SortOrder
+    reference?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    confirmeParAdmin?: SortOrder
+    createdAt?: SortOrder
+    abonnement?: AbonnementOrderByWithRelationInput
+  }
+
+  export type PaiementWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PaiementWhereInput | PaiementWhereInput[]
+    OR?: PaiementWhereInput[]
+    NOT?: PaiementWhereInput | PaiementWhereInput[]
+    abonnementId?: StringFilter<"Paiement"> | string
+    montant?: FloatFilter<"Paiement"> | number
+    dateReglement?: DateTimeFilter<"Paiement"> | Date | string
+    methode?: StringFilter<"Paiement"> | string
+    reference?: StringNullableFilter<"Paiement"> | string | null
+    note?: StringNullableFilter<"Paiement"> | string | null
+    confirmeParAdmin?: BoolFilter<"Paiement"> | boolean
+    createdAt?: DateTimeFilter<"Paiement"> | Date | string
+    abonnement?: XOR<AbonnementScalarRelationFilter, AbonnementWhereInput>
+  }, "id">
+
+  export type PaiementOrderByWithAggregationInput = {
+    id?: SortOrder
+    abonnementId?: SortOrder
+    montant?: SortOrder
+    dateReglement?: SortOrder
+    methode?: SortOrder
+    reference?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    confirmeParAdmin?: SortOrder
+    createdAt?: SortOrder
+    _count?: PaiementCountOrderByAggregateInput
+    _avg?: PaiementAvgOrderByAggregateInput
+    _max?: PaiementMaxOrderByAggregateInput
+    _min?: PaiementMinOrderByAggregateInput
+    _sum?: PaiementSumOrderByAggregateInput
+  }
+
+  export type PaiementScalarWhereWithAggregatesInput = {
+    AND?: PaiementScalarWhereWithAggregatesInput | PaiementScalarWhereWithAggregatesInput[]
+    OR?: PaiementScalarWhereWithAggregatesInput[]
+    NOT?: PaiementScalarWhereWithAggregatesInput | PaiementScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Paiement"> | string
+    abonnementId?: StringWithAggregatesFilter<"Paiement"> | string
+    montant?: FloatWithAggregatesFilter<"Paiement"> | number
+    dateReglement?: DateTimeWithAggregatesFilter<"Paiement"> | Date | string
+    methode?: StringWithAggregatesFilter<"Paiement"> | string
+    reference?: StringNullableWithAggregatesFilter<"Paiement"> | string | null
+    note?: StringNullableWithAggregatesFilter<"Paiement"> | string | null
+    confirmeParAdmin?: BoolWithAggregatesFilter<"Paiement"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"Paiement"> | Date | string
   }
 
   export type CartWhereInput = {
@@ -20602,9 +23431,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryCreateNestedManyWithoutVendeurInput
     products?: ProductCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementCreateNestedOneWithoutVendeurInput
     user: UserCreateNestedOneWithoutVendeurProfileInput
   }
 
@@ -20618,9 +23449,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryUncheckedCreateNestedManyWithoutVendeurInput
     products?: ProductUncheckedCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentUncheckedCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementUncheckedCreateNestedOneWithoutVendeurInput
   }
 
   export type VendeurProfileUpdateInput = {
@@ -20632,9 +23465,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUpdateManyWithoutVendeurNestedInput
     products?: ProductUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUpdateOneWithoutVendeurNestedInput
     user?: UserUpdateOneRequiredWithoutVendeurProfileNestedInput
   }
 
@@ -20648,9 +23483,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUncheckedUpdateManyWithoutVendeurNestedInput
     products?: ProductUncheckedUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUncheckedUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUncheckedUpdateOneWithoutVendeurNestedInput
   }
 
   export type VendeurProfileCreateManyInput = {
@@ -20663,6 +23500,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
   }
 
   export type VendeurProfileUpdateManyMutationInput = {
@@ -20674,6 +23512,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
   }
 
   export type VendeurProfileUncheckedUpdateManyInput = {
@@ -20686,6 +23525,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
   }
 
   export type VendeurDocumentCreateInput = {
@@ -21140,6 +23980,176 @@ export namespace Prisma {
     stock?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AbonnementCreateInput = {
+    id?: string
+    niveau?: $Enums.NiveauAbonnement
+    statut?: $Enums.StatutAbonnement
+    dateDebut?: Date | string
+    dateFin: Date | string
+    periodicite?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vendeur: VendeurProfileCreateNestedOneWithoutAbonnementInput
+    paiements?: PaiementCreateNestedManyWithoutAbonnementInput
+  }
+
+  export type AbonnementUncheckedCreateInput = {
+    id?: string
+    vendeurId: string
+    niveau?: $Enums.NiveauAbonnement
+    statut?: $Enums.StatutAbonnement
+    dateDebut?: Date | string
+    dateFin: Date | string
+    periodicite?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    paiements?: PaiementUncheckedCreateNestedManyWithoutAbonnementInput
+  }
+
+  export type AbonnementUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vendeur?: VendeurProfileUpdateOneRequiredWithoutAbonnementNestedInput
+    paiements?: PaiementUpdateManyWithoutAbonnementNestedInput
+  }
+
+  export type AbonnementUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    vendeurId?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paiements?: PaiementUncheckedUpdateManyWithoutAbonnementNestedInput
+  }
+
+  export type AbonnementCreateManyInput = {
+    id?: string
+    vendeurId: string
+    niveau?: $Enums.NiveauAbonnement
+    statut?: $Enums.StatutAbonnement
+    dateDebut?: Date | string
+    dateFin: Date | string
+    periodicite?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AbonnementUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AbonnementUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    vendeurId?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaiementCreateInput = {
+    id?: string
+    montant: number
+    dateReglement?: Date | string
+    methode: string
+    reference?: string | null
+    note?: string | null
+    confirmeParAdmin?: boolean
+    createdAt?: Date | string
+    abonnement: AbonnementCreateNestedOneWithoutPaiementsInput
+  }
+
+  export type PaiementUncheckedCreateInput = {
+    id?: string
+    abonnementId: string
+    montant: number
+    dateReglement?: Date | string
+    methode: string
+    reference?: string | null
+    note?: string | null
+    confirmeParAdmin?: boolean
+    createdAt?: Date | string
+  }
+
+  export type PaiementUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    montant?: FloatFieldUpdateOperationsInput | number
+    dateReglement?: DateTimeFieldUpdateOperationsInput | Date | string
+    methode?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmeParAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    abonnement?: AbonnementUpdateOneRequiredWithoutPaiementsNestedInput
+  }
+
+  export type PaiementUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    abonnementId?: StringFieldUpdateOperationsInput | string
+    montant?: FloatFieldUpdateOperationsInput | number
+    dateReglement?: DateTimeFieldUpdateOperationsInput | Date | string
+    methode?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmeParAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaiementCreateManyInput = {
+    id?: string
+    abonnementId: string
+    montant: number
+    dateReglement?: Date | string
+    methode: string
+    reference?: string | null
+    note?: string | null
+    confirmeParAdmin?: boolean
+    createdAt?: Date | string
+  }
+
+  export type PaiementUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    montant?: FloatFieldUpdateOperationsInput | number
+    dateReglement?: DateTimeFieldUpdateOperationsInput | Date | string
+    methode?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmeParAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaiementUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    abonnementId?: StringFieldUpdateOperationsInput | string
+    montant?: FloatFieldUpdateOperationsInput | number
+    dateReglement?: DateTimeFieldUpdateOperationsInput | Date | string
+    methode?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmeParAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CartCreateInput = {
@@ -21922,6 +24932,17 @@ export namespace Prisma {
     not?: NestedEnumVendeurStatutFilter<$PrismaModel> | $Enums.VendeurStatut
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
   export type CategoryListRelationFilter = {
     every?: CategoryWhereInput
     some?: CategoryWhereInput
@@ -21938,6 +24959,11 @@ export namespace Prisma {
     every?: VendeurDocumentWhereInput
     some?: VendeurDocumentWhereInput
     none?: VendeurDocumentWhereInput
+  }
+
+  export type AbonnementNullableScalarRelationFilter = {
+    is?: AbonnementWhereInput | null
+    isNot?: AbonnementWhereInput | null
   }
 
   export type UserScalarRelationFilter = {
@@ -21967,6 +24993,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     flowmerceApiKey?: SortOrder
+    prioriteAffichage?: SortOrder
+  }
+
+  export type VendeurProfileAvgOrderByAggregateInput = {
+    prioriteAffichage?: SortOrder
   }
 
   export type VendeurProfileMaxOrderByAggregateInput = {
@@ -21979,6 +25010,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     flowmerceApiKey?: SortOrder
+    prioriteAffichage?: SortOrder
   }
 
   export type VendeurProfileMinOrderByAggregateInput = {
@@ -21991,6 +25023,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     flowmerceApiKey?: SortOrder
+    prioriteAffichage?: SortOrder
+  }
+
+  export type VendeurProfileSumOrderByAggregateInput = {
+    prioriteAffichage?: SortOrder
   }
 
   export type EnumVendeurStatutWithAggregatesFilter<$PrismaModel = never> = {
@@ -22001,6 +25038,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumVendeurStatutFilter<$PrismaModel>
     _max?: NestedEnumVendeurStatutFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type EnumDocumentStatutFilter<$PrismaModel = never> = {
@@ -22123,17 +25176,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -22277,22 +25319,6 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
@@ -22419,6 +25445,135 @@ export namespace Prisma {
 
   export type VariantOptionSumOrderByAggregateInput = {
     stock?: SortOrder
+  }
+
+  export type EnumNiveauAbonnementFilter<$PrismaModel = never> = {
+    equals?: $Enums.NiveauAbonnement | EnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumNiveauAbonnementFilter<$PrismaModel> | $Enums.NiveauAbonnement
+  }
+
+  export type EnumStatutAbonnementFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatutAbonnement | EnumStatutAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatutAbonnementFilter<$PrismaModel> | $Enums.StatutAbonnement
+  }
+
+  export type PaiementListRelationFilter = {
+    every?: PaiementWhereInput
+    some?: PaiementWhereInput
+    none?: PaiementWhereInput
+  }
+
+  export type PaiementOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AbonnementCountOrderByAggregateInput = {
+    id?: SortOrder
+    vendeurId?: SortOrder
+    niveau?: SortOrder
+    statut?: SortOrder
+    dateDebut?: SortOrder
+    dateFin?: SortOrder
+    periodicite?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AbonnementMaxOrderByAggregateInput = {
+    id?: SortOrder
+    vendeurId?: SortOrder
+    niveau?: SortOrder
+    statut?: SortOrder
+    dateDebut?: SortOrder
+    dateFin?: SortOrder
+    periodicite?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AbonnementMinOrderByAggregateInput = {
+    id?: SortOrder
+    vendeurId?: SortOrder
+    niveau?: SortOrder
+    statut?: SortOrder
+    dateDebut?: SortOrder
+    dateFin?: SortOrder
+    periodicite?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumNiveauAbonnementWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NiveauAbonnement | EnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumNiveauAbonnementWithAggregatesFilter<$PrismaModel> | $Enums.NiveauAbonnement
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumNiveauAbonnementFilter<$PrismaModel>
+    _max?: NestedEnumNiveauAbonnementFilter<$PrismaModel>
+  }
+
+  export type EnumStatutAbonnementWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatutAbonnement | EnumStatutAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatutAbonnementWithAggregatesFilter<$PrismaModel> | $Enums.StatutAbonnement
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatutAbonnementFilter<$PrismaModel>
+    _max?: NestedEnumStatutAbonnementFilter<$PrismaModel>
+  }
+
+  export type AbonnementScalarRelationFilter = {
+    is?: AbonnementWhereInput
+    isNot?: AbonnementWhereInput
+  }
+
+  export type PaiementCountOrderByAggregateInput = {
+    id?: SortOrder
+    abonnementId?: SortOrder
+    montant?: SortOrder
+    dateReglement?: SortOrder
+    methode?: SortOrder
+    reference?: SortOrder
+    note?: SortOrder
+    confirmeParAdmin?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PaiementAvgOrderByAggregateInput = {
+    montant?: SortOrder
+  }
+
+  export type PaiementMaxOrderByAggregateInput = {
+    id?: SortOrder
+    abonnementId?: SortOrder
+    montant?: SortOrder
+    dateReglement?: SortOrder
+    methode?: SortOrder
+    reference?: SortOrder
+    note?: SortOrder
+    confirmeParAdmin?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PaiementMinOrderByAggregateInput = {
+    id?: SortOrder
+    abonnementId?: SortOrder
+    montant?: SortOrder
+    dateReglement?: SortOrder
+    methode?: SortOrder
+    reference?: SortOrder
+    note?: SortOrder
+    confirmeParAdmin?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PaiementSumOrderByAggregateInput = {
+    montant?: SortOrder
   }
 
   export type CartCountOrderByAggregateInput = {
@@ -22953,6 +26108,12 @@ export namespace Prisma {
     connect?: VendeurDocumentWhereUniqueInput | VendeurDocumentWhereUniqueInput[]
   }
 
+  export type AbonnementCreateNestedOneWithoutVendeurInput = {
+    create?: XOR<AbonnementCreateWithoutVendeurInput, AbonnementUncheckedCreateWithoutVendeurInput>
+    connectOrCreate?: AbonnementCreateOrConnectWithoutVendeurInput
+    connect?: AbonnementWhereUniqueInput
+  }
+
   export type UserCreateNestedOneWithoutVendeurProfileInput = {
     create?: XOR<UserCreateWithoutVendeurProfileInput, UserUncheckedCreateWithoutVendeurProfileInput>
     connectOrCreate?: UserCreateOrConnectWithoutVendeurProfileInput
@@ -22980,8 +26141,22 @@ export namespace Prisma {
     connect?: VendeurDocumentWhereUniqueInput | VendeurDocumentWhereUniqueInput[]
   }
 
+  export type AbonnementUncheckedCreateNestedOneWithoutVendeurInput = {
+    create?: XOR<AbonnementCreateWithoutVendeurInput, AbonnementUncheckedCreateWithoutVendeurInput>
+    connectOrCreate?: AbonnementCreateOrConnectWithoutVendeurInput
+    connect?: AbonnementWhereUniqueInput
+  }
+
   export type EnumVendeurStatutFieldUpdateOperationsInput = {
     set?: $Enums.VendeurStatut
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type CategoryUpdateManyWithoutVendeurNestedInput = {
@@ -23024,6 +26199,16 @@ export namespace Prisma {
     update?: VendeurDocumentUpdateWithWhereUniqueWithoutVendeurInput | VendeurDocumentUpdateWithWhereUniqueWithoutVendeurInput[]
     updateMany?: VendeurDocumentUpdateManyWithWhereWithoutVendeurInput | VendeurDocumentUpdateManyWithWhereWithoutVendeurInput[]
     deleteMany?: VendeurDocumentScalarWhereInput | VendeurDocumentScalarWhereInput[]
+  }
+
+  export type AbonnementUpdateOneWithoutVendeurNestedInput = {
+    create?: XOR<AbonnementCreateWithoutVendeurInput, AbonnementUncheckedCreateWithoutVendeurInput>
+    connectOrCreate?: AbonnementCreateOrConnectWithoutVendeurInput
+    upsert?: AbonnementUpsertWithoutVendeurInput
+    disconnect?: AbonnementWhereInput | boolean
+    delete?: AbonnementWhereInput | boolean
+    connect?: AbonnementWhereUniqueInput
+    update?: XOR<XOR<AbonnementUpdateToOneWithWhereWithoutVendeurInput, AbonnementUpdateWithoutVendeurInput>, AbonnementUncheckedUpdateWithoutVendeurInput>
   }
 
   export type UserUpdateOneRequiredWithoutVendeurProfileNestedInput = {
@@ -23074,6 +26259,16 @@ export namespace Prisma {
     update?: VendeurDocumentUpdateWithWhereUniqueWithoutVendeurInput | VendeurDocumentUpdateWithWhereUniqueWithoutVendeurInput[]
     updateMany?: VendeurDocumentUpdateManyWithWhereWithoutVendeurInput | VendeurDocumentUpdateManyWithWhereWithoutVendeurInput[]
     deleteMany?: VendeurDocumentScalarWhereInput | VendeurDocumentScalarWhereInput[]
+  }
+
+  export type AbonnementUncheckedUpdateOneWithoutVendeurNestedInput = {
+    create?: XOR<AbonnementCreateWithoutVendeurInput, AbonnementUncheckedCreateWithoutVendeurInput>
+    connectOrCreate?: AbonnementCreateOrConnectWithoutVendeurInput
+    upsert?: AbonnementUpsertWithoutVendeurInput
+    disconnect?: AbonnementWhereInput | boolean
+    delete?: AbonnementWhereInput | boolean
+    connect?: AbonnementWhereUniqueInput
+    update?: XOR<XOR<AbonnementUpdateToOneWithWhereWithoutVendeurInput, AbonnementUpdateWithoutVendeurInput>, AbonnementUncheckedUpdateWithoutVendeurInput>
   }
 
   export type VendeurProfileCreateNestedOneWithoutDocumentsInput = {
@@ -23229,14 +26424,6 @@ export namespace Prisma {
   }
 
   export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
     decrement?: number
@@ -23628,6 +26815,84 @@ export namespace Prisma {
     update?: OrderItemUpdateWithWhereUniqueWithoutVariantOptionInput | OrderItemUpdateWithWhereUniqueWithoutVariantOptionInput[]
     updateMany?: OrderItemUpdateManyWithWhereWithoutVariantOptionInput | OrderItemUpdateManyWithWhereWithoutVariantOptionInput[]
     deleteMany?: OrderItemScalarWhereInput | OrderItemScalarWhereInput[]
+  }
+
+  export type VendeurProfileCreateNestedOneWithoutAbonnementInput = {
+    create?: XOR<VendeurProfileCreateWithoutAbonnementInput, VendeurProfileUncheckedCreateWithoutAbonnementInput>
+    connectOrCreate?: VendeurProfileCreateOrConnectWithoutAbonnementInput
+    connect?: VendeurProfileWhereUniqueInput
+  }
+
+  export type PaiementCreateNestedManyWithoutAbonnementInput = {
+    create?: XOR<PaiementCreateWithoutAbonnementInput, PaiementUncheckedCreateWithoutAbonnementInput> | PaiementCreateWithoutAbonnementInput[] | PaiementUncheckedCreateWithoutAbonnementInput[]
+    connectOrCreate?: PaiementCreateOrConnectWithoutAbonnementInput | PaiementCreateOrConnectWithoutAbonnementInput[]
+    createMany?: PaiementCreateManyAbonnementInputEnvelope
+    connect?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+  }
+
+  export type PaiementUncheckedCreateNestedManyWithoutAbonnementInput = {
+    create?: XOR<PaiementCreateWithoutAbonnementInput, PaiementUncheckedCreateWithoutAbonnementInput> | PaiementCreateWithoutAbonnementInput[] | PaiementUncheckedCreateWithoutAbonnementInput[]
+    connectOrCreate?: PaiementCreateOrConnectWithoutAbonnementInput | PaiementCreateOrConnectWithoutAbonnementInput[]
+    createMany?: PaiementCreateManyAbonnementInputEnvelope
+    connect?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+  }
+
+  export type EnumNiveauAbonnementFieldUpdateOperationsInput = {
+    set?: $Enums.NiveauAbonnement
+  }
+
+  export type EnumStatutAbonnementFieldUpdateOperationsInput = {
+    set?: $Enums.StatutAbonnement
+  }
+
+  export type VendeurProfileUpdateOneRequiredWithoutAbonnementNestedInput = {
+    create?: XOR<VendeurProfileCreateWithoutAbonnementInput, VendeurProfileUncheckedCreateWithoutAbonnementInput>
+    connectOrCreate?: VendeurProfileCreateOrConnectWithoutAbonnementInput
+    upsert?: VendeurProfileUpsertWithoutAbonnementInput
+    connect?: VendeurProfileWhereUniqueInput
+    update?: XOR<XOR<VendeurProfileUpdateToOneWithWhereWithoutAbonnementInput, VendeurProfileUpdateWithoutAbonnementInput>, VendeurProfileUncheckedUpdateWithoutAbonnementInput>
+  }
+
+  export type PaiementUpdateManyWithoutAbonnementNestedInput = {
+    create?: XOR<PaiementCreateWithoutAbonnementInput, PaiementUncheckedCreateWithoutAbonnementInput> | PaiementCreateWithoutAbonnementInput[] | PaiementUncheckedCreateWithoutAbonnementInput[]
+    connectOrCreate?: PaiementCreateOrConnectWithoutAbonnementInput | PaiementCreateOrConnectWithoutAbonnementInput[]
+    upsert?: PaiementUpsertWithWhereUniqueWithoutAbonnementInput | PaiementUpsertWithWhereUniqueWithoutAbonnementInput[]
+    createMany?: PaiementCreateManyAbonnementInputEnvelope
+    set?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    disconnect?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    delete?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    connect?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    update?: PaiementUpdateWithWhereUniqueWithoutAbonnementInput | PaiementUpdateWithWhereUniqueWithoutAbonnementInput[]
+    updateMany?: PaiementUpdateManyWithWhereWithoutAbonnementInput | PaiementUpdateManyWithWhereWithoutAbonnementInput[]
+    deleteMany?: PaiementScalarWhereInput | PaiementScalarWhereInput[]
+  }
+
+  export type PaiementUncheckedUpdateManyWithoutAbonnementNestedInput = {
+    create?: XOR<PaiementCreateWithoutAbonnementInput, PaiementUncheckedCreateWithoutAbonnementInput> | PaiementCreateWithoutAbonnementInput[] | PaiementUncheckedCreateWithoutAbonnementInput[]
+    connectOrCreate?: PaiementCreateOrConnectWithoutAbonnementInput | PaiementCreateOrConnectWithoutAbonnementInput[]
+    upsert?: PaiementUpsertWithWhereUniqueWithoutAbonnementInput | PaiementUpsertWithWhereUniqueWithoutAbonnementInput[]
+    createMany?: PaiementCreateManyAbonnementInputEnvelope
+    set?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    disconnect?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    delete?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    connect?: PaiementWhereUniqueInput | PaiementWhereUniqueInput[]
+    update?: PaiementUpdateWithWhereUniqueWithoutAbonnementInput | PaiementUpdateWithWhereUniqueWithoutAbonnementInput[]
+    updateMany?: PaiementUpdateManyWithWhereWithoutAbonnementInput | PaiementUpdateManyWithWhereWithoutAbonnementInput[]
+    deleteMany?: PaiementScalarWhereInput | PaiementScalarWhereInput[]
+  }
+
+  export type AbonnementCreateNestedOneWithoutPaiementsInput = {
+    create?: XOR<AbonnementCreateWithoutPaiementsInput, AbonnementUncheckedCreateWithoutPaiementsInput>
+    connectOrCreate?: AbonnementCreateOrConnectWithoutPaiementsInput
+    connect?: AbonnementWhereUniqueInput
+  }
+
+  export type AbonnementUpdateOneRequiredWithoutPaiementsNestedInput = {
+    create?: XOR<AbonnementCreateWithoutPaiementsInput, AbonnementUncheckedCreateWithoutPaiementsInput>
+    connectOrCreate?: AbonnementCreateOrConnectWithoutPaiementsInput
+    upsert?: AbonnementUpsertWithoutPaiementsInput
+    connect?: AbonnementWhereUniqueInput
+    update?: XOR<XOR<AbonnementUpdateToOneWithWhereWithoutPaiementsInput, AbonnementUpdateWithoutPaiementsInput>, AbonnementUncheckedUpdateWithoutPaiementsInput>
   }
 
   export type UserCreateNestedOneWithoutCartInput = {
@@ -24095,6 +27360,33 @@ export namespace Prisma {
     _max?: NestedEnumVendeurStatutFilter<$PrismaModel>
   }
 
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type NestedEnumDocumentStatutFilter<$PrismaModel = never> = {
     equals?: $Enums.DocumentStatut | EnumDocumentStatutFieldRefInput<$PrismaModel>
     in?: $Enums.DocumentStatut[] | ListEnumDocumentStatutFieldRefInput<$PrismaModel>
@@ -24129,17 +27421,6 @@ export namespace Prisma {
     _max?: NestedEnumCategoryStatutFilter<$PrismaModel>
   }
 
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type NestedBoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -24159,22 +27440,6 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -24206,6 +27471,40 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedEnumNiveauAbonnementFilter<$PrismaModel = never> = {
+    equals?: $Enums.NiveauAbonnement | EnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumNiveauAbonnementFilter<$PrismaModel> | $Enums.NiveauAbonnement
+  }
+
+  export type NestedEnumStatutAbonnementFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatutAbonnement | EnumStatutAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatutAbonnementFilter<$PrismaModel> | $Enums.StatutAbonnement
+  }
+
+  export type NestedEnumNiveauAbonnementWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NiveauAbonnement | EnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NiveauAbonnement[] | ListEnumNiveauAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumNiveauAbonnementWithAggregatesFilter<$PrismaModel> | $Enums.NiveauAbonnement
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumNiveauAbonnementFilter<$PrismaModel>
+    _max?: NestedEnumNiveauAbonnementFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatutAbonnementWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatutAbonnement | EnumStatutAbonnementFieldRefInput<$PrismaModel>
+    in?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatutAbonnement[] | ListEnumStatutAbonnementFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatutAbonnementWithAggregatesFilter<$PrismaModel> | $Enums.StatutAbonnement
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatutAbonnementFilter<$PrismaModel>
+    _max?: NestedEnumStatutAbonnementFilter<$PrismaModel>
   }
 
   export type NestedEnumOrderStatusFilter<$PrismaModel = never> = {
@@ -24355,9 +27654,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryCreateNestedManyWithoutVendeurInput
     products?: ProductCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementCreateNestedOneWithoutVendeurInput
   }
 
   export type VendeurProfileUncheckedCreateWithoutUserInput = {
@@ -24369,9 +27670,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryUncheckedCreateNestedManyWithoutVendeurInput
     products?: ProductUncheckedCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentUncheckedCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementUncheckedCreateNestedOneWithoutVendeurInput
   }
 
   export type VendeurProfileCreateOrConnectWithoutUserInput = {
@@ -24519,9 +27822,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUpdateManyWithoutVendeurNestedInput
     products?: ProductUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUpdateOneWithoutVendeurNestedInput
   }
 
   export type VendeurProfileUncheckedUpdateWithoutUserInput = {
@@ -24533,9 +27838,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUncheckedUpdateManyWithoutVendeurNestedInput
     products?: ProductUncheckedUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUncheckedUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUncheckedUpdateOneWithoutVendeurNestedInput
   }
 
   export type CategoryCreateWithoutVendeurInput = {
@@ -24650,6 +27957,35 @@ export namespace Prisma {
   export type VendeurDocumentCreateManyVendeurInputEnvelope = {
     data: VendeurDocumentCreateManyVendeurInput | VendeurDocumentCreateManyVendeurInput[]
     skipDuplicates?: boolean
+  }
+
+  export type AbonnementCreateWithoutVendeurInput = {
+    id?: string
+    niveau?: $Enums.NiveauAbonnement
+    statut?: $Enums.StatutAbonnement
+    dateDebut?: Date | string
+    dateFin: Date | string
+    periodicite?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    paiements?: PaiementCreateNestedManyWithoutAbonnementInput
+  }
+
+  export type AbonnementUncheckedCreateWithoutVendeurInput = {
+    id?: string
+    niveau?: $Enums.NiveauAbonnement
+    statut?: $Enums.StatutAbonnement
+    dateDebut?: Date | string
+    dateFin: Date | string
+    periodicite?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    paiements?: PaiementUncheckedCreateNestedManyWithoutAbonnementInput
+  }
+
+  export type AbonnementCreateOrConnectWithoutVendeurInput = {
+    where: AbonnementWhereUniqueInput
+    create: XOR<AbonnementCreateWithoutVendeurInput, AbonnementUncheckedCreateWithoutVendeurInput>
   }
 
   export type UserCreateWithoutVendeurProfileInput = {
@@ -24794,6 +28130,41 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"VendeurDocument"> | Date | string
   }
 
+  export type AbonnementUpsertWithoutVendeurInput = {
+    update: XOR<AbonnementUpdateWithoutVendeurInput, AbonnementUncheckedUpdateWithoutVendeurInput>
+    create: XOR<AbonnementCreateWithoutVendeurInput, AbonnementUncheckedCreateWithoutVendeurInput>
+    where?: AbonnementWhereInput
+  }
+
+  export type AbonnementUpdateToOneWithWhereWithoutVendeurInput = {
+    where?: AbonnementWhereInput
+    data: XOR<AbonnementUpdateWithoutVendeurInput, AbonnementUncheckedUpdateWithoutVendeurInput>
+  }
+
+  export type AbonnementUpdateWithoutVendeurInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paiements?: PaiementUpdateManyWithoutAbonnementNestedInput
+  }
+
+  export type AbonnementUncheckedUpdateWithoutVendeurInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paiements?: PaiementUncheckedUpdateManyWithoutAbonnementNestedInput
+  }
+
   export type UserUpsertWithoutVendeurProfileInput = {
     update: XOR<UserUpdateWithoutVendeurProfileInput, UserUncheckedUpdateWithoutVendeurProfileInput>
     create: XOR<UserCreateWithoutVendeurProfileInput, UserUncheckedCreateWithoutVendeurProfileInput>
@@ -24854,8 +28225,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryCreateNestedManyWithoutVendeurInput
     products?: ProductCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementCreateNestedOneWithoutVendeurInput
     user: UserCreateNestedOneWithoutVendeurProfileInput
   }
 
@@ -24869,8 +28242,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryUncheckedCreateNestedManyWithoutVendeurInput
     products?: ProductUncheckedCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementUncheckedCreateNestedOneWithoutVendeurInput
   }
 
   export type VendeurProfileCreateOrConnectWithoutDocumentsInput = {
@@ -24898,8 +28273,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUpdateManyWithoutVendeurNestedInput
     products?: ProductUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUpdateOneWithoutVendeurNestedInput
     user?: UserUpdateOneRequiredWithoutVendeurProfileNestedInput
   }
 
@@ -24913,8 +28290,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUncheckedUpdateManyWithoutVendeurNestedInput
     products?: ProductUncheckedUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUncheckedUpdateOneWithoutVendeurNestedInput
   }
 
   export type VendeurProfileCreateWithoutCategoriesInput = {
@@ -24926,8 +28305,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     products?: ProductCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementCreateNestedOneWithoutVendeurInput
     user: UserCreateNestedOneWithoutVendeurProfileInput
   }
 
@@ -24941,8 +28322,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     products?: ProductUncheckedCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentUncheckedCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementUncheckedCreateNestedOneWithoutVendeurInput
   }
 
   export type VendeurProfileCreateOrConnectWithoutCategoriesInput = {
@@ -25018,8 +28401,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     products?: ProductUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUpdateOneWithoutVendeurNestedInput
     user?: UserUpdateOneRequiredWithoutVendeurProfileNestedInput
   }
 
@@ -25033,8 +28418,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     products?: ProductUncheckedUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUncheckedUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUncheckedUpdateOneWithoutVendeurNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutCategoryInput = {
@@ -25169,8 +28556,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementCreateNestedOneWithoutVendeurInput
     user: UserCreateNestedOneWithoutVendeurProfileInput
   }
 
@@ -25184,8 +28573,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     flowmerceApiKey?: string | null
+    prioriteAffichage?: number
     categories?: CategoryUncheckedCreateNestedManyWithoutVendeurInput
     documents?: VendeurDocumentUncheckedCreateNestedManyWithoutVendeurInput
+    abonnement?: AbonnementUncheckedCreateNestedOneWithoutVendeurInput
   }
 
   export type VendeurProfileCreateOrConnectWithoutProductsInput = {
@@ -25357,8 +28748,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUpdateOneWithoutVendeurNestedInput
     user?: UserUpdateOneRequiredWithoutVendeurProfileNestedInput
   }
 
@@ -25372,8 +28765,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
     categories?: CategoryUncheckedUpdateManyWithoutVendeurNestedInput
     documents?: VendeurDocumentUncheckedUpdateManyWithoutVendeurNestedInput
+    abonnement?: AbonnementUncheckedUpdateOneWithoutVendeurNestedInput
   }
 
   export type ProductVariantUpsertWithWhereUniqueWithoutProductInput = {
@@ -25802,6 +29197,213 @@ export namespace Prisma {
   export type OrderItemUpdateManyWithWhereWithoutVariantOptionInput = {
     where: OrderItemScalarWhereInput
     data: XOR<OrderItemUpdateManyMutationInput, OrderItemUncheckedUpdateManyWithoutVariantOptionInput>
+  }
+
+  export type VendeurProfileCreateWithoutAbonnementInput = {
+    id?: string
+    statut?: $Enums.VendeurStatut
+    nomBoutique?: string | null
+    description?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    flowmerceApiKey?: string | null
+    prioriteAffichage?: number
+    categories?: CategoryCreateNestedManyWithoutVendeurInput
+    products?: ProductCreateNestedManyWithoutVendeurInput
+    documents?: VendeurDocumentCreateNestedManyWithoutVendeurInput
+    user: UserCreateNestedOneWithoutVendeurProfileInput
+  }
+
+  export type VendeurProfileUncheckedCreateWithoutAbonnementInput = {
+    id?: string
+    userId: string
+    statut?: $Enums.VendeurStatut
+    nomBoutique?: string | null
+    description?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    flowmerceApiKey?: string | null
+    prioriteAffichage?: number
+    categories?: CategoryUncheckedCreateNestedManyWithoutVendeurInput
+    products?: ProductUncheckedCreateNestedManyWithoutVendeurInput
+    documents?: VendeurDocumentUncheckedCreateNestedManyWithoutVendeurInput
+  }
+
+  export type VendeurProfileCreateOrConnectWithoutAbonnementInput = {
+    where: VendeurProfileWhereUniqueInput
+    create: XOR<VendeurProfileCreateWithoutAbonnementInput, VendeurProfileUncheckedCreateWithoutAbonnementInput>
+  }
+
+  export type PaiementCreateWithoutAbonnementInput = {
+    id?: string
+    montant: number
+    dateReglement?: Date | string
+    methode: string
+    reference?: string | null
+    note?: string | null
+    confirmeParAdmin?: boolean
+    createdAt?: Date | string
+  }
+
+  export type PaiementUncheckedCreateWithoutAbonnementInput = {
+    id?: string
+    montant: number
+    dateReglement?: Date | string
+    methode: string
+    reference?: string | null
+    note?: string | null
+    confirmeParAdmin?: boolean
+    createdAt?: Date | string
+  }
+
+  export type PaiementCreateOrConnectWithoutAbonnementInput = {
+    where: PaiementWhereUniqueInput
+    create: XOR<PaiementCreateWithoutAbonnementInput, PaiementUncheckedCreateWithoutAbonnementInput>
+  }
+
+  export type PaiementCreateManyAbonnementInputEnvelope = {
+    data: PaiementCreateManyAbonnementInput | PaiementCreateManyAbonnementInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type VendeurProfileUpsertWithoutAbonnementInput = {
+    update: XOR<VendeurProfileUpdateWithoutAbonnementInput, VendeurProfileUncheckedUpdateWithoutAbonnementInput>
+    create: XOR<VendeurProfileCreateWithoutAbonnementInput, VendeurProfileUncheckedCreateWithoutAbonnementInput>
+    where?: VendeurProfileWhereInput
+  }
+
+  export type VendeurProfileUpdateToOneWithWhereWithoutAbonnementInput = {
+    where?: VendeurProfileWhereInput
+    data: XOR<VendeurProfileUpdateWithoutAbonnementInput, VendeurProfileUncheckedUpdateWithoutAbonnementInput>
+  }
+
+  export type VendeurProfileUpdateWithoutAbonnementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    statut?: EnumVendeurStatutFieldUpdateOperationsInput | $Enums.VendeurStatut
+    nomBoutique?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
+    categories?: CategoryUpdateManyWithoutVendeurNestedInput
+    products?: ProductUpdateManyWithoutVendeurNestedInput
+    documents?: VendeurDocumentUpdateManyWithoutVendeurNestedInput
+    user?: UserUpdateOneRequiredWithoutVendeurProfileNestedInput
+  }
+
+  export type VendeurProfileUncheckedUpdateWithoutAbonnementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    statut?: EnumVendeurStatutFieldUpdateOperationsInput | $Enums.VendeurStatut
+    nomBoutique?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    flowmerceApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    prioriteAffichage?: IntFieldUpdateOperationsInput | number
+    categories?: CategoryUncheckedUpdateManyWithoutVendeurNestedInput
+    products?: ProductUncheckedUpdateManyWithoutVendeurNestedInput
+    documents?: VendeurDocumentUncheckedUpdateManyWithoutVendeurNestedInput
+  }
+
+  export type PaiementUpsertWithWhereUniqueWithoutAbonnementInput = {
+    where: PaiementWhereUniqueInput
+    update: XOR<PaiementUpdateWithoutAbonnementInput, PaiementUncheckedUpdateWithoutAbonnementInput>
+    create: XOR<PaiementCreateWithoutAbonnementInput, PaiementUncheckedCreateWithoutAbonnementInput>
+  }
+
+  export type PaiementUpdateWithWhereUniqueWithoutAbonnementInput = {
+    where: PaiementWhereUniqueInput
+    data: XOR<PaiementUpdateWithoutAbonnementInput, PaiementUncheckedUpdateWithoutAbonnementInput>
+  }
+
+  export type PaiementUpdateManyWithWhereWithoutAbonnementInput = {
+    where: PaiementScalarWhereInput
+    data: XOR<PaiementUpdateManyMutationInput, PaiementUncheckedUpdateManyWithoutAbonnementInput>
+  }
+
+  export type PaiementScalarWhereInput = {
+    AND?: PaiementScalarWhereInput | PaiementScalarWhereInput[]
+    OR?: PaiementScalarWhereInput[]
+    NOT?: PaiementScalarWhereInput | PaiementScalarWhereInput[]
+    id?: StringFilter<"Paiement"> | string
+    abonnementId?: StringFilter<"Paiement"> | string
+    montant?: FloatFilter<"Paiement"> | number
+    dateReglement?: DateTimeFilter<"Paiement"> | Date | string
+    methode?: StringFilter<"Paiement"> | string
+    reference?: StringNullableFilter<"Paiement"> | string | null
+    note?: StringNullableFilter<"Paiement"> | string | null
+    confirmeParAdmin?: BoolFilter<"Paiement"> | boolean
+    createdAt?: DateTimeFilter<"Paiement"> | Date | string
+  }
+
+  export type AbonnementCreateWithoutPaiementsInput = {
+    id?: string
+    niveau?: $Enums.NiveauAbonnement
+    statut?: $Enums.StatutAbonnement
+    dateDebut?: Date | string
+    dateFin: Date | string
+    periodicite?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vendeur: VendeurProfileCreateNestedOneWithoutAbonnementInput
+  }
+
+  export type AbonnementUncheckedCreateWithoutPaiementsInput = {
+    id?: string
+    vendeurId: string
+    niveau?: $Enums.NiveauAbonnement
+    statut?: $Enums.StatutAbonnement
+    dateDebut?: Date | string
+    dateFin: Date | string
+    periodicite?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AbonnementCreateOrConnectWithoutPaiementsInput = {
+    where: AbonnementWhereUniqueInput
+    create: XOR<AbonnementCreateWithoutPaiementsInput, AbonnementUncheckedCreateWithoutPaiementsInput>
+  }
+
+  export type AbonnementUpsertWithoutPaiementsInput = {
+    update: XOR<AbonnementUpdateWithoutPaiementsInput, AbonnementUncheckedUpdateWithoutPaiementsInput>
+    create: XOR<AbonnementCreateWithoutPaiementsInput, AbonnementUncheckedCreateWithoutPaiementsInput>
+    where?: AbonnementWhereInput
+  }
+
+  export type AbonnementUpdateToOneWithWhereWithoutPaiementsInput = {
+    where?: AbonnementWhereInput
+    data: XOR<AbonnementUpdateWithoutPaiementsInput, AbonnementUncheckedUpdateWithoutPaiementsInput>
+  }
+
+  export type AbonnementUpdateWithoutPaiementsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vendeur?: VendeurProfileUpdateOneRequiredWithoutAbonnementNestedInput
+  }
+
+  export type AbonnementUncheckedUpdateWithoutPaiementsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    vendeurId?: StringFieldUpdateOperationsInput | string
+    niveau?: EnumNiveauAbonnementFieldUpdateOperationsInput | $Enums.NiveauAbonnement
+    statut?: EnumStatutAbonnementFieldUpdateOperationsInput | $Enums.StatutAbonnement
+    dateDebut?: DateTimeFieldUpdateOperationsInput | Date | string
+    dateFin?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodicite?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserCreateWithoutCartInput = {
@@ -27642,6 +31244,50 @@ export namespace Prisma {
     variantId?: NullableStringFieldUpdateOperationsInput | string | null
     variantNom?: NullableStringFieldUpdateOperationsInput | string | null
     variantOptionValeur?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PaiementCreateManyAbonnementInput = {
+    id?: string
+    montant: number
+    dateReglement?: Date | string
+    methode: string
+    reference?: string | null
+    note?: string | null
+    confirmeParAdmin?: boolean
+    createdAt?: Date | string
+  }
+
+  export type PaiementUpdateWithoutAbonnementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    montant?: FloatFieldUpdateOperationsInput | number
+    dateReglement?: DateTimeFieldUpdateOperationsInput | Date | string
+    methode?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmeParAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaiementUncheckedUpdateWithoutAbonnementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    montant?: FloatFieldUpdateOperationsInput | number
+    dateReglement?: DateTimeFieldUpdateOperationsInput | Date | string
+    methode?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmeParAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaiementUncheckedUpdateManyWithoutAbonnementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    montant?: FloatFieldUpdateOperationsInput | number
+    dateReglement?: DateTimeFieldUpdateOperationsInput | Date | string
+    methode?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmeParAdmin?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CartItemCreateManyCartInput = {

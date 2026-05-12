@@ -139,12 +139,18 @@ export default function HomePage() {
     where: { products: { some: { actif: true } } },
     include: {
       products: {
-        where: { actif: true },
+        where: {
+          actif: true,
+          vendeur: { prioriteAffichage: { lt: 99 } },
+        },
         take: 10,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [
+          { vendeur: { prioriteAffichage: 'asc' } },
+          { createdAt: 'desc' },
+        ],
         include: {
           variants: { select: { id: true, couleur: true, nom: true }, orderBy: { createdAt: 'asc' } },
-        },
+        }, // garder l'include existant
       },
     },
   })
@@ -270,10 +276,14 @@ export default function HomePage() {
 
 async function ProduitsSection() {
   const produits = await prisma.product.findMany({
-    where: { actif: true },
+    where: { actif: true, vendeur: { prioriteAffichage: { lt: 99 } } },
     take: 8,
-    orderBy: { createdAt: 'desc' },
+    orderBy: [
+      { vendeur: { prioriteAffichage: 'asc' } }, // 0 en premier (admin), 3 en dernier
+      { createdAt: 'desc' },
+    ],
     include: {
+      vendeur: { select: { prioriteAffichage: true, nomBoutique: true } },
       category: true,
       variants: { select: { id: true, nom: true, couleur: true }, orderBy: { createdAt: 'asc' } },
     },

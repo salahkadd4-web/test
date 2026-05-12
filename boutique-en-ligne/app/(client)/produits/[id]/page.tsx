@@ -84,12 +84,22 @@ export default async function ProduitDetailPage({
 
 async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: string; produitId: string }) {
   const produits = await prisma.product.findMany({
-    where: { categoryId, actif: true, NOT: { id: produitId } },
-    take: 4,
-    include: {
-      category: true,
-      variants: { select: { id: true, nom: true, couleur: true }, orderBy: { createdAt: 'asc' } },
+    where: {
+      categoryId,
+      actif: true,
+      NOT: { id: produitId },
+      vendeur: { prioriteAffichage: { lt: 99 } },
     },
+    take: 4,
+    orderBy: [
+      { vendeur: { prioriteAffichage: 'asc' } },
+      { createdAt: 'desc' },
+    ],
+    include: { 
+    category: true,
+    variants: { select: { id: true, nom: true, couleur: true }, orderBy: { createdAt: 'asc' } },
+    
+     },
   })
 
   if (produits.length === 0) return null

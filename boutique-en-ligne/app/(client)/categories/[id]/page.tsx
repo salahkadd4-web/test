@@ -20,8 +20,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
     where: { id },
     include: {
       products: {
-        where: { actif: true },
-        orderBy: { createdAt: 'desc' },
+        where: {
+          actif: true,
+          vendeur: { prioriteAffichage: { lt: 99 } }, // ← exclure vendeurs expirés
+        },
+        orderBy: [
+          { vendeur: { prioriteAffichage: 'asc' } }, // ← niveau 0 en premier
+          { createdAt: 'desc' },
+        ],
         include: {
           variants: {
             select: { id: true, nom: true, couleur: true },

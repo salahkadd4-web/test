@@ -8,10 +8,14 @@ export async function GET(req: NextRequest) {
   const produits = await prisma.product.findMany({
     where: {
       actif: true,
+      vendeur: { prioriteAffichage: { lt: 99 } },
       ...(categorie ? { categoryId: categorie } : {}),
       ...(recherche ? { nom: { contains: recherche, mode: 'insensitive' } } : {}),
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [
+      { vendeur: { prioriteAffichage: 'asc' } },
+      { createdAt: 'desc' },
+    ],
     select: {
       id: true,
       nom: true,

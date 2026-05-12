@@ -144,18 +144,16 @@ export default function Header() {
               </Link>
             )}
 
-            {session && (
+            {session && cartCount > 0 && (
               <Link
                 href="/panier"
                 className="relative flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 active:scale-95"
                 title="Mon panier"
               >
                 <ShoppingCart className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-md animate-bounce-once">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
-                )}
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-md animate-bounce-once">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
               </Link>
             )}
 
@@ -257,18 +255,16 @@ export default function Header() {
             )}
 
             {/* ── Icône Panier avec badge ── */}
-            {session && (
+            {session && cartCount > 0 && (
               <Link
                 href="/panier"
                 className="relative flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 active:scale-95"
                 title="Mon panier"
               >
                 <ShoppingCart className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-md">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
-                )}
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-md">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
               </Link>
             )}
 

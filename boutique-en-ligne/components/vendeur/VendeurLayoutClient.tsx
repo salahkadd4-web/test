@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import VendeurDocumentsClient from './VendeurDocumentsClient'
-import { Ban, BarChart2, Loader2, Package, RefreshCw, ShoppingCart, Store, Tag, X } from 'lucide-react'
+import { Ban, BarChart2, CreditCard, Loader2, Package, RefreshCw, ShoppingCart, Store, Tag, X } from 'lucide-react'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://test-rosy-omega-60.vercel.app'
 
@@ -16,6 +16,7 @@ const navItems = [
   { href: '/vendeur/categories', label: 'Catégories',      icon: Tag },
   { href: '/vendeur/commandes',  label: 'Commandes',       icon: ShoppingCart },
   { href: '/vendeur/retours',    label: 'Retours',         icon: RefreshCw },
+  { href: '/vendeur/abonnement',  label: 'Abonnement',      icon: CreditCard },
 ]
 
 interface Doc {

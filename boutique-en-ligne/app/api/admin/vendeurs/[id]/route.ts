@@ -83,24 +83,35 @@ export async function PATCH(
 
   if (action === 'approuver') {
     const docsRefuses = await prisma.vendeurDocument.count({
-      where: {
-        vendeurId: id,
-        fichier:   { not: null },
-        statut:    'REFUSE',
-      },
+      where: { vendeurId: id, fichier: { not: null }, statut: 'REFUSE' },
     })
     if (docsRefuses > 0) {
       return NextResponse.json(
-        { error: 'Certains documents ont été refusés. Veuillez les traiter avant d\'approuver.' },
+        { error: 'Certains documents ont été refusés.' },
         { status: 400 }
       )
     }
 
-    await prisma.vendeurProfile.update({
-      where: { id },
-      data:  { statut: 'APPROUVE', adminNote: adminNote || null },
-    })
-    return NextResponse.json({ message: 'Vendeur approuvé avec succès' })
+    const dateFin = new Date()
+    dateFin.setFullYear(dateFin.getFullYear() + 1) // 1 an gratuit
+
+    await prisma.$transaction([
+      prisma.vendeurProfile.update({
+        where: { id },
+        data: { statut: 'APPROUVE', adminNote: adminNote || null, prioriteAffichage: 3 },
+      }),
+      prisma.abonnement.upsert({
+        where: { vendeurId: id },
+        update: {},
+        create: {
+          vendeurId: id,
+          niveau: 'NIVEAU_3',
+          statut: 'GRATUIT',
+          dateFin,
+        },
+      }),
+    ])
+    return NextResponse.json({ message: 'Vendeur approuvé — période gratuite d\'1 an démarrée' })
   }
 
   if (action === 'suspendre') {

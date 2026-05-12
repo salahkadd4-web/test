@@ -167,12 +167,19 @@ export default function ProduitsSearch({
         </p>
 
         {produits.length === 0 && !loading ? (
-          <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-            <Package className="w-14 h-14" />
-            <p className="text-lg">Aucun produit trouvé.</p>
+          <div className="flex flex-col items-center justify-center text-center py-20 text-gray-400 dark:text-gray-500">
+            <Package className="w-14 h-14 mb-4" />
+
+            <p className="text-lg">
+              Aucun produit trouvé.
+            </p>
+
             <button
-              onClick={() => { setQuery(''); setCategorieActive('') }}
-              className="text-blue-600 dark:text-blue-400 hover:underline mt-4 inline-block text-sm"
+              onClick={() => {
+                setQuery('')
+                setCategorieActive('')
+              }}
+              className="text-blue-600 dark:text-blue-400 hover:underline mt-4 text-sm"
             >
               Voir tous les produits
             </button>

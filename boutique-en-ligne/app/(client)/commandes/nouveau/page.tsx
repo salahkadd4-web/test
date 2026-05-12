@@ -332,8 +332,8 @@ export default function NouvelleCommandePage() {
                 Annuler
               </button>
               <button onClick={handleConfirmer} disabled={submitting}
-                className="flex-1 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-2.5 rounded-xl transition disabled:opacity-50">
-                {submitting ? 'En cours...' : <>Confirmer{' '}<CheckCircle2 className="w-5 h-5" /></>}
+                className="flex-1 flex items-center justify-center gap-2 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-2.5 rounded-xl transition disabled:opacity-50">
+                {submitting ? 'En cours...' : <><span>Confirmer</span><CheckCircle2 className="w-5 h-5" /></>}
               </button>
             </div>
           </div>

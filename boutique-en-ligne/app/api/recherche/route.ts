@@ -18,8 +18,10 @@ export async function GET(req: NextRequest) {
       where: {
         actif: true,
         nom: { contains: q, mode: 'insensitive' },
+        vendeur: { prioriteAffichage: { lt: 99 } },
       },
       take: 5,
+      orderBy: [{ vendeur: { prioriteAffichage: 'asc' } }],
       select: { id: true, nom: true, images: true, prix: true, category: { select: { nom: true } } },
     }),
   ])

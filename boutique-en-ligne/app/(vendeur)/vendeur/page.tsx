@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { countVendeurClaims } from '@/lib/flowmerceApi'
 import { Store } from 'lucide-react'
+import { CreditCard } from 'lucide-react'
 
 export default async function VendeurDashboard() {
   const session = await auth()
@@ -46,7 +47,6 @@ export default async function VendeurDashboard() {
   ])
 
   const totalRetours     = flowmerceCounts.total
-  const retoursEnAttente = flowmerceCounts.enAttente
 
   const ca         = caData._sum.prix ?? 0
   const tauxRetour = totalCommandes > 0 ? Math.round((totalRetours / totalCommandes) * 1000) / 10 : 0

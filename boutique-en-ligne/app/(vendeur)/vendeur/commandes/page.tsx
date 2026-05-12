@@ -160,7 +160,7 @@ export default function VendeurCommandesPage() {
           onChange={(e) => setFilterCategory(e.target.value)}
           className="border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
         >
-          <option value=""><Tag className="w-4 h-4 inline mr-1" />{' '}Toutes les catégories</option>
+          <option value="">Toutes les catégories</option>
           {categories.map(c => (
             <option key={c.id} value={c.id}>{c.nom}</option>
           ))}
