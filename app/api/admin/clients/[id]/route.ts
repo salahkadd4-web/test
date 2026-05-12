@@ -25,25 +25,10 @@ export async function GET(
           orderBy: { createdAt: 'desc' },
           include: { items: { include: { product: true } } },
         },
-        // ← FIXÉ : retours inclus avec fraudScore pour le modal
-        returns: {
-          orderBy: { createdAt: 'desc' },
-          take: 10,
-          select: {
-            id:           true,
-            returnStatus: true,
-            returnReason: true,
-            createdAt:    true,
-            fraudScore:   true,
-            product: { select: { nom: true, images: true } },
-            order:   { select: { id: true } },
-          },
-        },
         _count: {
           select: {
             orders:    true,
             favorites: true,
-            returns:   true,  // ← FIXÉ : était absent
           },
         },
       },
@@ -51,12 +36,13 @@ export async function GET(
 
     if (!client) return NextResponse.json({ error: 'Client introuvable' }, { status: 404 })
 
-    // Score de fraude max parmi tous les retours
-    const maxFraudScore = client.returns.length > 0
-      ? Math.max(...client.returns.map(r => r.fraudScore ?? 0))
-      : null
-
-    return NextResponse.json({ ...client, maxFraudScore })
+    // Les retours sont gérés par Flowmerce — on renvoie des valeurs neutres
+    return NextResponse.json({
+      ...client,
+      _count: { ...client._count, returns: 0 },
+      returns: [] as never[],
+      maxFraudScore: null as null,
+    })
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
@@ -74,7 +60,6 @@ export async function DELETE(
     const { id } = await params
 
     await prisma.resetToken.deleteMany({ where: { userId: id } })
-    await prisma.message.deleteMany({ where: { userId: id } })
     await prisma.favorite.deleteMany({ where: { userId: id } })
     await prisma.cartItem.deleteMany({ where: { cart: { userId: id } } })
     await prisma.cart.deleteMany({ where: { userId: id } })
