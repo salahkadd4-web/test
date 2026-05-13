@@ -127,7 +127,7 @@ function CommandesContent() {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Mes Commandes</h1>
         <Link
           href="/commandes/nouveau"
-          className="bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black text-sm font-semibold px-4 py-2 rounded-lg transition"
+          className="hidden sm:inline-flex bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black text-sm font-semibold px-4 py-2 rounded-lg transition"
         >
           + Nouvelle commande
         </Link>
@@ -135,7 +135,7 @@ function CommandesContent() {
 
       {commandes.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-6xl mb-4"><Package className="w-5 h-5" /></p>
+          <Package className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Aucune commande</h2>
           <Link href="/produits" className="bg-black dark:bg-white text-white dark:text-black font-semibold px-8 py-3 rounded-xl hover:bg-gray-800 transition">
             Voir les produits

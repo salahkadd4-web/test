@@ -203,7 +203,7 @@ function RetourContent() {
 
   if (!loading && commandes.length === 0) return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">
-      <Package className="w-14 h-14" />
+      <Package className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
       <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Aucune commande livrée</h2>
       <p className="text-sm text-gray-500 mb-6">Les retours ne sont disponibles que pour les commandes livrées.</p>
       <Link href="/commandes" className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline">← Mes commandes</Link>
