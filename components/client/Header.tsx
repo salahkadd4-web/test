@@ -138,9 +138,8 @@ export default function Header() {
             {/* Bouton Espace Vendeur → retour côté vendeur */}
             {isVendeur && (
               <Link href="/vendeur"
-                className="flex items-center gap-1 text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-full font-medium active:scale-95 transition-all">
-                <span><Store className="w-5 h-5" /></span>
-                <span>Vendeur</span>
+                className="flex items-center justify-center w-9 h-9 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full active:scale-95 transition-all">
+                <Store className="w-4 h-4" />
               </Link>
             )}
 
