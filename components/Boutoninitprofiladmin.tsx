@@ -26,14 +26,17 @@ export default function BoutonInitProfilAdmin() {
     setTimeout(() => setToast(null), 4000)
   }
 
-  // Vérifie automatiquement au montage si un profil admin existe
-  useEffect(() => {
+  async function verifier() {
+    setLoading(true)
     fetch('/api/admin/init-profil-vendeur')
       .then(r => r.json())
       .then(d => setInfo(d))
       .catch(() => setInfo(null))
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  // Vérifie automatiquement au montage
+  useEffect(() => { verifier() }, [])
 
   async function supprimer() {
     if (!info?.vendeurId) return
@@ -61,6 +64,16 @@ export default function BoutonInitProfilAdmin() {
       <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-2">
         <Shield className="w-4 h-4" /> Priorité 0 — Produits Admin
       </h3>
+
+      {/* Bouton vérification manuelle */}
+      <button
+        onClick={verifier}
+        disabled={loading}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-400 text-purple-700 dark:text-purple-300 text-sm hover:bg-purple-100 dark:hover:bg-purple-900 disabled:opacity-50 transition w-fit"
+      >
+        <CheckCircle2 className="w-4 h-4" />
+        {loading ? 'Vérification...' : 'Actualiser'}
+      </button>
 
       {/* Explication */}
       <div className="flex items-start gap-2 text-xs text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/40 rounded-lg p-3">
