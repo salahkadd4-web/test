@@ -14,16 +14,19 @@ export async function PATCH(
 
   const { docId } = await params
   const body = await req.json()
-  const { filename } = body  // nom du fichier local (plus d'URL Cloudinary)
+  const { filename } = body  // contient maintenant l'URL blob Vercel
 
   if (!filename) {
-    return NextResponse.json({ error: 'Nom de fichier requis' }, { status: 400 })
+    return NextResponse.json({ error: 'URL du fichier requise' }, { status: 400 })
   }
 
-  // Validation basique du nom de fichier
-  const validFilename = /^[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp|pdf)$/i.test(filename)
-  if (!validFilename) {
-    return NextResponse.json({ error: 'Nom de fichier invalide' }, { status: 400 })
+  // Validation : doit être une URL Vercel Blob
+  const isValidBlobUrl = filename.startsWith('https://') && (
+    filename.includes('.public.blob.vercel-storage.com') ||
+    filename.includes('.blob.vercel-storage.com')
+  )
+  if (!isValidBlobUrl) {
+    return NextResponse.json({ error: 'URL de fichier invalide' }, { status: 400 })
   }
 
   // Vérifier que ce document appartient bien à ce vendeur
@@ -45,7 +48,7 @@ export async function PATCH(
   await prisma.vendeurDocument.update({
     where: { id: docId },
     data: {
-      fichier:   filename,  // stocke le nom local, pas une URL
+      fichier:   filename,  // stocke l'URL blob privée
       statut:    'EN_ATTENTE',
       adminNote: null,
     },

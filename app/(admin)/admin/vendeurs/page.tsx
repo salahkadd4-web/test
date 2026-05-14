@@ -490,7 +490,7 @@ export default function AdminVendeursPage() {
                             {doc.adminNote && <p className="text-xs text-red-500 dark:text-red-400 mb-2">Note : {doc.adminNote}</p>}
                             {doc.fichier ? (
                               <div className="flex items-center gap-3">
-                                <a href={`/api/admin/documents/${doc.fichier}`} target="_blank" rel="noopener noreferrer"
+                                <a href={`/api/admin/documents/view?docId=${doc.id}`} target="_blank" rel="noopener noreferrer"
                                   className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
                                   <Paperclip className="w-4 h-4 inline mr-1" />Voir le fichier
                                 </a>
