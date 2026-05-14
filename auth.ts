@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 import { authConfig } from './auth.config'
 
 const isProd = process.env.NODE_ENV === 'production'
-const PROD_URL = 'https://test-rosy-omega-60.vercel.app'
+const PROD_URL = process.env.NEXTAUTH_URL || 'https://caba-store.vercel.app'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,

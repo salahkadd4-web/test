@@ -280,7 +280,13 @@ export default async function HomePage() {
 
 async function ProduitsSection() {
   const produits = await prisma.product.findMany({
-    where: { actif: true, vendeur: { prioriteAffichage: { lt: 99 } } },
+    where: {
+        actif: true,
+        OR: [
+          { vendeurId: null },                              // produits admin (pas de vendeur)
+          { vendeur: { prioriteAffichage: { lt: 99 } } },  // produits vendeurs actifs
+        ],
+      },
     take: 8,
     orderBy: [
       { vendeur: { prioriteAffichage: 'asc' } }, // 0 en premier (admin), 3 en dernier

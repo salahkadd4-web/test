@@ -9,7 +9,7 @@ import { useIsMobile, useHideOnScroll } from '@/app/hooks/useIsMobile'
 import SearchBar from '@/components/client/SearchBar'
 import { Heart, LogOut, Menu, Package, RefreshCw, ShoppingCart, Store, User, X } from 'lucide-react'
 
-const APP_URL = 'https://test-rosy-omega-60.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://caba-store.vercel.app'
 
 function ChevronDown({ open }: { open: boolean }) {
   return (

@@ -9,6 +9,7 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   if (!isMobile) return null
+  if (pathname.startsWith('/admin') || pathname.startsWith('/vendeur')) return null
 
   const items = [
     {

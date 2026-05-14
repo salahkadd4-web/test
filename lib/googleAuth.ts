@@ -3,7 +3,7 @@
  * Gère la connexion Google selon la plateforme (web vs app native)
  */
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://test-rosy-omega-60.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://caba-store.vercel.app'
 
 export async function signInWithGoogle(callbackUrl?: string) {
   const destination = callbackUrl || `${APP_URL}/`

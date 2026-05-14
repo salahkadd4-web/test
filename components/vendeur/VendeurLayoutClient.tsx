@@ -8,7 +8,7 @@ import { signOut } from 'next-auth/react'
 import VendeurDocumentsClient from './VendeurDocumentsClient'
 import { Ban, BarChart2, CreditCard, Loader2, Package, RefreshCw, ShoppingCart, Store, Tag, X } from 'lucide-react'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://test-rosy-omega-60.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://caba-store.vercel.app'
 
 const navItems = [
   { href: '/vendeur',            label: 'Tableau de bord', icon: BarChart2 },
