@@ -190,12 +190,12 @@ export default function AdminProduitsPage() {
             className="flex-1 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
           <select value={filterVendeur} onChange={e => { setFilterVendeur(e.target.value); setAdminOnly(false) }} disabled={adminOnly}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px] disabled:opacity-40">
-            <option value="">🏪 Tous les vendeurs</option>
+            <option value="">Tous les vendeurs</option>
             {vendeurs.map(v => <option key={v.id} value={v.id}>{v.nomBoutique || `${v.user.prenom} ${v.user.nom}`}</option>)}
           </select>
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[180px]">
-            <option value="">🏷️ Toutes les catégories</option>
+            <option value="">Toutes les catégories</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
           </select>
           <button onClick={() => { setAdminOnly(v => !v); setFilterVendeur('') }}
@@ -390,7 +390,7 @@ export default function AdminProduitsPage() {
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">💰 Prix dégressifs par quantité</label>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Prix dégressifs par quantité</label>
                       <button type="button" onClick={() => setPrixTiers(t => [...t, emptyTier()])}
                         className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-lg hover:bg-purple-200 transition">
                         + Ajouter un palier
