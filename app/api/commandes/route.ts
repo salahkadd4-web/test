@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthToken } from '@/lib/getAuthToken'
 
+/** Retourne le prix unitaire en tenant compte des paliers dégressifs */
+function getPrixUnitaire(prixVariables: any, prixBase: number, quantite: number): number {
+  if (!Array.isArray(prixVariables) || !prixVariables.length) return prixBase
+  const sorted = [...prixVariables].sort((a: any, b: any) => b.minQte - a.minQte)
+  for (const t of sorted) { if (quantite >= t.minQte) return t.prix }
+  return prixBase
+}
+
 // GET — Récupérer les commandes de l'utilisateur
 export async function GET(req: NextRequest) {
   try {
@@ -80,9 +88,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Calculer le total
+    // Calculer le total en appliquant les prix dégressifs
     const sousTotal = panier.items.reduce(
-      (acc, item) => acc + item.product.prix * item.quantite,
+      (acc, item) => acc + getPrixUnitaire(item.product.prixVariables, item.product.prix, item.quantite) * item.quantite,
       0
     )
     const frais = typeof fraisLivraison === 'number' ? fraisLivraison : 700
@@ -101,7 +109,7 @@ export async function POST(req: NextRequest) {
           create: panier.items.map((item) => ({
             productId:          item.productId,
             quantite:           item.quantite,
-            prix:               item.product.prix,
+            prix:               getPrixUnitaire(item.product.prixVariables, item.product.prix, item.quantite),
             variantId:          item.variantId          ?? null,
             variantNom:         item.variant?.nom        ?? null,
             variantOptionId:    item.variantOptionId    ?? null,

@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { CheckCircle2, Loader2, MapPin, Package, Phone, RefreshCw, Search, Tag, Truck, User, Wrench, X, XCircle } from 'lucide-react'
+import { CheckCircle2, Loader2, MapPin, Package, Phone, RefreshCw, Search, Tag, TrendingDown, Truck, User, Wrench, X, XCircle } from 'lucide-react'
 
 interface OrderItem {
   id: string; quantite: number; prix: number
   variantOptionValeur?: string | null
   variant?: { id: string; nom: string; couleur: string | null; images: string[] } | null
-  product: { id: string; nom: string; images: string[] }
+  product: { id: string; nom: string; images: string[]; prix: number }
 }
 interface Order {
   id: string; statut: string; adresse: string
@@ -221,17 +221,21 @@ export default function VendeurCommandesPage() {
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-1 mb-3">
-                  {cmd.items.map((item) => (
-                    <span key={item.id} className="flex items-center gap-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
-                      {item.variant?.couleur && (
-                        <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.variant.couleur }} />
-                      )}
-                      {item.product.nom}
-                      {item.variant && ` — ${item.variant.nom}`}
-                      {item.variantOptionValeur && ` (${item.variantOptionValeur})`}
-                      {' '}×{item.quantite}
-                    </span>
-                  ))}
+                  {cmd.items.map((item) => {
+                    const estReduit = item.prix < item.product.prix && item.prix > 0
+                    return (
+                      <span key={item.id} className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${estReduit ? 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-100 dark:border-green-900' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
+                        {item.variant?.couleur && (
+                          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.variant.couleur }} />
+                        )}
+                        {item.product.nom}
+                        {item.variant && ` — ${item.variant.nom}`}
+                        {item.variantOptionValeur && ` (${item.variantOptionValeur})`}
+                        {' '}×{item.quantite}
+                        {estReduit && <TrendingDown className="w-3 h-3 shrink-0" />}
+                      </span>
+                    )
+                  })}
                 </div>
 
                 {cmd.statut !== 'LIVREE' && cmd.statut !== 'ANNULEE' && (
@@ -326,22 +330,78 @@ export default function VendeurCommandesPage() {
                             {item.variantOptionValeur}
                           </span>
                         )}
-                        <p className="text-xs text-gray-400 dark:text-gray-500">×{item.quantite} — {item.prix.toLocaleString('fr-DZ')} DA/u</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                          {(() => {
+                            const prixBase  = item.product.prix
+                            const estReduit = item.prix < prixBase && item.prix > 0
+                            const pct       = estReduit ? Math.round((1 - item.prix / prixBase) * 100) : 0
+                            return (
+                              <span className="flex items-center gap-1 flex-wrap">
+                                <span className={estReduit ? 'text-green-600 dark:text-green-400 font-semibold' : ''}>
+                                  ×{item.quantite} — {item.prix.toLocaleString('fr-DZ')} DA/u
+                                </span>
+                                {estReduit && (
+                                  <>
+                                    <span className="line-through">{prixBase.toLocaleString('fr-DZ')} DA</span>
+                                    <span className="inline-flex items-center gap-0.5 bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 font-bold text-[10px] px-1.5 py-0.5 rounded-full">
+                                      <TrendingDown className="w-2.5 h-2.5" />−{pct}%
+                                    </span>
+                                  </>
+                                )}
+                              </span>
+                            )
+                          })()}
+                        </p>
                       </div>
-                      <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                        {(item.prix * item.quantite).toLocaleString('fr-DZ')} DA
-                      </p>
+                      <div className="text-right shrink-0">
+                        {(() => {
+                          const prixBase  = item.product.prix
+                          const estReduit = item.prix < prixBase && item.prix > 0
+                          return (
+                            <>
+                              <p className={`text-sm font-bold ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                {(item.prix * item.quantite).toLocaleString('fr-DZ')} DA
+                              </p>
+                              {estReduit && (
+                                <p className="text-[10px] text-gray-400 line-through">{(prixBase * item.quantite).toLocaleString('fr-DZ')} DA</p>
+                              )}
+                            </>
+                          )
+                        })()}
+                      </div>
                     </div>
                     )
                   })}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Total (vos produits)</p>
-                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                  {selected.totalVendeur.toLocaleString('fr-DZ')} DA
-                </p>
+              <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                {(() => {
+                  const totalEco = selected.items.reduce((sum, item) => {
+                    const diff = item.product.prix - item.prix
+                    return sum + (diff > 0 ? diff * item.quantite : 0)
+                  }, 0)
+                  return (
+                    <>
+                      {totalEco > 0 && (
+                        <div className="flex items-center justify-between bg-green-50 dark:bg-green-950/50 border border-green-100 dark:border-green-900 rounded-xl px-3 py-2">
+                          <span className="flex items-center gap-1.5 text-sm text-green-700 dark:text-green-400 font-medium">
+                            <TrendingDown className="w-4 h-4" /> Économies dégressives
+                          </span>
+                          <span className="text-sm font-bold text-green-700 dark:text-green-400">
+                            −{totalEco.toFixed(2)} DA
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Total (vos produits)</p>
+                        <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                          {selected.totalVendeur.toLocaleString('fr-DZ')} DA
+                        </p>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
 
               {selected.statut !== 'LIVREE' && selected.statut !== 'ANNULEE' && (

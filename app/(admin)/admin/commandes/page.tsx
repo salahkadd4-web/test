@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import PusherJS from 'pusher-js'
-import { CheckCircle2, Eye, Loader2, MapPin, Package, RefreshCw, ShoppingCart, Store, Tag, Truck, User, Wrench, X, XCircle } from 'lucide-react'
+import { CheckCircle2, Eye, Loader2, MapPin, Package, RefreshCw, ShoppingCart, Store, Tag, TrendingDown, Truck, User, Wrench, X, XCircle } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────
+
+type PrixTier = { minQte: number; maxQte: number | null; prix: number }
 
 type OrderItem = {
   id:        string
@@ -19,8 +21,10 @@ type OrderItem = {
     images:  string[]
   } | null
   product: {
-    nom:     string
-    images:  string[]
+    nom:          string
+    images:       string[]
+    prix:         number
+    prixVariables: PrixTier[] | null
     vendeur?: { id: string; nomBoutique: string | null } | null
   }
 }
@@ -54,6 +58,14 @@ const statutConfig: Record<string, { label: string; color: string; icon: React.E
 
 const ordreStatuts   = ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 'EXPEDIEE', 'LIVREE']
 const tousLesStatuts = Object.keys(statutConfig)
+
+/** Économies totales d'une commande grâce aux prix dégressifs */
+function getEconomieCommande(items: OrderItem[]): number {
+  return items.reduce((sum, item) => {
+    const diff = item.product.prix - item.prix
+    return sum + (diff > 0 ? diff * item.quantite : 0)
+  }, 0)
+}
 
 // ── Composant principal ────────────────────────────────────────────────────
 
@@ -417,8 +429,18 @@ export default function AdminCommandesPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-4 font-bold text-blue-600 dark:text-blue-400">
-                        {commande.total.toFixed(2)} DA
+                      <td className="px-4 py-4">
+                        <p className="font-bold text-blue-600 dark:text-blue-400">
+                          {commande.total.toFixed(2)} DA
+                        </p>
+                        {(() => {
+                          const eco = getEconomieCommande(commande.items)
+                          return eco > 0 ? (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 font-semibold px-1.5 py-0.5 rounded-full mt-0.5">
+                              <TrendingDown className="w-2.5 h-2.5" />−{eco.toFixed(2)} DA
+                            </span>
+                          ) : null
+                        })()}
                       </td>
                       <td className="px-4 py-4">
                         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statut.color}`}>
@@ -530,28 +552,75 @@ export default function AdminCommandesPage() {
                             {item.variantOptionValeur}
                           </span>
                         )}
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          ×{item.quantite} — {item.prix.toFixed(2)} DA
-                        </p>
+                        {(() => {
+                          const prixBase  = item.product.prix
+                          const estReduit = item.prix < prixBase && item.prix > 0
+                          const pct       = estReduit ? Math.round((1 - item.prix / prixBase) * 100) : 0
+                          return (
+                            <span className="flex items-center gap-1 flex-wrap">
+                              <span className={`text-xs font-semibold ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                ×{item.quantite} — {item.prix.toFixed(2)} DA/u.
+                              </span>
+                              {estReduit && (
+                                <>
+                                  <span className="text-[10px] text-gray-400 line-through">{prixBase.toFixed(2)} DA</span>
+                                  <span className="inline-flex items-center gap-0.5 text-[10px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 font-bold px-1.5 py-0.5 rounded-full">
+                                    <TrendingDown className="w-2.5 h-2.5" />−{pct}%
+                                  </span>
+                                </>
+                              )}
+                            </span>
+                          )
+                        })()}
                         {item.product.vendeur && (
                           <span className="text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full"><Store className="w-4 h-4 inline mr-1" />{' '}{item.product.vendeur.nomBoutique || '—'}
                           </span>
                         )}
                       </div>
                     </div>
-                    <p className="font-semibold text-sm text-gray-800 dark:text-gray-100 shrink-0">
-                      {(item.prix * item.quantite).toFixed(2)} DA
-                    </p>
+                    <div className="text-right shrink-0">
+                      {(() => {
+                        const prixBase  = item.product.prix
+                        const estReduit = item.prix < prixBase && item.prix > 0
+                        return (
+                          <>
+                            <p className={`font-semibold text-sm ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-800 dark:text-gray-100'}`}>
+                              {(item.prix * item.quantite).toFixed(2)} DA
+                            </p>
+                            {estReduit && (
+                              <p className="text-[10px] text-gray-400 line-through">{(prixBase * item.quantite).toFixed(2)} DA</p>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Total */}
-            <div className="flex justify-between font-bold text-lg mb-6 px-1">
-              <span className="text-gray-800 dark:text-gray-100">Total</span>
-              <span className="text-blue-600 dark:text-blue-400">{selectedCommande.total.toFixed(2)} DA</span>
-            </div>
+            {/* Économies + Total */}
+            {(() => {
+              const totalEco = getEconomieCommande(selectedCommande.items)
+              return (
+                <div className="space-y-2 mb-6 px-1">
+                  {totalEco > 0 && (
+                    <div className="flex items-center justify-between bg-green-50 dark:bg-green-950/50 border border-green-100 dark:border-green-900 rounded-xl px-4 py-2.5">
+                      <span className="flex items-center gap-1.5 text-sm text-green-700 dark:text-green-400 font-medium">
+                        <TrendingDown className="w-4 h-4" /> Économies dégressives
+                      </span>
+                      <span className="text-sm font-bold text-green-700 dark:text-green-400">
+                        −{totalEco.toFixed(2)} DA
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-lg">
+                    <span className="text-gray-800 dark:text-gray-100">Total commande</span>
+                    <span className="text-blue-600 dark:text-blue-400">{selectedCommande.total.toFixed(2)} DA</span>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Changer statut */}
             <div className="mb-6">
