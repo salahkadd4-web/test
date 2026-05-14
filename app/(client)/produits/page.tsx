@@ -8,18 +8,19 @@ export default async function ProduitsPage({
 }) {
   const { categorie, recherche } = await searchParams
 
-  const [produits, categories] = await Promise.all([
+  const [produitsRaw, categories] = await Promise.all([
     prisma.product.findMany({
       where: {
         actif: true,
-        vendeur: { prioriteAffichage: { lt: 99 } },
+        OR: [
+          { vendeurId: null },
+          { vendeur: { prioriteAffichage: { lt: 99 } } },
+        ],
         ...(categorie ? { categoryId: categorie } : {}),
         ...(recherche ? { nom: { contains: recherche, mode: 'insensitive' } } : {}),
       },
-      orderBy: [
-        { vendeur: { prioriteAffichage: 'asc' } },
-        { createdAt: 'desc' },
-      ],
+      // Tri par createdAt côté DB ; le tri par priorité se fait en JS ci-dessous
+      orderBy: [{ createdAt: 'desc' }],
       select: {
         id: true,
         nom: true,
@@ -29,10 +30,16 @@ export default async function ProduitsPage({
         prixVariables: true,
         category: { select: { nom: true } },
         variants: { select: { id: true, couleur: true, nom: true }, orderBy: { createdAt: 'asc' } },
+        vendeur: { select: { prioriteAffichage: true } },
       },
     }),
     prisma.category.findMany({ orderBy: { nom: 'asc' } }),
   ])
+
+  // Tri priorité en couche applicative : null (admin) → 0, vendeurs → leur niveau
+  const produits = [...produitsRaw].sort(
+    (a, b) => (a.vendeur?.prioriteAffichage ?? 0) - (b.vendeur?.prioriteAffichage ?? 0)
+  )
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 pt-4">

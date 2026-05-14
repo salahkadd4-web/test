@@ -22,24 +22,33 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
       products: {
         where: {
           actif: true,
-          vendeur: { prioriteAffichage: { lt: 99 } }, // ← exclure vendeurs expirés
+          OR: [
+            { vendeurId: null },
+            { vendeur: { prioriteAffichage: { lt: 99 } } },
+          ],
         },
-        orderBy: [
-          { vendeur: { prioriteAffichage: 'asc' } }, // ← niveau 0 en premier
-          { createdAt: 'desc' },
-        ],
+        // Tri DB par date ; le tri priorité se fait en JS ci-dessous
+        orderBy: [{ createdAt: 'desc' }],
         include: {
+          vendeur: { select: { prioriteAffichage: true } },
           variants: {
             select: { id: true, nom: true, couleur: true },
             orderBy: { createdAt: 'asc' },
           },
         },
       },
-      _count: { select: { products: { where: { actif: true } } } },
     },
   })
 
   if (!categorie) notFound()
+
+  // Tri priorité applicatif : admin (null → 0) avant vendeurs
+  const produits = [...categorie.products].sort(
+    (a, b) => (a.vendeur?.prioriteAffichage ?? 0) - (b.vendeur?.prioriteAffichage ?? 0)
+  )
+
+  // Count des produits actifs
+  const totalActif = produits.length
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 pt-4">
@@ -68,13 +77,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
             <p className="text-gray-500 dark:text-gray-400 mt-1">{categorie.description}</p>
           )}
           <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-            {categorie._count.products} produit{categorie._count.products > 1 ? 's' : ''}
+            {totalActif} produit{totalActif > 1 ? 's' : ''}
           </p>
         </div>
       </div>
 
       {/* Produits */}
-      {categorie.products.length === 0 ? (
+      {produits.length === 0 ? (
         <div className="text-center py-20 text-gray-400 dark:text-gray-500">
           <Package className="w-14 h-14" />
           <p className="text-lg">Aucun produit dans cette catégorie.</p>
@@ -84,7 +93,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categorie.products.map((produit) => {
+          {produits.map((produit) => {
             const hasTiers  = Array.isArray(produit.prixVariables) && (produit.prixVariables as PrixTier[]).length > 0
             const prixMin   = getPrixMin(produit.prix, produit.prixVariables)
             const estReduit = hasTiers && prixMin < produit.prix

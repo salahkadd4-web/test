@@ -83,24 +83,30 @@ export default async function ProduitDetailPage({
 }
 
 async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: string; produitId: string }) {
-  const produits = await prisma.product.findMany({
+  const produitsRaw = await prisma.product.findMany({
     where: {
       categoryId,
       actif: true,
       NOT: { id: produitId },
-      vendeur: { prioriteAffichage: { lt: 99 } },
+      OR: [
+        { vendeurId: null },
+        { vendeur: { prioriteAffichage: { lt: 99 } } },
+      ],
     },
-    take: 4,
-    orderBy: [
-      { vendeur: { prioriteAffichage: 'asc' } },
-      { createdAt: 'desc' },
-    ],
-    include: { 
-    category: true,
-    variants: { select: { id: true, nom: true, couleur: true }, orderBy: { createdAt: 'asc' } },
-    
-     },
+    // Tri DB par date ; le tri priorité se fait en JS ci-dessous
+    orderBy: [{ createdAt: 'desc' }],
+    take: 8, // on prend plus pour avoir 4 après le tri
+    include: {
+      category: true,
+      vendeur: { select: { prioriteAffichage: true } },
+      variants: { select: { id: true, nom: true, couleur: true }, orderBy: { createdAt: 'asc' } },
+    },
   })
+
+  // Tri priorité applicatif puis on limite à 4
+  const produits = [...produitsRaw]
+    .sort((a, b) => (a.vendeur?.prioriteAffichage ?? 0) - (b.vendeur?.prioriteAffichage ?? 0))
+    .slice(0, 4)
 
   if (produits.length === 0) return null
 
