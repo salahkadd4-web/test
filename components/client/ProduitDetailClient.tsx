@@ -283,19 +283,85 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
         )}
 
         {/* Quantité */}
+        {/* Quantité */}
         {(stock > 0 && canAdd) && (
           <div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Quantité</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Quantité
+              </p>
+
+              <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                Stock disponible : {stock}
+              </span>
+            </div>
+
             <div className="flex items-center gap-3">
-              <button onClick={() => setQuantite(q => Math.max(1, q - 1))} disabled={quantite <= 1}
-                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition active:scale-95">
+
+              {/* Bouton - */}
+              <button
+                onClick={() => setQuantite(q => Math.max(1, q - 1))}
+                disabled={quantite <= 1}
+                className="
+                  w-10 h-10 rounded-xl
+                  bg-gray-100 dark:bg-gray-800
+                  flex items-center justify-center
+                  disabled:opacity-30
+                  hover:bg-gray-200 dark:hover:bg-gray-700
+                  transition active:scale-95
+                "
+              >
                 <Minus className="w-4 h-4 text-gray-700 dark:text-gray-200" />
               </button>
-              <span className="w-12 text-center font-bold text-gray-800 dark:text-gray-100 text-xl tabular-nums">{quantite}</span>
-              <button onClick={() => setQuantite(q => Math.min(stock, q + 1))} disabled={quantite >= stock}
-                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition active:scale-95">
+
+              {/* INPUT */}
+              <input
+                type="number"
+                min={1}
+                max={stock}
+                value={quantite}
+                onChange={(e) => {
+                  let value = Number(e.target.value)
+
+                  if (isNaN(value)) value = 1
+
+                  // Minimum
+                  if (value < 1) value = 1
+
+                  // Maximum stock
+                  if (value > stock) value = stock
+
+                  setQuantite(value)
+                }}
+                className="
+                  w-24 h-10 text-center
+                  rounded-xl border
+                  border-gray-300 dark:border-gray-700
+                  bg-white dark:bg-gray-900
+                  text-gray-800 dark:text-gray-100
+                  font-bold text-lg
+                  outline-none
+                  focus:ring-2 focus:ring-blue-500
+                "
+              />
+
+              {/* Bouton + */}
+              <button
+                onClick={() => setQuantite(q => Math.min(stock, q + 1))}
+                disabled={quantite >= stock}
+                className="
+                  w-10 h-10 rounded-xl
+                  bg-gray-100 dark:bg-gray-800
+                  flex items-center justify-center
+                  disabled:opacity-30
+                  hover:bg-gray-200 dark:hover:bg-gray-700
+                  transition active:scale-95
+                "
+              >
                 <Plus className="w-4 h-4 text-gray-700 dark:text-gray-200" />
               </button>
+
+              {/* Prix dégressif */}
               {hasTiers && (
                 <span className="text-xs text-blue-500 dark:text-blue-400 font-medium flex items-center gap-1">
                   {prixReduit
@@ -304,6 +370,13 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
                 </span>
               )}
             </div>
+
+            {/* Message limite stock */}
+            {quantite >= stock && (
+              <p className="mt-2 text-xs text-orange-500 dark:text-orange-400">
+                Quantité maximale disponible atteinte.
+              </p>
+            )}
           </div>
         )}
 
