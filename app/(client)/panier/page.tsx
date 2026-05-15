@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import {
-  ShoppingCart, X, Minus, Plus, Check, TrendingDown,
-  Ruler, Package, ChevronRight, ArrowLeft, AlertTriangle,
-  Trash2, ShoppingBag, Tag,
+  ShoppingCart, X, Minus, Plus, TrendingDown,
+  Ruler, Package, ArrowLeft, AlertTriangle,
+  Trash2, ShoppingBag, Tag, ChevronDown, ChevronUp,
+  Pencil, Check, Loader2,
 } from 'lucide-react'
 
-/* ── Types ── */
+/* ══════════════════════════════════════════
+   TYPES
+══════════════════════════════════════════ */
 type VariantOption = { id: string; valeur: string; stock: number }
 type Variant = {
   id: string; nom: string; couleur: string | null
@@ -34,158 +37,317 @@ type CartItem = {
 
 type Cart = { id: string; items: CartItem[] }
 
-function getPrixUnitaire(product: CartItem['product'], quantite: number): number {
+/* Groupe d'items du même produit */
+type ProductGroup = {
+  product: CartItem['product']
+  items:   CartItem[]
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function getPrixUnitaire(product: CartItem['product'], qte: number): number {
   if (!product.prixVariables?.length) return product.prix
   const sorted = [...product.prixVariables].sort((a, b) => b.minQte - a.minQte)
-  for (const t of sorted) { if (quantite >= t.minQte) return t.prix }
+  for (const t of sorted) { if (qte >= t.minQte) return t.prix }
   return product.prix
 }
 
-function getItemImage(item: CartItem): string | null {
-  if (item.variant?.images?.length) return item.variant.images[0]
-  return item.product.images[0] ?? null
+function groupByProduct(items: CartItem[]): ProductGroup[] {
+  const map = new Map<string, ProductGroup>()
+  for (const item of items) {
+    const pid = item.product.id
+    if (!map.has(pid)) map.set(pid, { product: item.product, items: [] })
+    map.get(pid)!.items.push(item)
+  }
+  return [...map.values()]
 }
 
-/* ── Contrôle quantité ─────────────────────── */
-function QuantiteControl({
-  item, onUpdate,
-}: { item: CartItem; onUpdate: (id: string, q: number) => Promise<void> }) {
-  const maxStock = item.variantOption?.stock ?? (item.variant?.stock ?? item.product.stock)
-  const [val,      setVal]      = useState(String(item.quantite))
-  const [stockMsg, setStockMsg] = useState('')
-  const [updating, setUpdating] = useState(false)
+/* ══════════════════════════════════════════
+   QteInput — saisie libre + stepper
+══════════════════════════════════════════ */
+function QteInput({
+  value, stockMax, onChange, onZero, size = 'md', disabled = false,
+}: {
+  value:    number
+  stockMax: number
+  onChange: (v: number) => void
+  onZero?:  () => void
+  size?:    'sm' | 'md'
+  disabled?: boolean
+}) {
+  const [raw, setRaw] = useState(String(value))
+  const ref           = useRef<HTMLInputElement>(null)
+  const focused       = () => document.activeElement === ref.current
 
-  useEffect(() => { setVal(String(item.quantite)) }, [item.quantite])
+  const prev = useRef(value)
+  if (prev.current !== value && !focused()) { prev.current = value; setRaw(String(value)) }
 
-  const apply = useCallback(async (raw: number) => {
-    const n      = Math.max(1, Math.round(raw))
-    const capped = Math.min(n, maxStock)
-    setStockMsg(n > maxStock ? `Max disponible : ${maxStock}` : '')
-    setVal(String(capped))
-    setUpdating(true)
-    await onUpdate(item.id, capped)
-    setUpdating(false)
-  }, [item.id, maxStock, onUpdate])
+  const commit = (s: string) => {
+    const n = parseInt(s, 10)
+    if (isNaN(n) || n <= 0) { if (onZero) { onZero(); return } setRaw('1'); onChange(1); return }
+    const c = Math.min(n, stockMax); setRaw(String(c)); onChange(c)
+  }
 
-  const currentQ = Number(val) || 1
-
+  const isSm = size === 'sm'
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-1.5">
-        <button onClick={() => apply(currentQ - 1)} disabled={currentQ <= 1 || updating}
-          className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition active:scale-95">
-          <Minus className="w-3.5 h-3.5 text-gray-600 dark:text-gray-300" />
-        </button>
-        <input
-          type="number" min={1} max={maxStock} value={val}
-          onChange={e => { setVal(e.target.value); if (Number(e.target.value) > maxStock) setStockMsg(`Max : ${maxStock}`) }}
-          onBlur={() => { const n = Number(val); if (!isNaN(n) && n >= 1) apply(n); else setVal(String(item.quantite)) }}
-          onKeyDown={e => { if (e.key === 'Enter') { const n = Number(val); if (!isNaN(n) && n >= 1) apply(n) } }}
-          onFocus={e => e.target.select()}
-          disabled={updating}
-          className="w-14 text-center font-semibold bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 disabled:opacity-60 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none transition"
-        />
-        <button onClick={() => apply(currentQ + 1)} disabled={currentQ >= maxStock || updating}
-          className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition active:scale-95">
-          <Plus className="w-3.5 h-3.5 text-gray-600 dark:text-gray-300" />
-        </button>
-        {updating && (
-          <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-        )}
-      </div>
-      {stockMsg && (
-        <p className="text-xs text-orange-500 dark:text-orange-400 flex items-center gap-1">
-          <AlertTriangle className="w-3 h-3" />{stockMsg}
-        </p>
-      )}
+    <div className="flex items-center gap-1">
+      <button type="button" tabIndex={-1} disabled={disabled || value <= 1}
+        onClick={() => { if (value - 1 <= 0 && onZero) { onZero(); return } const n = value - 1; setRaw(String(n)); onChange(n) }}
+        className={`flex items-center justify-center rounded-md disabled:opacity-30 transition ${isSm ? 'w-6 h-6 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400' : 'w-8 h-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+        <Minus className={isSm ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} />
+      </button>
+      <input ref={ref} type="number" min={1} max={stockMax} value={raw} disabled={disabled}
+        onChange={e => setRaw(e.target.value)}
+        onBlur={e => commit(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') { commit(raw); ref.current?.blur() } }}
+        onFocus={e => e.target.select()}
+        className={`text-center font-bold tabular-nums bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none transition ${isSm ? 'w-10 text-sm py-0.5' : 'w-14 text-sm py-1.5'}`}
+      />
+      <button type="button" tabIndex={-1} disabled={disabled || value >= stockMax}
+        onClick={() => { const n = Math.min(stockMax, value + 1); setRaw(String(n)); onChange(n) }}
+        className={`flex items-center justify-center rounded-md disabled:opacity-30 transition ${isSm ? 'w-6 h-6 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400' : 'w-8 h-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+        <Plus className={isSm ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} />
+      </button>
     </div>
   )
 }
 
-/* ── Sélecteur variante inline ─────────────── */
-function VariantSelector({ item, onChange }: {
-  item: CartItem
-  onChange: (itemId: string, variantId: string | null, optionId: string | null) => Promise<void>
+/* ══════════════════════════════════════════
+   PANNEAU ÉDITEUR (expandable)
+   Reprend la logique de ProduitDetailClient
+   mais branché sur les items du panier
+══════════════════════════════════════════ */
+function ProductEditor({
+  group,
+  onUpdate,
+  onDelete,
+  onAddNew,
+}: {
+  group:    ProductGroup
+  onUpdate: (itemId: string, quantite: number) => Promise<void>
+  onDelete: (itemId: string) => Promise<void>
+  onAddNew: (productId: string, variantId: string, optionId: string | undefined, qte: number) => Promise<void>
 }) {
-  const { product, variant, variantOption } = item
-  if (!product.variants?.length) return null
-  const [changing, setChanging] = useState(false)
+  const { product, items } = group
   const typeOpt    = product.typeOption || 'Taille'
+  const hasOptions = product.variants.some(v => v.options.length > 0)
   const isColor    = product.variants.some(v => v.couleur)
-  const curVariant = product.variants.find(v => v.id === variant?.id) ?? null
-  const hasOptions = (curVariant?.options.length ?? 0) > 0
 
-  const handleVariant = async (variantId: string) => {
-    if (variantId === variant?.id) return
-    setChanging(true); await onChange(item.id, variantId, null); setChanging(false)
-  }
-  const handleOption = async (optionId: string) => {
-    if (optionId === variantOption?.id) return
-    setChanging(true); await onChange(item.id, variant?.id ?? null, optionId); setChanging(false)
+  // Variante active dans l'éditeur
+  const [activeVId, setActiveVId] = useState<string>(
+    items[0]?.variant?.id ?? product.variants[0]?.id ?? ''
+  )
+  const activeVariant = product.variants.find(v => v.id === activeVId) ?? null
+
+  // Image preview
+  const [imgPreview, setImgPreview] = useState<string | null>(
+    items[0]?.variant?.images?.[0] ?? product.images?.[0] ?? null
+  )
+
+  // Pending updates (itemId → loading)
+  const [pending, setPending] = useState<Record<string, boolean>>({})
+
+  /* Trouver un item du panier par (variantId, optionId?) */
+  const findItem = (variantId: string, optionId?: string) =>
+    items.find(i =>
+      i.variant?.id === variantId &&
+      (optionId ? i.variantOption?.id === optionId : !i.variantOption)
+    ) ?? null
+
+  /* Quantité actuelle dans le panier */
+  const qteInCart = (variantId: string, optionId?: string) =>
+    findItem(variantId, optionId)?.quantite ?? 0
+
+  /* Changer la quantité d'un item existant ou en créer un nouveau */
+  const handleChange = async (variantId: string, optionId: string | undefined, newQte: number) => {
+    const existing = findItem(variantId, optionId)
+    const key = `${variantId}__${optionId ?? ''}`
+    setPending(p => ({ ...p, [key]: true }))
+    if (existing) {
+      if (newQte === 0) await onDelete(existing.id)
+      else await onUpdate(existing.id, newQte)
+    } else if (newQte > 0) {
+      await onAddNew(product.id, variantId, optionId, newQte)
+    }
+    setPending(p => ({ ...p, [key]: false }))
   }
 
   return (
-    <div className="mt-2 space-y-2">
-      <div>
-        <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold uppercase tracking-wide">
-          {isColor ? 'Couleur' : 'Variante'}
-          {changing && <span className="ml-1 text-blue-400 normal-case font-normal">mise à jour…</span>}
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {product.variants.map(v => {
-            const isSel      = v.id === variant?.id
-            const outOfStock = v.options.length > 0 ? v.options.every(o => o.stock === 0) : v.stock === 0
-            return (
-              <button key={v.id}
-                onClick={() => !outOfStock && !changing && handleVariant(v.id)}
-                disabled={outOfStock || changing}
-                className={`relative flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs font-medium transition-all ${
-                  isSel
-                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
-                    : outOfStock
-                      ? 'border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                      : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-blue-400'
-                }`}>
-                {v.couleur && <span className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-500 shrink-0" style={{ backgroundColor: v.couleur }} />}
-                {v.nom}
-                {isSel && <Check className="w-3 h-3 text-blue-500 shrink-0" />}
-                {outOfStock && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white w-3 h-3 rounded-full flex items-center justify-center">
-                    <X className="w-2 h-2" />
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+    <div className="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100 dark:border-gray-800">
 
-      {hasOptions && curVariant && (
-        <div>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold uppercase tracking-wide flex items-center gap-1">
-            <Ruler className="w-3 h-3" />{typeOpt}
+      {/* Image + swatches couleur */}
+      <div className="flex gap-3">
+        {/* Miniature */}
+        <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 flex items-center justify-center">
+          {imgPreview
+            ? <img src={imgPreview} alt="" className="w-full h-full object-cover" />
+            : <Package className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+          }
+        </div>
+
+        {/* Swatches */}
+        <div className="flex-1">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
+            {isColor ? 'Couleur' : 'Variante'}
           </p>
-          <div className="flex flex-wrap gap-1.5">
-            {curVariant.options.map(o => {
-              const isSel = o.id === variantOption?.id
+          <div className="flex flex-wrap gap-2">
+            {product.variants.map(v => {
+              const isActive   = v.id === activeVId
+              const qteV       = hasOptions
+                ? v.options.reduce((s, o) => s + qteInCart(v.id, o.id), 0)
+                : qteInCart(v.id)
+              const outOfStock = hasOptions
+                ? v.options.every(o => o.stock === 0)
+                : v.stock === 0
+
               return (
-                <button key={o.id}
-                  onClick={() => o.stock > 0 && !changing && handleOption(o.id)}
-                  disabled={o.stock === 0 || changing}
-                  className={`relative min-w-[2.25rem] px-2 py-1 rounded-lg border text-xs font-semibold transition-all ${
-                    isSel
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
-                      : o.stock === 0
-                        ? 'border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed line-through'
-                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-blue-400'
+                <button key={v.id} type="button"
+                  onClick={() => { if (outOfStock) return; setActiveVId(v.id); setImgPreview(v.images?.[0] ?? product.images?.[0] ?? null) }}
+                  disabled={outOfStock}
+                  className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border-2 text-xs font-semibold transition-all ${
+                    isActive
+                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 shadow-sm'
+                      : outOfStock
+                        ? 'border-gray-200 dark:border-gray-700 opacity-30 cursor-not-allowed'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-600'
                   }`}>
-                  {o.valeur}
-                  {o.stock === 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white w-3 h-3 rounded-full flex items-center justify-center">
-                      <X className="w-2 h-2" />
+                  {v.couleur && (
+                    <span className="w-3.5 h-3.5 rounded-full border border-gray-300 dark:border-gray-500 shrink-0 shadow-sm"
+                      style={{ backgroundColor: v.couleur }} />
+                  )}
+                  {v.nom}
+                  {qteV > 0 && (
+                    <span className="ml-1 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
+                      {qteV}
                     </span>
                   )}
                 </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Options (tailles) de la variante active */}
+      {activeVariant && (
+        <div>
+          {hasOptions ? (
+            <>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+                <Ruler className="w-3 h-3" /> {typeOpt}
+                <span className="font-normal normal-case text-gray-400 ml-1">— cliquez pour ajouter, tapez la quantité</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {activeVariant.options.map(opt => {
+                  const key       = `${activeVariant.id}__${opt.id}`
+                  const qt        = qteInCart(activeVariant.id, opt.id)
+                  const isPending = pending[key]
+                  const outStock  = opt.stock === 0
+                  const maxReach  = qt >= opt.stock
+
+                  return (
+                    <div key={opt.id}
+                      className={`relative flex items-center rounded-xl border-2 overflow-hidden text-sm transition-all ${
+                        outStock
+                          ? 'border-gray-200 dark:border-gray-700 opacity-30 cursor-not-allowed'
+                          : qt > 0
+                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/50 shadow-sm'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
+                      }`}>
+
+                      {/* Label — clic = ajouter si pas encore présent */}
+                      <button type="button"
+                        onClick={() => !outStock && qt === 0 && handleChange(activeVariant.id, opt.id, 1)}
+                        disabled={outStock || (qt > 0)}
+                        className={`min-w-[2.5rem] px-3 h-9 flex items-center justify-center font-semibold transition-all ${
+                          outStock ? 'cursor-not-allowed line-through text-gray-400' : qt > 0 ? 'cursor-default text-blue-700 dark:text-blue-300' : 'cursor-pointer text-gray-700 dark:text-gray-200'
+                        }`}>
+                        {opt.valeur}
+                      </button>
+
+                      {/* QteInput si qt > 0 */}
+                      {qt > 0 && (
+                        <div className="pr-1.5 flex items-center gap-1">
+                          {isPending
+                            ? <Loader2 className="w-4 h-4 animate-spin text-blue-500 mx-2" />
+                            : <QteInput size="sm" value={qt} stockMax={opt.stock}
+                                onChange={v => handleChange(activeVariant.id, opt.id, v)}
+                                onZero={() => handleChange(activeVariant.id, opt.id, 0)}
+                              />
+                          }
+                        </div>
+                      )}
+
+                      {/* Badge MAX */}
+                      {maxReach && qt > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[9px] font-bold px-1 rounded-full shadow leading-tight">MAX</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          ) : (
+            /* Variante sans options → stepper direct */
+            <div className="flex items-center gap-3">
+              <p className="text-xs font-semibold text-gray-600 dark:text-gray-400">Quantité</p>
+              {pending[`${activeVariant.id}__`]
+                ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                : <QteInput
+                    value={qteInCart(activeVariant.id)}
+                    stockMax={activeVariant.stock}
+                    onChange={v => handleChange(activeVariant.id, undefined, v)}
+                    onZero={() => handleChange(activeVariant.id, undefined, 0)}
+                  />
+              }
+              <span className="text-xs text-gray-400">{activeVariant.stock} dispo.</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Récap lignes du produit */}
+      {items.length > 0 && (
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-3 pt-2.5 pb-1.5">
+            Dans votre panier
+          </p>
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            {items.map(item => {
+              const prixU = getPrixUnitaire(item.product, item.quantite)
+              const key   = `${item.variant?.id ?? ''}__${item.variantOption?.id ?? ''}`
+              return (
+                <div key={item.id} className="flex items-center gap-2 px-3 py-2">
+                  {/* Swatch */}
+                  {item.variant?.couleur && (
+                    <span className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 shrink-0"
+                      style={{ backgroundColor: item.variant.couleur }} />
+                  )}
+                  {/* Label */}
+                  <span className="text-xs text-gray-700 dark:text-gray-300 flex-1">
+                    {item.variant?.nom ?? ''}
+                    {item.variantOption && ` / ${typeOpt} ${item.variantOption.valeur}`}
+                  </span>
+                  {/* QteInput */}
+                  {pending[key]
+                    ? <Loader2 className="w-4 h-4 animate-spin text-blue-500 mx-2" />
+                    : <QteInput size="sm" value={item.quantite}
+                        stockMax={item.variantOption?.stock ?? item.variant?.stock ?? item.product.stock}
+                        onChange={v => handleChange(item.variant?.id ?? '', item.variantOption?.id, v)}
+                        onZero={() => handleChange(item.variant?.id ?? '', item.variantOption?.id, 0)}
+                      />
+                  }
+                  {/* Prix ligne */}
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 w-20 text-right tabular-nums shrink-0">
+                    {(prixU * item.quantite).toFixed(2)} DA
+                  </span>
+                  {/* Supprimer */}
+                  <button type="button" onClick={() => onDelete(item.id)}
+                    className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition shrink-0 p-0.5 rounded">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               )
             })}
           </div>
@@ -195,57 +357,204 @@ function VariantSelector({ item, onChange }: {
   )
 }
 
-/* ── Page panier ───────────────────────────── */
+/* ══════════════════════════════════════════
+   PRODUCT CARD (collapsed + expanded)
+══════════════════════════════════════════ */
+function ProductCard({
+  group, onUpdate, onDelete, onAddNew, onDeleteGroup,
+}: {
+  group:         ProductGroup
+  onUpdate:      (id: string, q: number) => Promise<void>
+  onDelete:      (id: string) => Promise<void>
+  onAddNew:      (pid: string, vid: string, oid: string | undefined, q: number) => Promise<void>
+  onDeleteGroup: (items: CartItem[]) => Promise<void>
+}) {
+  const { product, items } = group
+  const [open, setOpen] = useState(false)
+  const typeOpt = product.typeOption || 'Taille'
+
+  /* Totaux du groupe */
+  const totalQte = items.reduce((s, i) => s + i.quantite, 0)
+  const prixUnit = getPrixUnitaire(product, totalQte)
+  const prixBase = product.prix
+  const isReduit = (product.prixVariables?.length ?? 0) > 0 && prixUnit < prixBase
+  const sousTotal = prixUnit * totalQte
+  const economie  = isReduit ? (prixBase - prixUnit) * totalQte : 0
+
+  /* Image principale = première variante qui a des images */
+  const mainImg = items.find(i => i.variant?.images?.length)?.variant?.images[0]
+    ?? product.images?.[0] ?? null
+
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-2xl border overflow-hidden transition-all duration-200 ${open ? 'border-blue-300 dark:border-blue-700 shadow-md shadow-blue-500/5' : 'border-gray-100 dark:border-gray-800 hover:shadow-sm'}`}>
+
+      {/* ── EN-TÊTE CARTE ── */}
+      <div className="flex gap-3 p-4">
+
+        {/* Image */}
+        <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative">
+          {mainImg
+            ? <img src={mainImg} alt={product.nom} className="w-full h-full object-cover" />
+            : <Package className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+          }
+          {/* Badges couleur empilés */}
+          {items.filter(i => i.variant?.couleur).slice(0, 3).map((i, idx) => (
+            <span key={i.id}
+              className="absolute bottom-1 border-2 border-white dark:border-gray-900 rounded-full shadow-sm w-4 h-4"
+              style={{ right: `${4 + idx * 10}px`, backgroundColor: i.variant!.couleur! }} />
+          ))}
+        </div>
+
+        {/* Infos */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-1">
+            <div className="min-w-0">
+              <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium mb-0.5 truncate">{product.category.nom}</p>
+              <h3 className="font-bold text-gray-800 dark:text-gray-100 text-sm leading-snug line-clamp-2">{product.nom}</h3>
+            </div>
+            {/* Supprimer tout le groupe */}
+            <button type="button" onClick={() => onDeleteGroup(items)}
+              title="Retirer ce produit"
+              className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition p-1 shrink-0 rounded-lg hover:bg-red-50 dark:hover:bg-red-950">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Chips variantes en résumé */}
+          <div className="flex flex-wrap gap-1 mt-2">
+            {items.map(item => (
+              <span key={item.id}
+                className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[11px] px-2 py-0.5 rounded-full">
+                {item.variant?.couleur && (
+                  <span className="w-2.5 h-2.5 rounded-full border border-gray-300 dark:border-gray-600 shrink-0"
+                    style={{ backgroundColor: item.variant.couleur }} />
+                )}
+                {item.variant?.nom ?? product.nom}
+                {item.variantOption && <> · {typeOpt} {item.variantOption.valeur}</>}
+                <span className="font-bold text-gray-500 dark:text-gray-400 ml-0.5">×{item.quantite}</span>
+              </span>
+            ))}
+          </div>
+
+          {/* Prix */}
+          <div className="flex items-baseline gap-2 mt-2.5 flex-wrap">
+            <span className={`text-base font-bold ${isReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+              {prixUnit.toFixed(2)} DA<span className="text-xs font-normal text-gray-400 ml-0.5">/u.</span>
+            </span>
+            {isReduit && (
+              <>
+                <span className="text-xs text-gray-400 line-through">{prixBase.toFixed(2)} DA</span>
+                <span className="text-[10px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  <TrendingDown className="w-2.5 h-2.5" />−{Math.round((1 - prixUnit / prixBase) * 100)}%
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── PANNEAU ÉDITEUR (expandable) ── */}
+      {open && (
+        <ProductEditor
+          group={group}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+          onAddNew={onAddNew}
+        />
+      )}
+
+      {/* ── FOOTER ── */}
+      <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 px-4 py-2.5 flex items-center justify-between gap-3">
+        {/* Sous-total */}
+        <div>
+          <p className="text-[10px] text-gray-400 uppercase tracking-wide">Sous-total — {totalQte} art.</p>
+          <div className="flex items-baseline gap-1.5">
+            <p className="font-bold text-gray-800 dark:text-gray-100">{sousTotal.toFixed(2)} DA</p>
+            {isReduit && <p className="text-[10px] text-gray-400 line-through">{(prixBase * totalQte).toFixed(2)} DA</p>}
+          </div>
+        </div>
+
+        {/* Bouton modifier */}
+        <button type="button"
+          onClick={() => setOpen(o => !o)}
+          className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl border-2 transition-all active:scale-95 ${
+            open
+              ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
+              : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400'
+          }`}>
+          {open
+            ? <><ChevronUp className="w-3.5 h-3.5" /> Fermer</>
+            : <><Pencil className="w-3.5 h-3.5" /> Modifier la sélection <ChevronDown className="w-3.5 h-3.5" /></>
+          }
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════
+   PAGE PANIER
+══════════════════════════════════════════ */
 export default function PanierPage() {
-  const [panier,        setPanier]        = useState<Cart | null>(null)
-  const [loading,       setLoading]       = useState(true)
-  const [vidageLoading, setVidageLoading] = useState(false)
+  const [panier,  setPanier]  = useState<Cart | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(false)
 
-  const fetchPanier = async () => {
-    try { const res = await fetch('/api/panier'); setPanier(await res.json()) }
+  const fetchPanier = useCallback(async () => {
+    try { const r = await fetch('/api/panier'); setPanier(await r.json()) }
     finally { setLoading(false) }
-  }
+  }, [])
 
-  useEffect(() => { fetchPanier() }, [])
-
-  const updateItem = async (itemId: string, variantId: string | null, optionId: string | null) => {
-    await fetch(`/api/panier/${itemId}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variantId, variantOptionId: optionId }),
-    })
-    fetchPanier()
-  }
+  useEffect(() => { fetchPanier() }, [fetchPanier])
 
   const updateQuantite = async (itemId: string, quantite: number) => {
     await fetch(`/api/panier/${itemId}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ quantite }),
     })
-    fetchPanier()
+    await fetchPanier()
   }
 
   const supprimerItem = async (itemId: string) => {
     await fetch(`/api/panier/${itemId}`, { method: 'DELETE' })
-    fetchPanier()
+    await fetchPanier()
+  }
+
+  const supprimerGroupe = async (items: CartItem[]) => {
+    await Promise.all(items.map(i => fetch(`/api/panier/${i.id}`, { method: 'DELETE' })))
+    await fetchPanier()
+  }
+
+  const ajouterItem = async (productId: string, variantId: string, optionId: string | undefined, quantite: number) => {
+    await fetch('/api/panier', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produitId: productId, variantId, variantOptionId: optionId, quantite }),
+    })
+    await fetchPanier()
   }
 
   const viderPanier = async () => {
     if (!panier) return
-    setVidageLoading(true)
+    setDeleting(true)
     await Promise.all(panier.items.map(i => fetch(`/api/panier/${i.id}`, { method: 'DELETE' })))
     await fetchPanier()
-    setVidageLoading(false)
+    setDeleting(false)
   }
 
-  /* ── Calculs ── */
-  const lignesCalc = (panier?.items ?? []).map(item => {
-    const prixUnit  = getPrixUnitaire(item.product, item.quantite)
-    const prixBase  = item.product.prix
-    const estReduit = (item.product.prixVariables?.length ?? 0) > 0 && prixUnit < prixBase
-    return { item, prixUnit, prixBase, estReduit, sousLigne: prixUnit * item.quantite }
-  })
-  const sousTotal      = lignesCalc.reduce((s, l) => s + l.sousLigne, 0)
-  const totalEconomies = lignesCalc.reduce((s, l) => s + (l.estReduit ? (l.prixBase - l.prixUnit) * l.item.quantite : 0), 0)
+  /* Calculs globaux */
+  const groups = panier ? groupByProduct(panier.items) : []
+  const sousTotal = groups.reduce((s, g) => {
+    const qte   = g.items.reduce((a, i) => a + i.quantite, 0)
+    const prixU = getPrixUnitaire(g.product, qte)
+    return s + prixU * qte
+  }, 0)
+  const totalEconomies = groups.reduce((s, g) => {
+    const qte   = g.items.reduce((a, i) => a + i.quantite, 0)
+    const prixU = getPrixUnitaire(g.product, qte)
+    const base  = g.product.prix
+    return s + (prixU < base ? (base - prixU) * qte : 0)
+  }, 0)
+  const totalArticles = panier?.items.reduce((s, i) => s + i.quantite, 0) ?? 0
 
   /* ── Loading ── */
   if (loading) return (
@@ -275,149 +584,75 @@ export default function PanierPage() {
     <div className="max-w-5xl mx-auto px-4 py-6">
 
       {/* En-tête */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
           <ShoppingCart className="w-6 h-6" />
           Mon Panier
-          <span className="text-base font-normal text-gray-400 ml-1">({panier.items.length} article{panier.items.length > 1 ? 's' : ''})</span>
+          <span className="text-base font-normal text-gray-400 ml-1">
+            ({groups.length} produit{groups.length > 1 ? 's' : ''} · {totalArticles} art.)
+          </span>
         </h1>
-        <button onClick={viderPanier} disabled={vidageLoading}
-          className="text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition flex items-center gap-1 disabled:opacity-50">
+        <button onClick={viderPanier} disabled={deleting}
+          className="text-xs text-gray-400 hover:text-red-500 transition flex items-center gap-1 disabled:opacity-50">
           <Trash2 className="w-3.5 h-3.5" />
-          {vidageLoading ? 'Vidage…' : 'Vider le panier'}
+          {deleting ? 'Vidage…' : 'Vider le panier'}
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* ── Articles ── */}
+        {/* ── Cartes produits ── */}
         <div className="lg:col-span-2 space-y-3">
-          {lignesCalc.map(({ item, prixUnit, prixBase, estReduit, sousLigne }) => {
-            const imageUrl = getItemImage(item)
-            const typeOpt  = item.product.typeOption || 'Taille'
-
-            return (
-              <div key={item.id}
-                className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden transition hover:shadow-sm">
-
-                {/* Corps de la carte */}
-                <div className="flex gap-3 p-4">
-
-                  {/* Image */}
-                  <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0 relative">
-                    {imageUrl
-                      ? <img src={imageUrl} alt={item.product.nom} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center"><Package className="w-8 h-8 text-gray-300 dark:text-gray-600" /></div>
-                    }
-                    {item.variant?.couleur && (
-                      <span className="absolute bottom-1.5 right-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"
-                        style={{ backgroundColor: item.variant.couleur }} />
-                    )}
-                  </div>
-
-                  {/* Infos */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-0.5">{item.product.category.nom}</p>
-                        <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm leading-snug line-clamp-2">{item.product.nom}</h3>
-                      </div>
-                      {/* Supprimer */}
-                      <button onClick={() => supprimerItem(item.id)}
-                        className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition p-1 shrink-0 rounded-lg hover:bg-red-50 dark:hover:bg-red-950">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Badge variante sélectionnée */}
-                    {(item.variant || item.variantOption) && (
-                      <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                        {item.variant?.couleur && (
-                          <span className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 inline-block shrink-0"
-                            style={{ backgroundColor: item.variant.couleur }} />
-                        )}
-                        {item.variant && (
-                          <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
-                            {item.variant.nom}
-                          </span>
-                        )}
-                        {item.variantOption && (
-                          <>
-                            <ChevronRight className="w-3 h-3 text-gray-300 shrink-0" />
-                            <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Ruler className="w-2.5 h-2.5" />{typeOpt} {item.variantOption.valeur}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Sélecteur variante */}
-                    <VariantSelector item={item} onChange={updateItem} />
-
-                    {/* Prix unitaire */}
-                    <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-                      <span className={`text-base font-bold ${estReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                        {prixUnit.toFixed(2)} DA
-                      </span>
-                      {estReduit && (
-                        <>
-                          <span className="text-xs text-gray-400 line-through">{prixBase.toFixed(2)} DA</span>
-                          <span className="text-[10px] bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                            <TrendingDown className="w-2.5 h-2.5" />
-                            −{Math.round((1 - prixUnit / prixBase) * 100)}%
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Barre quantité + sous-total article */}
-                <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 px-4 py-2.5 flex items-center justify-between gap-4">
-                  <QuantiteControl item={item} onUpdate={updateQuantite} />
-                  <div className="text-right shrink-0">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Sous-total</p>
-                    <p className="font-bold text-gray-800 dark:text-gray-100">{sousLigne.toFixed(2)} DA</p>
-                    {estReduit && (
-                      <p className="text-[10px] text-gray-400 line-through">{(prixBase * item.quantite).toFixed(2)} DA</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-
-          {/* Lien continuer */}
-          <Link href="/produits" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition mt-1">
+          {groups.map(group => (
+            <ProductCard
+              key={group.product.id}
+              group={group}
+              onUpdate={updateQuantite}
+              onDelete={supprimerItem}
+              onAddNew={ajouterItem}
+              onDeleteGroup={supprimerGroupe}
+            />
+          ))}
+          <Link href="/produits"
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition mt-1">
             <ArrowLeft className="w-4 h-4" /> Continuer les achats
           </Link>
         </div>
 
-        {/* ── Résumé de commande ── */}
+        {/* ── Résumé ── */}
         <div className="lg:sticky lg:top-20 h-fit space-y-3">
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
             <h2 className="font-bold text-gray-800 dark:text-gray-100 mb-4">Résumé</h2>
 
-            {/* Lignes articles */}
-            <div className="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">
-              {lignesCalc.map(({ item, prixUnit, sousLigne }) => {
-                const typeOpt = item.product.typeOption || 'Taille'
+            {/* Lignes par produit */}
+            <div className="space-y-2.5 mb-4 max-h-52 overflow-y-auto pr-1">
+              {groups.map(group => {
+                const qte   = group.items.reduce((s, i) => s + i.quantite, 0)
+                const prixU = getPrixUnitaire(group.product, qte)
                 return (
-                  <div key={item.id} className="flex justify-between items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
-                    <span className="flex-1 line-clamp-2 leading-relaxed">
-                      {item.variant?.couleur && (
-                        <span className="w-2.5 h-2.5 rounded-full border border-gray-300 inline-block mr-1 align-middle shrink-0"
-                          style={{ backgroundColor: item.variant.couleur }} />
-                      )}
-                      {item.product.nom}
-                      {item.variant ? ` — ${item.variant.nom}` : ''}
-                      {item.variantOption ? ` / ${typeOpt} ${item.variantOption.valeur}` : ''}
-                      {' '}×{item.quantite}
-                    </span>
-                    <span className="font-semibold text-gray-700 dark:text-gray-300 shrink-0 tabular-nums">
-                      {sousLigne.toFixed(2)} DA
-                    </span>
+                  <div key={group.product.id} className="space-y-0.5">
+                    <div className="flex justify-between items-start gap-2 text-xs">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium flex-1 line-clamp-1">{group.product.nom}</span>
+                      <span className="text-gray-800 dark:text-gray-200 font-bold shrink-0 tabular-nums">
+                        {(prixU * qte).toFixed(2)} DA
+                      </span>
+                    </div>
+                    {group.items.map(item => (
+                      <div key={item.id} className="flex justify-between text-[11px] text-gray-400 pl-2">
+                        <span className="flex items-center gap-1 flex-wrap">
+                          {item.variant?.couleur && (
+                            <span className="w-2.5 h-2.5 rounded-full border border-gray-300 inline-block shrink-0"
+                              style={{ backgroundColor: item.variant.couleur }} />
+                          )}
+                          {item.variant?.nom}
+                          {item.variantOption && ` / ${item.variantOption.valeur}`}
+                          {' '}×{item.quantite}
+                        </span>
+                        <span className="tabular-nums shrink-0">
+                          {(getPrixUnitaire(item.product, item.quantite) * item.quantite).toFixed(2)} DA
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )
               })}
@@ -431,13 +666,11 @@ export default function PanierPage() {
               </div>
               {totalEconomies > 0 && (
                 <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                  <span className="flex items-center gap-1">
-                    <Tag className="w-3.5 h-3.5" /> Réductions dégressives
-                  </span>
+                  <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" /> Réductions</span>
                   <span className="tabular-nums font-semibold">−{totalEconomies.toFixed(2)} DA</span>
                 </div>
               )}
-              <p className="text-xs text-gray-400">Frais de livraison calculés à l&apos;étape suivante</p>
+              <p className="text-xs text-gray-400">+ Livraison calculée à l&apos;étape suivante</p>
               <div className="flex justify-between font-bold text-lg pt-1 border-t border-gray-100 dark:border-gray-800">
                 <span className="text-gray-800 dark:text-gray-100">Total articles</span>
                 <span className="text-blue-600 dark:text-blue-400 tabular-nums">{sousTotal.toFixed(2)} DA</span>
@@ -445,7 +678,7 @@ export default function PanierPage() {
             </div>
           </div>
 
-          {/* Économies badge */}
+          {/* Économies */}
           {totalEconomies > 0 && (
             <div className="bg-green-50 dark:bg-green-950/50 border border-green-100 dark:border-green-900 rounded-xl px-4 py-3 flex items-center gap-2.5">
               <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center shrink-0">
@@ -453,14 +686,14 @@ export default function PanierPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-green-700 dark:text-green-400">Vous économisez !</p>
-                <p className="text-sm font-semibold text-green-800 dark:text-green-300">{totalEconomies.toFixed(2)} DA grâce aux prix dégressifs</p>
+                <p className="text-sm font-semibold text-green-800 dark:text-green-300">{totalEconomies.toFixed(2)} DA</p>
               </div>
             </div>
           )}
 
-          {/* Bouton commander */}
+          {/* Commander */}
           <Link href="/commandes/nouveau"
-            className="flex items-center justify-center gap-2 w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-4 rounded-xl transition text-base shadow-lg shadow-black/10 dark:shadow-white/10">
+            className="flex items-center justify-center gap-2 w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-4 rounded-xl transition text-base shadow-lg shadow-black/10">
             <ShoppingBag className="w-5 h-5" /> Passer la commande
           </Link>
         </div>
