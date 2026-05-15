@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import {
   ShoppingCart, X, Minus, Plus, TrendingDown,
-  Ruler, Package, ArrowLeft, AlertTriangle,
+  Ruler, Package, ArrowLeft,
   Trash2, ShoppingBag, Tag, ChevronDown, ChevronUp,
   Pencil, Check, Loader2,
 } from 'lucide-react'
@@ -37,7 +37,6 @@ type CartItem = {
 
 type Cart = { id: string; items: CartItem[] }
 
-/* Groupe d'items du même produit */
 type ProductGroup = {
   product: CartItem['product']
   items:   CartItem[]
@@ -114,9 +113,7 @@ function QteInput({
 }
 
 /* ══════════════════════════════════════════
-   PANNEAU ÉDITEUR (expandable)
-   Reprend la logique de ProduitDetailClient
-   mais branché sur les items du panier
+   PANNEAU ÉDITEUR
 ══════════════════════════════════════════ */
 function ProductEditor({
   group,
@@ -134,32 +131,29 @@ function ProductEditor({
   const hasOptions = product.variants.some(v => v.options.length > 0)
   const isColor    = product.variants.some(v => v.couleur)
 
-  // Variante active dans l'éditeur
+  // ── Quantité TOTALE du groupe (pour le palier dégressif correct) ──
+  const totalQteGroupe = items.reduce((s, i) => s + i.quantite, 0)
+
   const [activeVId, setActiveVId] = useState<string>(
     items[0]?.variant?.id ?? product.variants[0]?.id ?? ''
   )
   const activeVariant = product.variants.find(v => v.id === activeVId) ?? null
 
-  // Image preview
   const [imgPreview, setImgPreview] = useState<string | null>(
     items[0]?.variant?.images?.[0] ?? product.images?.[0] ?? null
   )
 
-  // Pending updates (itemId → loading)
   const [pending, setPending] = useState<Record<string, boolean>>({})
 
-  /* Trouver un item du panier par (variantId, optionId?) */
   const findItem = (variantId: string, optionId?: string) =>
     items.find(i =>
       i.variant?.id === variantId &&
       (optionId ? i.variantOption?.id === optionId : !i.variantOption)
     ) ?? null
 
-  /* Quantité actuelle dans le panier */
   const qteInCart = (variantId: string, optionId?: string) =>
     findItem(variantId, optionId)?.quantite ?? 0
 
-  /* Changer la quantité d'un item existant ou en créer un nouveau */
   const handleChange = async (variantId: string, optionId: string | undefined, newQte: number) => {
     const existing = findItem(variantId, optionId)
     const key = `${variantId}__${optionId ?? ''}`
@@ -178,7 +172,6 @@ function ProductEditor({
 
       {/* Image + swatches couleur */}
       <div className="flex gap-3">
-        {/* Miniature */}
         <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 flex items-center justify-center">
           {imgPreview
             ? <img src={imgPreview} alt="" className="w-full h-full object-cover" />
@@ -186,7 +179,6 @@ function ProductEditor({
           }
         </div>
 
-        {/* Swatches */}
         <div className="flex-1">
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
             {isColor ? 'Couleur' : 'Variante'}
@@ -255,8 +247,6 @@ function ProductEditor({
                             ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/50 shadow-sm'
                             : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                       }`}>
-
-                      {/* Label — clic = ajouter si pas encore présent */}
                       <button type="button"
                         onClick={() => !outStock && qt === 0 && handleChange(activeVariant.id, opt.id, 1)}
                         disabled={outStock || (qt > 0)}
@@ -265,8 +255,6 @@ function ProductEditor({
                         }`}>
                         {opt.valeur}
                       </button>
-
-                      {/* QteInput si qt > 0 */}
                       {qt > 0 && (
                         <div className="pr-1.5 flex items-center gap-1">
                           {isPending
@@ -278,8 +266,6 @@ function ProductEditor({
                           }
                         </div>
                       )}
-
-                      {/* Badge MAX */}
                       {maxReach && qt > 0 && (
                         <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[9px] font-bold px-1 rounded-full shadow leading-tight">MAX</span>
                       )}
@@ -289,7 +275,6 @@ function ProductEditor({
               </div>
             </>
           ) : (
-            /* Variante sans options → stepper direct */
             <div className="flex items-center gap-3">
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400">Quantité</p>
               {pending[`${activeVariant.id}__`]
@@ -307,7 +292,7 @@ function ProductEditor({
         </div>
       )}
 
-      {/* Récap lignes du produit */}
+      {/* ── Récap lignes — prix basé sur la quantité TOTALE du groupe ── */}
       {items.length > 0 && (
         <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden">
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-3 pt-2.5 pb-1.5">
@@ -315,21 +300,19 @@ function ProductEditor({
           </p>
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {items.map(item => {
-              const prixU = getPrixUnitaire(item.product, item.quantite)
+              // ✅ Prix calculé sur la quantité TOTALE du groupe, pas item.quantite
+              const prixU = getPrixUnitaire(item.product, totalQteGroupe)
               const key   = `${item.variant?.id ?? ''}__${item.variantOption?.id ?? ''}`
               return (
                 <div key={item.id} className="flex items-center gap-2 px-3 py-2">
-                  {/* Swatch */}
                   {item.variant?.couleur && (
                     <span className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 shrink-0"
                       style={{ backgroundColor: item.variant.couleur }} />
                   )}
-                  {/* Label */}
                   <span className="text-xs text-gray-700 dark:text-gray-300 flex-1">
                     {item.variant?.nom ?? ''}
                     {item.variantOption && ` / ${typeOpt} ${item.variantOption.valeur}`}
                   </span>
-                  {/* QteInput */}
                   {pending[key]
                     ? <Loader2 className="w-4 h-4 animate-spin text-blue-500 mx-2" />
                     : <QteInput size="sm" value={item.quantite}
@@ -338,11 +321,9 @@ function ProductEditor({
                         onZero={() => handleChange(item.variant?.id ?? '', item.variantOption?.id, 0)}
                       />
                   }
-                  {/* Prix ligne */}
                   <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 w-20 text-right tabular-nums shrink-0">
                     {(prixU * item.quantite).toFixed(2)} DA
                   </span>
-                  {/* Supprimer */}
                   <button type="button" onClick={() => onDelete(item.id)}
                     className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition shrink-0 p-0.5 rounded">
                     <X className="w-3.5 h-3.5" />
@@ -373,7 +354,6 @@ function ProductCard({
   const [open, setOpen] = useState(false)
   const typeOpt = product.typeOption || 'Taille'
 
-  /* Totaux du groupe */
   const totalQte = items.reduce((s, i) => s + i.quantite, 0)
   const prixUnit = getPrixUnitaire(product, totalQte)
   const prixBase = product.prix
@@ -381,23 +361,23 @@ function ProductCard({
   const sousTotal = prixUnit * totalQte
   const economie  = isReduit ? (prixBase - prixUnit) * totalQte : 0
 
-  /* Image principale = première variante qui a des images */
   const mainImg = items.find(i => i.variant?.images?.length)?.variant?.images[0]
     ?? product.images?.[0] ?? null
+
+  // Prochain palier
+  const tiers = [...(product.prixVariables ?? [])].sort((a, b) => a.minQte - b.minQte)
+  const prochainPalier = tiers.find(t => t.minQte > totalQte) ?? null
 
   return (
     <div className={`bg-white dark:bg-gray-900 rounded-2xl border overflow-hidden transition-all duration-200 ${open ? 'border-blue-300 dark:border-blue-700 shadow-md shadow-blue-500/5' : 'border-gray-100 dark:border-gray-800 hover:shadow-sm'}`}>
 
-      {/* ── EN-TÊTE CARTE ── */}
+      {/* ── EN-TÊTE ── */}
       <div className="flex gap-3 p-4">
-
-        {/* Image */}
         <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative">
           {mainImg
             ? <img src={mainImg} alt={product.nom} className="w-full h-full object-cover" />
             : <Package className="w-8 h-8 text-gray-300 dark:text-gray-600" />
           }
-          {/* Badges couleur empilés */}
           {items.filter(i => i.variant?.couleur).slice(0, 3).map((i, idx) => (
             <span key={i.id}
               className="absolute bottom-1 border-2 border-white dark:border-gray-900 rounded-full shadow-sm w-4 h-4"
@@ -405,14 +385,12 @@ function ProductCard({
           ))}
         </div>
 
-        {/* Infos */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-1">
             <div className="min-w-0">
               <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium mb-0.5 truncate">{product.category.nom}</p>
               <h3 className="font-bold text-gray-800 dark:text-gray-100 text-sm leading-snug line-clamp-2">{product.nom}</h3>
             </div>
-            {/* Supprimer tout le groupe */}
             <button type="button" onClick={() => onDeleteGroup(items)}
               title="Retirer ce produit"
               className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition p-1 shrink-0 rounded-lg hover:bg-red-50 dark:hover:bg-red-950">
@@ -420,7 +398,7 @@ function ProductCard({
             </button>
           </div>
 
-          {/* Chips variantes en résumé */}
+          {/* Chips variantes */}
           <div className="flex flex-wrap gap-1 mt-2">
             {items.map(item => (
               <span key={item.id}
@@ -436,7 +414,7 @@ function ProductCard({
             ))}
           </div>
 
-          {/* Prix */}
+          {/* Prix unitaire */}
           <div className="flex items-baseline gap-2 mt-2.5 flex-wrap">
             <span className={`text-base font-bold ${isReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
               {prixUnit.toFixed(2)} DA<span className="text-xs font-normal text-gray-400 ml-0.5">/u.</span>
@@ -450,10 +428,18 @@ function ProductCard({
               </>
             )}
           </div>
+
+          {/* Incitation palier suivant */}
+          {prochainPalier && (
+            <p className="text-[11px] text-blue-500 dark:text-blue-400 flex items-center gap-1 mt-1">
+              <TrendingDown className="w-3 h-3 shrink-0" />
+              +{prochainPalier.minQte - totalQte} art. → {prochainPalier.prix.toFixed(2)} DA/u.
+            </p>
+          )}
         </div>
       </div>
 
-      {/* ── PANNEAU ÉDITEUR (expandable) ── */}
+      {/* ── ÉDITEUR ── */}
       {open && (
         <ProductEditor
           group={group}
@@ -465,16 +451,16 @@ function ProductCard({
 
       {/* ── FOOTER ── */}
       <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 px-4 py-2.5 flex items-center justify-between gap-3">
-        {/* Sous-total */}
         <div>
-          <p className="text-[10px] text-gray-400 uppercase tracking-wide">Sous-total — {totalQte} art.</p>
+          <p className="text-[10px] text-gray-400 uppercase tracking-wide">
+            Sous-total — {totalQte} art.{isReduit && economie > 0 && ` · éco. ${economie.toFixed(0)} DA`}
+          </p>
           <div className="flex items-baseline gap-1.5">
             <p className="font-bold text-gray-800 dark:text-gray-100">{sousTotal.toFixed(2)} DA</p>
             {isReduit && <p className="text-[10px] text-gray-400 line-through">{(prixBase * totalQte).toFixed(2)} DA</p>}
           </div>
         </div>
 
-        {/* Bouton modifier */}
         <button type="button"
           onClick={() => setOpen(o => !o)}
           className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl border-2 transition-all active:scale-95 ${
@@ -541,8 +527,9 @@ export default function PanierPage() {
     setDeleting(false)
   }
 
-  /* Calculs globaux */
   const groups = panier ? groupByProduct(panier.items) : []
+
+  // ── Calculs globaux (quantité totale par produit pour le bon palier) ──
   const sousTotal = groups.reduce((s, g) => {
     const qte   = g.items.reduce((a, i) => a + i.quantite, 0)
     const prixU = getPrixUnitaire(g.product, qte)
@@ -556,7 +543,6 @@ export default function PanierPage() {
   }, 0)
   const totalArticles = panier?.items.reduce((s, i) => s + i.quantite, 0) ?? 0
 
-  /* ── Loading ── */
   if (loading) return (
     <div className="max-w-5xl mx-auto px-4 py-16 text-center text-gray-400">
       <div className="w-8 h-8 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-3" />
@@ -564,7 +550,6 @@ export default function PanierPage() {
     </div>
   )
 
-  /* ── Panier vide ── */
   if (!panier || panier.items.length === 0) return (
     <div className="max-w-5xl mx-auto px-4 py-20 flex flex-col items-center text-center gap-4">
       <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center">
@@ -579,11 +564,9 @@ export default function PanierPage() {
     </div>
   )
 
-  /* ── Panier rempli ── */
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
 
-      {/* En-tête */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
           <ShoppingCart className="w-6 h-6" />
@@ -624,7 +607,6 @@ export default function PanierPage() {
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
             <h2 className="font-bold text-gray-800 dark:text-gray-100 mb-4">Résumé</h2>
 
-            {/* Lignes par produit */}
             <div className="space-y-2.5 mb-4 max-h-52 overflow-y-auto pr-1">
               {groups.map(group => {
                 const qte   = group.items.reduce((s, i) => s + i.quantite, 0)
@@ -648,8 +630,9 @@ export default function PanierPage() {
                           {item.variantOption && ` / ${item.variantOption.valeur}`}
                           {' '}×{item.quantite}
                         </span>
+                        {/* ✅ Prix dans le résumé aussi basé sur la qte totale du groupe */}
                         <span className="tabular-nums shrink-0">
-                          {(getPrixUnitaire(item.product, item.quantite) * item.quantite).toFixed(2)} DA
+                          {(prixU * item.quantite).toFixed(2)} DA
                         </span>
                       </div>
                     ))}
@@ -658,7 +641,6 @@ export default function PanierPage() {
               })}
             </div>
 
-            {/* Totaux */}
             <div className="border-t border-gray-100 dark:border-gray-800 pt-4 space-y-2.5">
               <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                 <span>Sous-total</span>
@@ -678,7 +660,6 @@ export default function PanierPage() {
             </div>
           </div>
 
-          {/* Économies */}
           {totalEconomies > 0 && (
             <div className="bg-green-50 dark:bg-green-950/50 border border-green-100 dark:border-green-900 rounded-xl px-4 py-3 flex items-center gap-2.5">
               <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center shrink-0">
@@ -691,7 +672,6 @@ export default function PanierPage() {
             </div>
           )}
 
-          {/* Commander */}
           <Link href="/commandes/nouveau"
             className="flex items-center justify-center gap-2 w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-4 rounded-xl transition text-base shadow-lg shadow-black/10">
             <ShoppingBag className="w-5 h-5" /> Passer la commande

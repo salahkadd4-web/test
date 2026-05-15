@@ -88,9 +88,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Calculer le total en appliquant les prix dégressifs
+    // Quantité totale par produit (pour appliquer le bon palier dégressif)
+    const qteParProduit = new Map<string, number>()
+    for (const item of panier.items) {
+      qteParProduit.set(item.productId, (qteParProduit.get(item.productId) ?? 0) + item.quantite)
+    }
+
+    // Calculer le total en appliquant les prix dégressifs sur la quantité totale du produit
     const sousTotal = panier.items.reduce(
-      (acc, item) => acc + getPrixUnitaire(item.product.prixVariables, item.product.prix, item.quantite) * item.quantite,
+      (acc, item) => acc + getPrixUnitaire(item.product.prixVariables, item.product.prix, qteParProduit.get(item.productId)!) * item.quantite,
       0
     )
     const frais = typeof fraisLivraison === 'number' ? fraisLivraison : 700
@@ -109,7 +115,7 @@ export async function POST(req: NextRequest) {
           create: panier.items.map((item) => ({
             productId:          item.productId,
             quantite:           item.quantite,
-            prix:               getPrixUnitaire(item.product.prixVariables, item.product.prix, item.quantite),
+            prix:               getPrixUnitaire(item.product.prixVariables, item.product.prix, qteParProduit.get(item.productId)!),
             variantId:          item.variantId          ?? null,
             variantNom:         item.variant?.nom        ?? null,
             variantOptionId:    item.variantOptionId    ?? null,
