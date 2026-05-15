@@ -84,9 +84,16 @@ export default function NouvelleCommandePage() {
   const selectedExpedition = METHODES_EXPEDITION.find(m => m.label === methodeExpedition) ?? METHODES_EXPEDITION[0]
 
   /* ── Calculs avec prix dégressifs ── */
+  // Quantité totale par produit (pour appliquer le bon palier dégressif)
+  const qteParProduit = new Map<string, number>()
+  for (const item of panier?.items ?? []) {
+    qteParProduit.set(item.product.id, (qteParProduit.get(item.product.id) ?? 0) + item.quantite)
+  }
+
   const lignesCalc = (panier?.items ?? []).map(item => {
-    const prixUnit = getPrixUnitaire(item.product, item.quantite)
-    const prixBase = item.product.prix
+    // ✅ Prix basé sur la quantité TOTALE du produit, pas item.quantite seul
+    const prixUnit  = getPrixUnitaire(item.product, qteParProduit.get(item.product.id) ?? item.quantite)
+    const prixBase  = item.product.prix
     const estReduit = prixUnit < prixBase
     return {
       item,
