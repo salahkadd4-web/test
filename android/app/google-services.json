@@ -2,12 +2,12 @@
   "project_info": {
     "project_number": "502936788244",
     "project_id": "nextjs-auth-490800",
-    "storage_bucket": "nextjs-auth-490800.appspot.com"
+    "storage_bucket": "nextjs-auth-490800.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:502936788244:android:cabastore000000000000",
+        "mobilesdk_app_id": "1:502936788244:android:1a1affb075b889307f3601",
         "android_client_info": {
           "package_name": "com.cabastore.app"
         }
@@ -18,22 +18,27 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.cabastore.app",
-            "certificate_hash": "C321BE15512C15E6BF2224070B78A13DD23E0497"
+            "certificate_hash": "c321be15512c15e6bf2224070b78a13dd23e0497"
           }
         },
         {
-          "client_id": "502936788244-kjr3pb0b8196ru6p3gsb7c2c3oea6fp9.apps.googleusercontent.com",
+          "client_id": "502936788244-mn58pnn6u9v5ekp3o14ord4778gp7ki3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": ""
+          "current_key": "AIzaSyC3bC8XfrEMKMwtbWJGUGEuFwxo3XRMBes"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502936788244-mn58pnn6u9v5ekp3o14ord4778gp7ki3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
