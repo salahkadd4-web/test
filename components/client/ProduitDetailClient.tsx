@@ -220,7 +220,7 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
   if (isMobile) {
     return (
       // ✅ Fix bouton caché : pb-44 = CTA sticky (~80px) + BottomNav (~64px) + marge
-      <div className="flex flex-col pb-44">
+      <div className="flex flex-col">
 
         {/* Galerie compacte 4:3 */}
         <div className="relative bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden mb-3" style={{ aspectRatio: '4/3' }}>
