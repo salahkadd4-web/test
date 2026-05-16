@@ -68,28 +68,6 @@ function ConnexionContent() {
     initGoogle()
   }, [])
 
-  // ── Redirection automatique si déjà connecté (app mobile) ────────────────
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { Capacitor } = await import('@capacitor/core')
-        if (!Capacitor.isNativePlatform()) return
-
-        const res     = await fetch('/api/auth/session')
-        const session = await res.json()
-        if (!session?.user) return
-
-        if (session.user.role === 'ADMIN')        router.replace('/admin')
-        else if (session.user.role === 'VENDEUR') router.replace('/vendeur')
-        else                                       router.replace('/')
-      } catch {
-        // session non disponible, on reste sur /connexion
-      }
-    }
-    checkSession()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
     setError('')
@@ -139,10 +117,10 @@ function ConnexionContent() {
       const { Capacitor } = await import('@capacitor/core')
 
       if (Capacitor.isNativePlatform()) {
+        // ── Flux natif (Android / iOS) ──────────────────────────────────────
         // @ts-ignore
         const { SocialLogin } = await import('@capgo/capacitor-social-login')
 
-        // ✅ initialize() déjà appelé au montage — on passe directement au login
         const result = await SocialLogin.login({
           provider: 'google',
           options:  { scopes: ['email', 'profile'] },
@@ -154,6 +132,7 @@ function ConnexionContent() {
           return
         }
 
+        // ── Vérifier si le compte existe déjà ───────────────────────────────
         const res  = await fetch('/api/auth/google-native', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -161,18 +140,38 @@ function ConnexionContent() {
         })
         const data = await res.json()
 
-        if (!res.ok || !data.ok) { setError(data.error || 'Erreur connexion Google.'); return }
+        if (!res.ok || !data.ok) {
+          setError(data.error || 'Erreur connexion Google.')
+          return
+        }
 
-        const signInResult = await signIn('credentials-google', {
-          userId:   data.userId,
-          redirect: false,
-        })
+        if (data.exists) {
+          // ✅ Compte existant → connexion directe
+          const signInResult = await signIn('credentials-google', {
+            userId:   data.userId,
+            redirect: false,
+          })
 
-        if (signInResult?.ok) { router.push('/'); router.refresh() }
-        else setError('Erreur de session. Veuillez réessayer.')
+          if (signInResult?.ok) {
+            const sessionRes = await fetch('/api/auth/session')
+            const session    = await sessionRes.json()
+
+            if (session?.user?.role === 'ADMIN')        router.push('/admin')
+            else if (session?.user?.role === 'VENDEUR') router.push('/vendeur')
+            else                                         router.push('/')
+
+            router.refresh()
+          } else {
+            setError('Erreur de session. Veuillez réessayer.')
+          }
+        } else {
+          // 🆕 Nouveau compte → page de finalisation
+          router.push(`/inscription/finaliser-google?token=${data.tempToken}`)
+        }
 
       } else {
-        // ── Version web : NextAuth standard ──
+        // ── Flux web : NextAuth OAuth standard ──────────────────────────────
+        // Si nouveau compte → auth.ts signIn callback redirige vers finaliser-google
         await signIn('google', { callbackUrl: '/' })
       }
     } catch (err: any) {

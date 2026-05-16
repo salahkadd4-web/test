@@ -3,9 +3,10 @@ import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import { prisma } from './lib/prisma'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import { authConfig } from './auth.config'
 
-const isProd = process.env.NODE_ENV === 'production'
+const isProd  = process.env.NODE_ENV === 'production'
 const PROD_URL = process.env.NEXTAUTH_URL || 'https://caba-store.vercel.app'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -46,20 +47,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const passwordMatch = await bcrypt.compare(motDePasse, user.motDePasse)
         if (!passwordMatch) return null
 
-        // ── Statut vendeur : on laisse TOUJOURS passer la connexion ──
-        // VendeurGuard (Server Component) affiche la page adaptée selon le statut :
-        //   EN_ATTENTE      → page "en cours de validation"
-        //   SUSPENDU        → page "compte suspendu"
-        //   PIECES_REQUISES → page d'upload des documents
-        //   APPROUVE        → dashboard normal
-
         return {
-          id:              user.id,
-          name:            `${user.prenom} ${user.nom}`,
-          email:           user.email,
-          role:            user.role,
-          telephone:       user.telephone ?? null,
-          vendeurStatut:   user.vendeurProfile?.statut ?? null,
+          id:            user.id,
+          name:          `${user.prenom} ${user.nom}`,
+          email:         user.email,
+          role:          user.role,
+          telephone:     user.telephone ?? null,
+          vendeurStatut: user.vendeurProfile?.statut ?? null,
         }
       },
     }),
@@ -105,20 +99,47 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const existing = await prisma.user.findFirst({
             where: { email: user.email ?? '' },
           })
-          if (!existing) {
-            const parts = (user.name ?? '').split(' ')
-            await prisma.user.create({
-              data: {
-                email:      user.email ?? '',
-                prenom:     parts[0] || '',
-                nom:        parts.slice(1).join(' ') || '',
-                role:       'CLIENT',
-                motDePasse: null,
-              },
-            })
+
+          if (existing) {
+            // ✅ Compte existant → connexion normale
+            return true
           }
+
+          // 🆕 Nouveau compte → créer un token temporaire et rediriger
+          // L'utilisateur doit saisir son téléphone et choisir son rôle.
+          const tempToken = crypto.randomBytes(32).toString('hex')
+          const email     = user.email ?? ''
+          const name      = user.name  ?? ''
+
+          // Nettoyer d'éventuels anciens tokens pour cet email
+          const oldTokens = await prisma.otpToken.findMany({
+            where: { identifiant: { startsWith: 'google_oauth_' } },
+          })
+          for (const t of oldTokens) {
+            try {
+              const d = JSON.parse(t.data)
+              if (d.email === email) {
+                await prisma.otpToken.delete({ where: { id: t.id } })
+              }
+            } catch { /* ignored */ }
+          }
+
+          await prisma.otpToken.create({
+            data: {
+              identifiant: `google_oauth_${tempToken}`,
+              token:       '',
+              expiresAt:   new Date(Date.now() + 30 * 60 * 1000),
+              data:        JSON.stringify({ email, name }),
+            },
+          })
+
+          // Rediriger vers la page de finalisation
+          // NextAuth v5 : retourner une URL string depuis signIn redirige vers celle-ci
+          const base = isProd ? PROD_URL : ''
+          return `${base}/inscription/finaliser-google?token=${tempToken}`
+
         } catch (err) {
-          console.error('Erreur création compte OAuth:', err)
+          console.error('Erreur OAuth signIn:', err)
           return false
         }
       }

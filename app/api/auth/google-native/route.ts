@@ -1,11 +1,15 @@
 // app/api/auth/google-native/route.ts
 //
-// Reçoit le idToken émis par le plugin natif @codetrix-studio/capacitor-google-auth,
-// le vérifie via Google, crée le compte si nécessaire, et retourne l'userId
-// pour que le client puisse ensuite créer une session NextAuth.
+// Reçoit le idToken émis par le plugin natif @capgo/capacitor-social-login,
+// le vérifie via Google, puis :
+//   • Si le compte existe  → { ok: true, exists: true,  userId }
+//   • Si le compte n'existe pas → crée un token temporaire et
+//                                  { ok: true, exists: false, tempToken }
+//     Le client redirige alors vers /inscription/finaliser-google?token=...
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,7 +30,6 @@ export async function POST(req: NextRequest) {
 
     const payload = await googleRes.json()
 
-    // Vérifier que le token est bien destiné à notre app
     const validAudiences = [
       process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID,
       process.env.GOOGLE_CLIENT_ID,
@@ -43,24 +46,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Email introuvable dans le token.' }, { status: 400 })
     }
 
-    // ── 2. Créer le compte si inexistant ─────────────────────────────────────
-    let user = await prisma.user.findFirst({ where: { email } })
+    // ── 2. Vérifier si le compte existe déjà ────────────────────────────────
+    const user = await prisma.user.findFirst({
+      where: { email },
+      include: { vendeurProfile: true },
+    })
 
-    if (!user) {
-      const parts = name.split(' ')
-      user = await prisma.user.create({
-        data: {
-          email,
-          prenom:     parts[0] || '',
-          nom:        parts.slice(1).join(' ') || '',
-          role:       'CLIENT',
-          motDePasse: null,
-        },
-      })
+    if (user) {
+      // ✅ Compte existant → retourner l'userId pour signIn direct
+      return NextResponse.json({ ok: true, exists: true, userId: user.id })
     }
 
-    // ── 3. Retourner l'userId au client ──────────────────────────────────────
-    return NextResponse.json({ ok: true, userId: user.id })
+    // ── 3. Nouveau compte → créer un token temporaire ───────────────────────
+    // Le client sera redirigé vers /inscription/finaliser-google?token=...
+    // où l'utilisateur saisit son téléphone et choisit son rôle.
+    const tempToken = crypto.randomBytes(32).toString('hex')
+
+    // Nettoyer d'éventuels anciens tokens pour cet email
+    await prisma.otpToken.deleteMany({
+      where: { data: { contains: email } },
+    })
+
+    await prisma.otpToken.create({
+      data: {
+        identifiant: `google_oauth_${tempToken}`,
+        token:       '',   // pas encore d'OTP
+        expiresAt:   new Date(Date.now() + 30 * 60 * 1000),
+        data:        JSON.stringify({ email, name }),
+      },
+    })
+
+    return NextResponse.json({ ok: true, exists: false, tempToken })
 
   } catch (err) {
     console.error('[google-native] Erreur:', err)
