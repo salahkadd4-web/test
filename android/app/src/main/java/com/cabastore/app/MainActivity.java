@@ -23,7 +23,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
   protected void onCreate(Bundle savedInstanceState) {
     registerPlugin(SocialLoginPlugin.class);
 
-    // ── Effacer les cookies uniquement sur nouvelle install / mise à jour ───
+    // ── Effacer les cookies sur nouvelle install / mise à jour ─────────────
     try {
       SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
       PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -42,11 +42,12 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
 
     super.onCreate(savedInstanceState);
 
-    // ── Toujours démarrer sur /connexion à chaque lancement ────────────────
-    // Le splash screen est encore visible ici → zéro flash de l'accueil.
-    // Si l'utilisateur est déjà connecté, la page /connexion le redirige
-    // automatiquement vers son espace (voir ConnexionContent useEffect).
-    getBridge().getWebView().loadUrl(SERVER_URL + "/connexion");
+    // ── Point d'entrée unique à chaque lancement ───────────────────────────
+    // /app-entry est un Server Component qui vérifie la session côté serveur
+    // et redirige avant d'envoyer du HTML :
+    //   → pas de session : /connexion
+    //   → connecté       : / ou /admin ou /vendeur selon le rôle
+    getBridge().getWebView().loadUrl(SERVER_URL + "/app-entry");
   }
 
   @Override
