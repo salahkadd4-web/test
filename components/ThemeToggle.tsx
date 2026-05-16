@@ -33,11 +33,11 @@ const options: { key: 'light' | 'dark' | 'system'; label: string }[] = [
   { key: 'system', label: 'Système' },
 ]
 
-const BTN            = 48   // diamètre du bouton en px
-const EDGE           = 12   // marge min par rapport aux bords
-const NAV_BOTTOM     = 80   // hauteur approx de la bottom nav + safe area
+const BTN            = 48   // diamètre bouton px
+const EDGE           = 12   // marge bords écran
+const NAV_BOTTOM     = 80   // hauteur bottom nav + safe area
 const DRAG_THRESHOLD = 6    // px avant de considérer un glissement
-const SNAP_DURATION  = 280  // ms de l'animation snap
+const SNAP_MS        = 300  // durée animation snap
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -45,130 +45,139 @@ export default function ThemeToggle() {
   const [dragging, setDragging] = useState(false)
   const [snapping, setSnapping] = useState(false)
 
-  /* Position — null jusqu'à l'hydratation */
+  /* Position — null jusqu'à l'hydratation (évite le SSR mismatch) */
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
 
   const wrapRef = useRef<HTMLDivElement>(null)
 
+  /* État interne du drag stocké en ref → zéro re-render pendant le glissement */
   const drag = useRef<{
-    startTouchX: number; startTouchY: number
-    startPosX:   number; startPosY:   number
-    moved:       boolean
+    startClientX: number
+    startClientY: number
+    startPosX:    number
+    startPosY:    number
+    moved:        boolean
   } | null>(null)
 
-  /* ── Clamp dans l'écran ── */
+  /* ── Clamp dans les limites de l'écran ── */
   const clamp = useCallback((x: number, y: number) => ({
     x: Math.max(EDGE, Math.min(window.innerWidth  - BTN - EDGE, x)),
     y: Math.max(EDGE, Math.min(window.innerHeight - BTN - EDGE, y)),
   }), [])
 
-  /* ── Snap vers le bord le plus proche (gauche ou droite) ── */
+  /* ── Snap vers le bord gauche ou droit le plus proche ── */
   const snapToEdge = useCallback((x: number, y: number) => {
-    const midX = window.innerWidth / 2
-    const snappedX = x + BTN / 2 < midX ? EDGE : window.innerWidth - BTN - EDGE
+    const snappedX = x + BTN / 2 < window.innerWidth / 2
+      ? EDGE
+      : window.innerWidth - BTN - EDGE
     const snappedY = Math.max(EDGE, Math.min(window.innerHeight - BTN - NAV_BOTTOM, y))
     setSnapping(true)
     setPos({ x: snappedX, y: snappedY })
     localStorage.setItem('theme-btn-pos', JSON.stringify({ x: snappedX, y: snappedY }))
-    setTimeout(() => setSnapping(false), SNAP_DURATION)
+    setTimeout(() => setSnapping(false), SNAP_MS)
   }, [])
 
-  /* ── Initialisation position — bottom-left par défaut ── */
+  /* ── Position initiale — coin bas-gauche par défaut ── */
   useEffect(() => {
     const saved = localStorage.getItem('theme-btn-pos')
     if (saved) {
       try {
         const p = JSON.parse(saved) as { x: number; y: number }
-        const x = Math.max(EDGE, Math.min(window.innerWidth  - BTN - EDGE, p.x))
-        const y = Math.max(EDGE, Math.min(window.innerHeight - BTN - EDGE, p.y))
-        setPos({ x, y }); return
+        setPos(clamp(p.x, p.y))
+        return
       } catch { /* ignored */ }
     }
-    /* Défaut : coin bas-gauche, au-dessus de la bottom nav */
-    setPos({ x: EDGE, y: window.innerHeight - BTN - NAV_BOTTOM })
-  }, [])
+    setPos({
+      x: EDGE,
+      y: window.innerHeight - BTN - NAV_BOTTOM,
+    })
+  }, [clamp])
 
-  /* ── Touch handlers ── */
-  const onTouchStart = (e: React.TouchEvent) => {
+  /* ══════════════════════════════════════════
+     POINTER EVENTS
+     setPointerCapture → le div reçoit TOUS les
+     événements même si le doigt sort de la zone.
+     touchAction:'none' → bloque le scroll natif.
+  ══════════════════════════════════════════ */
+  const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!pos) return
-    const t = e.touches[0]
+    e.currentTarget.setPointerCapture(e.pointerId)
     drag.current = {
-      startTouchX: t.clientX, startTouchY: t.clientY,
-      startPosX:   pos.x,     startPosY:   pos.y,
-      moved: false,
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      startPosX:    pos.x,
+      startPosY:    pos.y,
+      moved:        false,
     }
-    setDragging(false)
     setSnapping(false)
-  }
+  }, [pos])
 
-  /* passive: false pour bloquer le scroll pendant le drag */
-  const onTouchMoveNative = useCallback((e: TouchEvent) => {
+  const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!drag.current) return
-    e.preventDefault()
-    const t = e.touches[0]
-    const dx = t.clientX - drag.current.startTouchX
-    const dy = t.clientY - drag.current.startTouchY
+    const dx = e.clientX - drag.current.startClientX
+    const dy = e.clientY - drag.current.startClientY
+
     if (!drag.current.moved &&
         (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
       drag.current.moved = true
       setDragging(true)
       setOpen(false)
     }
+
     if (drag.current.moved) {
-      setPos(clamp(drag.current.startPosX + dx, drag.current.startPosY + dy))
+      setPos(clamp(
+        drag.current.startPosX + dx,
+        drag.current.startPosY + dy,
+      ))
     }
   }, [clamp])
 
-  const onTouchEnd = () => {
+  const onPointerUp = useCallback(() => {
     if (!drag.current) return
+
     if (!drag.current.moved) {
-      /* Tap → toggle menu */
       setOpen(o => !o)
     } else {
-      /* Fin du glissement → snap au bord le plus proche */
       setPos(prev => {
         if (prev) snapToEdge(prev.x, prev.y)
         return prev
       })
     }
+
     setDragging(false)
     drag.current = null
-  }
+  }, [snapToEdge])
 
-  /* Attacher touchmove en non-passif */
-  useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-    el.addEventListener('touchmove', onTouchMoveNative, { passive: false })
-    return () => el.removeEventListener('touchmove', onTouchMoveNative)
-  }, [onTouchMoveNative])
-
-  /* Fermer le menu si on touche ailleurs */
+  /* Fermer le menu si on appuie ailleurs */
   useEffect(() => {
     if (!open) return
-    const close = (e: TouchEvent) => {
+    const close = (e: PointerEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener('touchstart', close)
-    return () => document.removeEventListener('touchstart', close)
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
   }, [open])
 
-  /* Direction du popup selon position dans l'écran */
+  /* Direction du popup selon la position dans l'écran */
   const menuAbove = pos ? pos.y > window.innerHeight * 0.55 : true
-  const menuLeft  = pos ? pos.x < window.innerWidth  * 0.5  : true
+  const menuRight = pos ? pos.x > window.innerWidth  * 0.5  : false
 
   /* ══════════════════════════════════════════
      RENDU
   ══════════════════════════════════════════ */
   return (
     <>
-      {/* ── Desktop — comportement original (inchangé) ── */}
+      {/* ─────────────────────────────────────
+          DESKTOP — comportement original inchangé
+      ───────────────────────────────────────── */}
       <div
         className="hidden md:flex fixed bottom-6 right-6 z-50 flex-col items-center gap-2"
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
       >
-        <div className={`flex flex-col gap-2 transition-all duration-300 ${open ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+        <div className={`flex flex-col gap-2 transition-all duration-300 ${
+          open ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}>
           {options.map(opt => (
             <button key={opt.key} onClick={() => setTheme(opt.key)} title={opt.label}
               className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 border
@@ -190,36 +199,43 @@ export default function ThemeToggle() {
         </button>
       </div>
 
-      {/* ── Mobile — bulle glissable ── */}
+      {/* ─────────────────────────────────────
+          MOBILE — bulle draggable
+      ───────────────────────────────────────── */}
       {pos && (
         <div
           ref={wrapRef}
           className="md:hidden fixed z-50"
           style={{
-            left:       pos.x,
-            top:        pos.y,
-            width:      BTN,
-            height:     BTN,
-            touchAction:'none',
-            userSelect: 'none',
-            transition: snapping
-              ? `left ${SNAP_DURATION}ms cubic-bezier(0.34,1.56,0.64,1), top ${SNAP_DURATION}ms cubic-bezier(0.34,1.56,0.64,1)`
+            left:        pos.x,
+            top:         pos.y,
+            width:       BTN,
+            height:      BTN,
+            touchAction: 'none',   /* INDISPENSABLE — bloque le scroll pendant le drag */
+            userSelect:  'none',
+            cursor:      dragging ? 'grabbing' : 'grab',
+            transition:  snapping
+              ? `left ${SNAP_MS}ms cubic-bezier(0.34,1.56,0.64,1),
+                 top  ${SNAP_MS}ms cubic-bezier(0.34,1.56,0.64,1)`
               : 'none',
           }}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => { drag.current = null; setDragging(false) }}
         >
 
-          {/* ── Popup des options (tap) ── */}
+          {/* ── Popup options ── */}
           {open && (
             <div className={`absolute flex flex-col gap-2
               ${menuAbove ? 'bottom-14' : 'top-14'}
-              ${menuLeft  ? 'left-0'   : 'right-0'}
+              ${menuRight ? 'right-0'   : 'left-0'}
             `}>
               {options.map(opt => (
                 <button
                   key={opt.key}
-                  onTouchEnd={e => { e.stopPropagation(); setTheme(opt.key); setOpen(false) }}
+                  onPointerDown={e => e.stopPropagation()} /* évite de démarrer un drag depuis le menu */
+                  onClick={() => { setTheme(opt.key); setOpen(false) }}
                   className={`w-11 h-11 rounded-full flex items-center justify-center shadow-xl border-2 transition-all active:scale-95
                     ${theme === opt.key
                       ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white scale-110'
@@ -233,29 +249,26 @@ export default function ThemeToggle() {
             </div>
           )}
 
-          {/* ── Bouton principal — semi-transparent au repos ── */}
-          <button
+          {/* ── Bouton principal ── */}
+          <div
             className={`w-12 h-12 rounded-full flex flex-col items-center justify-center gap-0.5
               bg-gray-900 dark:bg-white text-white dark:text-gray-900
               shadow-lg border-2 border-gray-700 dark:border-gray-200
-              transition-all duration-200
+              transition-opacity duration-300 select-none
               ${dragging
-                ? 'scale-115 shadow-2xl opacity-90 border-blue-500'
-                : open
-                  ? 'opacity-95 scale-105'
-                  : 'opacity-40 scale-100'         /* discret au repos */
+                ? 'opacity-80 border-blue-500'
+                : open ? 'opacity-95' : 'opacity-40'
               }
             `}
-            title="Thème — glissez pour déplacer"
           >
             {icons[theme as 'light' | 'dark' | 'system'] ?? icons.system}
-            {/* Points de drag hint */}
             <div className="flex gap-0.5 mt-0.5">
               {[0, 1, 2].map(i => (
                 <span key={i} className="w-1 h-1 rounded-full bg-current opacity-50" />
               ))}
             </div>
-          </button>
+          </div>
+
         </div>
       )}
     </>
