@@ -140,7 +140,7 @@ async function ProduitsSimilaires({ categoryId, produitId }: { categoryId: strin
               {hasTiers && (
                 <div className="absolute top-2 left-2">
                   <span className="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow">
-                    💰 dégressif
+                    dégressif
                   </span>
                 </div>
               )}

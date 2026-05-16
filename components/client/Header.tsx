@@ -74,6 +74,10 @@ export default function Header() {
   // ── Masquer sur les pages /vendeur (le layout vendeur a son propre header) ──
   if (pathname?.startsWith('/vendeur')) return null
 
+  // ── Masquer Header sur connexion / inscription en mobile (version APK) ──
+  const isAuthPage = pathname?.startsWith('/connexion') || pathname?.startsWith('/inscription')
+  if (isMobile && isAuthPage) return null
+
   const isVendeur = session?.user?.role === 'VENDEUR'
 
   const handleSearch = (e: React.FormEvent) => {

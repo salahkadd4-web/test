@@ -6,6 +6,7 @@ import Header from '@/components/client/Header'
 import ThemeToggle from '@/components/ThemeToggle'
 import BottomNav from '@/components/BottomNav'
 import AndroidBackButton from '@/components/client/AndroidBackButton'
+import MobileFirstLaunch from '@/components/client/MobileFirstLaunch'
 
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
         <ThemeProvider>
           <SessionProvider>
+            <MobileFirstLaunch />
             <AndroidBackButton />
             <Header />
             <main className="pb-16 md:pb-0">

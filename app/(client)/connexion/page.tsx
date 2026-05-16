@@ -1,10 +1,39 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+
+/** Lien "Parcourir en tant qu'invité" — affiché uniquement dans l'app Capacitor */
+function GuestLink() {
+  const [isNative, setIsNative] = useState(false)
+
+  useEffect(() => {
+    import('@capacitor/core')
+      .then(({ Capacitor }) => setIsNative(Capacitor.isNativePlatform()))
+      .catch(() => {})
+  }, [])
+
+  if (!isNative) return null
+
+  return (
+    <div className="mt-6 text-center">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
+        <span className="text-[10px] text-gray-300 dark:text-gray-700 uppercase tracking-[0.25em]">ou</span>
+        <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
+      </div>
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors tracking-wide underline underline-offset-4"
+      >
+        Parcourir en tant qu'invité
+      </Link>
+    </div>
+  )
+}
 
 function ConnexionContent() {
   const router       = useRouter()
@@ -218,6 +247,9 @@ function ConnexionContent() {
               S'inscrire
             </Link>
           </p>
+
+          {/* Lien invité — visible uniquement sur l'app mobile Capacitor */}
+          <GuestLink />
         </div>
 
         <div className="lg:hidden mt-12 flex flex-col items-center gap-3 pb-8">
