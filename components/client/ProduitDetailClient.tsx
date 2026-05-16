@@ -107,11 +107,11 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
 
   const [imageIdx, setImageIdx] = useState(0)
   const [hoveredVariant, setHoveredVariant] = useState<string | null>(null)
+
   const previewVariant = useMemo(
     () => produit.variants.find(v => v.id === hoveredVariant) ?? null,
     [hoveredVariant, produit.variants]
   )
-  const images = previewVariant?.images.length ? previewVariant.images : produit.images
 
   const [activeVariantId, setActiveVariantId] = useState<string | null>(
     hasVariants ? produit.variants[0].id : null
@@ -120,6 +120,13 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
     () => produit.variants.find(v => v.id === activeVariantId) ?? null,
     [activeVariantId, produit.variants]
   )
+
+  // ✅ Fix photo mobile : previewVariant (hover desktop) > activeVariant (clic mobile) > produit
+  const images = useMemo(() => {
+    if (previewVariant?.images.length) return previewVariant.images
+    if (activeVariant?.images.length)  return activeVariant.images
+    return produit.images
+  }, [previewVariant, activeVariant, produit.images])
 
   const [lignes, setLignes] = useState<LigneSelection[]>([])
   const [sending, setSending]   = useState(false)
@@ -212,7 +219,8 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
   // ═══════════════════════════════════════════
   if (isMobile) {
     return (
-      <div className="flex flex-col pb-32">
+      // ✅ Fix bouton caché : pb-44 = CTA sticky (~80px) + BottomNav (~64px) + marge
+      <div className="flex flex-col pb-44">
 
         {/* Galerie compacte 4:3 */}
         <div className="relative bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden mb-3" style={{ aspectRatio: '4/3' }}>
@@ -318,7 +326,11 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
                   const outOfStock = hasOptions ? variant.options.every(o => o.stock === 0) : variant.stock === 0
                   return (
                     <button key={variant.id}
-                      onClick={() => { if (!outOfStock) { setActiveVariantId(variant.id); setImageIdx(0) } }}
+                      onClick={() => {
+                        if (outOfStock) return
+                        setActiveVariantId(variant.id)
+                        setImageIdx(0) // ✅ reset l'index quand on change de couleur
+                      }}
                       disabled={outOfStock}
                       className={`relative flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-sm font-medium transition-all ${isActive ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/60 shadow-sm' : outOfStock ? 'border-gray-200 dark:border-gray-700 opacity-30 cursor-not-allowed' : 'border-gray-200 dark:border-gray-700'}`}
                     >
@@ -403,9 +415,13 @@ export default function ProduitDetailClient({ produit }: { produit: Produit }) {
           </>
         )}
 
-        {/* ── BARRE STICKY MOBILE ── */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-
+        {/* ── BARRE STICKY MOBILE ──
+            ✅ bottom-16 pour se positionner AU-DESSUS du BottomNav (h ≈ 62px)
+        */}
+        <div
+          className="fixed bottom-16 left-0 right-0 z-40 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
           {/* Récap collapsible */}
           {lignes.length > 0 && (
             <div>
