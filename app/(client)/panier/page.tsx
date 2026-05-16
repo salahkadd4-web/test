@@ -6,7 +6,7 @@ import {
   ShoppingCart, X, Minus, Plus, TrendingDown,
   Ruler, Package, ArrowLeft,
   Trash2, ShoppingBag, Tag, ChevronDown, ChevronUp,
-  Pencil, Check, Loader2, Receipt,
+  Pencil, Check, Loader2,
 } from 'lucide-react'
 
 /* ══════════════════════════════════════════
@@ -91,33 +91,22 @@ function QteInput({
   const isSm = size === 'sm'
   return (
     <div className="flex items-center gap-1">
-      {/* Touch-friendly: min 44px on mobile */}
       <button type="button" tabIndex={-1} disabled={disabled || value <= 1}
         onClick={() => { if (value - 1 <= 0 && onZero) { onZero(); return } const n = value - 1; setRaw(String(n)); onChange(n) }}
-        className={`flex items-center justify-center rounded-md disabled:opacity-30 transition active:scale-90 ${
-          isSm
-            ? 'w-7 h-7 sm:w-6 sm:h-6 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400'
-            : 'w-9 h-9 sm:w-8 sm:h-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
-        }`}>
-        <Minus className={isSm ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
+        className={`flex items-center justify-center rounded-md disabled:opacity-30 transition ${isSm ? 'w-6 h-6 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400' : 'w-8 h-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+        <Minus className={isSm ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} />
       </button>
       <input ref={ref} type="number" min={1} max={stockMax} value={raw} disabled={disabled}
         onChange={e => setRaw(e.target.value)}
         onBlur={e => commit(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') { commit(raw); ref.current?.blur() } }}
         onFocus={e => e.target.select()}
-        className={`text-center font-bold tabular-nums bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none transition ${
-          isSm ? 'w-10 text-sm py-1' : 'w-14 text-sm py-2'
-        }`}
+        className={`text-center font-bold tabular-nums bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none transition ${isSm ? 'w-10 text-sm py-0.5' : 'w-14 text-sm py-1.5'}`}
       />
       <button type="button" tabIndex={-1} disabled={disabled || value >= stockMax}
         onClick={() => { const n = Math.min(stockMax, value + 1); setRaw(String(n)); onChange(n) }}
-        className={`flex items-center justify-center rounded-md disabled:opacity-30 transition active:scale-90 ${
-          isSm
-            ? 'w-7 h-7 sm:w-6 sm:h-6 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400'
-            : 'w-9 h-9 sm:w-8 sm:h-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
-        }`}>
-        <Plus className={isSm ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
+        className={`flex items-center justify-center rounded-md disabled:opacity-30 transition ${isSm ? 'w-6 h-6 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400' : 'w-8 h-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+        <Plus className={isSm ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} />
       </button>
     </div>
   )
@@ -142,6 +131,7 @@ function ProductEditor({
   const hasOptions = product.variants.some(v => v.options.length > 0)
   const isColor    = product.variants.some(v => v.couleur)
 
+  // ── Quantité TOTALE du groupe (pour le palier dégressif correct) ──
   const totalQteGroupe = items.reduce((s, i) => s + i.quantite, 0)
 
   const [activeVId, setActiveVId] = useState<string>(
@@ -178,22 +168,22 @@ function ProductEditor({
   }
 
   return (
-    <div className="px-3 sm:px-4 pb-4 pt-2 space-y-4 border-t border-gray-100 dark:border-gray-800">
+    <div className="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100 dark:border-gray-800">
 
       {/* Image + swatches couleur */}
       <div className="flex gap-3">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 flex items-center justify-center">
+        <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 flex items-center justify-center">
           {imgPreview
             ? <img src={imgPreview} alt="" className="w-full h-full object-cover" />
-            : <Package className="w-7 h-7 sm:w-8 sm:h-8 text-gray-300 dark:text-gray-600" />
+            : <Package className="w-8 h-8 text-gray-300 dark:text-gray-600" />
           }
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1">
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
             {isColor ? 'Couleur' : 'Variante'}
           </p>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {product.variants.map(v => {
               const isActive   = v.id === activeVId
               const qteV       = hasOptions
@@ -207,7 +197,7 @@ function ProductEditor({
                 <button key={v.id} type="button"
                   onClick={() => { if (outOfStock) return; setActiveVId(v.id); setImgPreview(v.images?.[0] ?? product.images?.[0] ?? null) }}
                   disabled={outOfStock}
-                  className={`relative flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl border-2 text-xs font-semibold transition-all active:scale-95 ${
+                  className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border-2 text-xs font-semibold transition-all ${
                     isActive
                       ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 shadow-sm'
                       : outOfStock
@@ -220,7 +210,7 @@ function ProductEditor({
                   )}
                   {v.nom}
                   {qteV > 0 && (
-                    <span className="ml-0.5 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
+                    <span className="ml-1 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
                       {qteV}
                     </span>
                   )}
@@ -236,9 +226,9 @@ function ProductEditor({
         <div>
           {hasOptions ? (
             <>
-              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1 flex-wrap">
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1">
                 <Ruler className="w-3 h-3" /> {typeOpt}
-                <span className="font-normal normal-case text-gray-400 ml-1 hidden sm:inline">— cliquez pour ajouter, tapez la quantité</span>
+                <span className="font-normal normal-case text-gray-400 ml-1">— cliquez pour ajouter, tapez la quantité</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {activeVariant.options.map(opt => {
@@ -260,7 +250,7 @@ function ProductEditor({
                       <button type="button"
                         onClick={() => !outStock && qt === 0 && handleChange(activeVariant.id, opt.id, 1)}
                         disabled={outStock || (qt > 0)}
-                        className={`min-w-[2.5rem] px-3 h-10 sm:h-9 flex items-center justify-center font-semibold transition-all ${
+                        className={`min-w-[2.5rem] px-3 h-9 flex items-center justify-center font-semibold transition-all ${
                           outStock ? 'cursor-not-allowed line-through text-gray-400' : qt > 0 ? 'cursor-default text-blue-700 dark:text-blue-300' : 'cursor-pointer text-gray-700 dark:text-gray-200'
                         }`}>
                         {opt.valeur}
@@ -302,7 +292,7 @@ function ProductEditor({
         </div>
       )}
 
-      {/* Récap lignes */}
+      {/* ── Récap lignes — prix basé sur la quantité TOTALE du groupe ── */}
       {items.length > 0 && (
         <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden">
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-3 pt-2.5 pb-1.5">
@@ -310,20 +300,21 @@ function ProductEditor({
           </p>
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {items.map(item => {
+              // ✅ Prix calculé sur la quantité TOTALE du groupe, pas item.quantite
               const prixU = getPrixUnitaire(item.product, totalQteGroupe)
               const key   = `${item.variant?.id ?? ''}__${item.variantOption?.id ?? ''}`
               return (
-                <div key={item.id} className="flex items-center gap-2 px-3 py-2.5">
+                <div key={item.id} className="flex items-center gap-2 px-3 py-2">
                   {item.variant?.couleur && (
                     <span className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 shrink-0"
                       style={{ backgroundColor: item.variant.couleur }} />
                   )}
-                  <span className="text-xs text-gray-700 dark:text-gray-300 flex-1 min-w-0 truncate">
+                  <span className="text-xs text-gray-700 dark:text-gray-300 flex-1">
                     {item.variant?.nom ?? ''}
                     {item.variantOption && ` / ${typeOpt} ${item.variantOption.valeur}`}
                   </span>
                   {pending[key]
-                    ? <Loader2 className="w-4 h-4 animate-spin text-blue-500 mx-2 shrink-0" />
+                    ? <Loader2 className="w-4 h-4 animate-spin text-blue-500 mx-2" />
                     : <QteInput size="sm" value={item.quantite}
                         stockMax={item.variantOption?.stock ?? item.variant?.stock ?? item.product.stock}
                         onChange={v => handleChange(item.variant?.id ?? '', item.variantOption?.id, v)}
@@ -334,7 +325,7 @@ function ProductEditor({
                     {(prixU * item.quantite).toFixed(2)} DA
                   </span>
                   <button type="button" onClick={() => onDelete(item.id)}
-                    className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition shrink-0 p-1.5 -mr-1 rounded-lg active:bg-red-50 dark:active:bg-red-950">
+                    className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition shrink-0 p-0.5 rounded">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -373,23 +364,19 @@ function ProductCard({
   const mainImg = items.find(i => i.variant?.images?.length)?.variant?.images[0]
     ?? product.images?.[0] ?? null
 
+  // Prochain palier
   const tiers = [...(product.prixVariables ?? [])].sort((a, b) => a.minQte - b.minQte)
   const prochainPalier = tiers.find(t => t.minQte > totalQte) ?? null
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-2xl border overflow-hidden transition-all duration-200 ${
-      open
-        ? 'border-blue-300 dark:border-blue-700 shadow-md shadow-blue-500/5'
-        : 'border-gray-100 dark:border-gray-800 hover:shadow-sm'
-    }`}>
+    <div className={`bg-white dark:bg-gray-900 rounded-2xl border overflow-hidden transition-all duration-200 ${open ? 'border-blue-300 dark:border-blue-700 shadow-md shadow-blue-500/5' : 'border-gray-100 dark:border-gray-800 hover:shadow-sm'}`}>
 
       {/* ── EN-TÊTE ── */}
-      <div className="flex gap-3 p-3 sm:p-4">
-        {/* Image */}
-        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative">
+      <div className="flex gap-3 p-4">
+        <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative">
           {mainImg
             ? <img src={mainImg} alt={product.nom} className="w-full h-full object-cover" />
-            : <Package className="w-7 h-7 sm:w-8 sm:h-8 text-gray-300 dark:text-gray-600" />
+            : <Package className="w-8 h-8 text-gray-300 dark:text-gray-600" />
           }
           {items.filter(i => i.variant?.couleur).slice(0, 3).map((i, idx) => (
             <span key={i.id}
@@ -400,20 +387,19 @@ function ProductCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-1">
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0">
               <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium mb-0.5 truncate">{product.category.nom}</p>
               <h3 className="font-bold text-gray-800 dark:text-gray-100 text-sm leading-snug line-clamp-2">{product.nom}</h3>
             </div>
-            {/* Delete group — large touch target */}
             <button type="button" onClick={() => onDeleteGroup(items)}
               title="Retirer ce produit"
-              className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition p-2 -mt-1 -mr-1 shrink-0 rounded-xl hover:bg-red-50 dark:hover:bg-red-950 active:scale-90">
+              className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition p-1 shrink-0 rounded-lg hover:bg-red-50 dark:hover:bg-red-950">
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
 
           {/* Chips variantes */}
-          <div className="flex flex-wrap gap-1 mt-1.5">
+          <div className="flex flex-wrap gap-1 mt-2">
             {items.map(item => (
               <span key={item.id}
                 className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[11px] px-2 py-0.5 rounded-full">
@@ -429,7 +415,7 @@ function ProductCard({
           </div>
 
           {/* Prix unitaire */}
-          <div className="flex items-baseline gap-2 mt-2 flex-wrap">
+          <div className="flex items-baseline gap-2 mt-2.5 flex-wrap">
             <span className={`text-base font-bold ${isReduit ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
               {prixUnit.toFixed(2)} DA<span className="text-xs font-normal text-gray-400 ml-0.5">/u.</span>
             </span>
@@ -464,7 +450,7 @@ function ProductCard({
       )}
 
       {/* ── FOOTER ── */}
-      <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3">
+      <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 px-4 py-2.5 flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] text-gray-400 uppercase tracking-wide">
             Sous-total — {totalQte} art.{isReduit && economie > 0 && ` · éco. ${economie.toFixed(0)} DA`}
@@ -477,104 +463,17 @@ function ProductCard({
 
         <button type="button"
           onClick={() => setOpen(o => !o)}
-          className={`flex items-center gap-1.5 text-xs font-semibold px-3 sm:px-3.5 py-2.5 sm:py-2 rounded-xl border-2 transition-all active:scale-95 ${
+          className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl border-2 transition-all active:scale-95 ${
             open
               ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
               : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400'
           }`}>
           {open
             ? <><ChevronUp className="w-3.5 h-3.5" /> Fermer</>
-            : <><Pencil className="w-3.5 h-3.5" /><span className="hidden xs:inline sm:hidden md:inline">Modifier </span>Sélection <ChevronDown className="w-3.5 h-3.5" /></>
+            : <><Pencil className="w-3.5 h-3.5" /> Modifier la sélection <ChevronDown className="w-3.5 h-3.5" /></>
           }
         </button>
       </div>
-    </div>
-  )
-}
-
-/* ══════════════════════════════════════════
-   RÉSUMÉ MOBILE (accordéon)
-══════════════════════════════════════════ */
-function ResumeMobile({
-  groups,
-  sousTotal,
-  totalEconomies,
-}: {
-  groups: ProductGroup[]
-  sousTotal: number
-  totalEconomies: number
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden lg:hidden">
-      {/* Toggle header */}
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-200 active:bg-gray-50 dark:active:bg-gray-800 transition"
-      >
-        <span className="flex items-center gap-2">
-          <Receipt className="w-4 h-4 text-gray-400" />
-          Voir le résumé
-        </span>
-        <div className="flex items-center gap-2">
-          <span className="text-blue-600 dark:text-blue-400 font-bold tabular-nums">{sousTotal.toFixed(2)} DA</span>
-          {open ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-        </div>
-      </button>
-
-      {/* Detail */}
-      {open && (
-        <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-3 space-y-3">
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {groups.map(group => {
-              const qte   = group.items.reduce((s, i) => s + i.quantite, 0)
-              const prixU = getPrixUnitaire(group.product, qte)
-              return (
-                <div key={group.product.id} className="space-y-0.5">
-                  <div className="flex justify-between items-start gap-2 text-xs">
-                    <span className="text-gray-700 dark:text-gray-300 font-medium flex-1 line-clamp-1">{group.product.nom}</span>
-                    <span className="text-gray-800 dark:text-gray-200 font-bold shrink-0 tabular-nums">
-                      {(prixU * qte).toFixed(2)} DA
-                    </span>
-                  </div>
-                  {group.items.map(item => (
-                    <div key={item.id} className="flex justify-between text-[11px] text-gray-400 pl-2">
-                      <span className="flex items-center gap-1 flex-wrap min-w-0">
-                        {item.variant?.couleur && (
-                          <span className="w-2.5 h-2.5 rounded-full border border-gray-300 inline-block shrink-0"
-                            style={{ backgroundColor: item.variant.couleur }} />
-                        )}
-                        <span className="truncate">
-                          {item.variant?.nom}
-                          {item.variantOption && ` / ${item.variantOption.valeur}`}
-                          {' '}×{item.quantite}
-                        </span>
-                      </span>
-                      <span className="tabular-nums shrink-0 ml-2">{(prixU * item.quantite).toFixed(2)} DA</span>
-                    </div>
-                  ))}
-                </div>
-              )
-            })}
-          </div>
-
-          <div className="border-t border-gray-100 dark:border-gray-800 pt-3 space-y-2">
-            <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-              <span>Sous-total</span>
-              <span className="tabular-nums">{sousTotal.toFixed(2)} DA</span>
-            </div>
-            {totalEconomies > 0 && (
-              <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" /> Réductions</span>
-                <span className="tabular-nums font-semibold">−{totalEconomies.toFixed(2)} DA</span>
-              </div>
-            )}
-            <p className="text-xs text-gray-400">+ Livraison calculée à l&apos;étape suivante</p>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -630,6 +529,7 @@ export default function PanierPage() {
 
   const groups = panier ? groupByProduct(panier.items) : []
 
+  // ── Calculs globaux (quantité totale par produit pour le bon palier) ──
   const sousTotal = groups.reduce((s, g) => {
     const qte   = g.items.reduce((a, i) => a + i.quantite, 0)
     const prixU = getPrixUnitaire(g.product, qte)
@@ -643,7 +543,6 @@ export default function PanierPage() {
   }, 0)
   const totalArticles = panier?.items.reduce((s, i) => s + i.quantite, 0) ?? 0
 
-  /* ── Loading ── */
   if (loading) return (
     <div className="max-w-5xl mx-auto px-4 py-16 text-center text-gray-400">
       <div className="w-8 h-8 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-3" />
@@ -651,7 +550,6 @@ export default function PanierPage() {
     </div>
   )
 
-  /* ── Panier vide ── */
   if (!panier || panier.items.length === 0) return (
     <div className="max-w-5xl mx-auto px-4 py-20 flex flex-col items-center text-center gap-4">
       <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center">
@@ -667,162 +565,120 @@ export default function PanierPage() {
   )
 
   return (
-    <>
-      {/* ══ CONTENU PRINCIPAL ══ */}
-      {/* pb-28 lg:pb-6 : espace pour la sticky bar mobile */}
-      <div className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-28 lg:pb-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
 
-        {/* ── En-tête ── */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
-            Mon Panier
-            <span className="text-sm sm:text-base font-normal text-gray-400 ml-0.5">
-              ({groups.length} produit{groups.length > 1 ? 's' : ''} · {totalArticles} art.)
-            </span>
-          </h1>
-          <button onClick={viderPanier} disabled={deleting}
-            className="text-xs text-gray-400 hover:text-red-500 transition flex items-center gap-1 disabled:opacity-50 p-2 -mr-2 rounded-xl active:bg-red-50 dark:active:bg-red-950">
-            <Trash2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{deleting ? 'Vidage…' : 'Vider le panier'}</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-
-          {/* ── Cartes produits ── */}
-          <div className="lg:col-span-2 space-y-3">
-            {groups.map(group => (
-              <ProductCard
-                key={group.product.id}
-                group={group}
-                onUpdate={updateQuantite}
-                onDelete={supprimerItem}
-                onAddNew={ajouterItem}
-                onDeleteGroup={supprimerGroupe}
-              />
-            ))}
-
-            {/* Résumé accordéon — visible seulement sur mobile */}
-            <ResumeMobile
-              groups={groups}
-              sousTotal={sousTotal}
-              totalEconomies={totalEconomies}
-            />
-
-            <Link href="/produits"
-              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition mt-1 py-2">
-              <ArrowLeft className="w-4 h-4" /> Continuer les achats
-            </Link>
-          </div>
-
-          {/* ── Résumé sidebar desktop ── */}
-          <div className="hidden lg:block lg:sticky lg:top-20 h-fit space-y-3">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
-              <h2 className="font-bold text-gray-800 dark:text-gray-100 mb-4">Résumé</h2>
-
-              <div className="space-y-2.5 mb-4 max-h-52 overflow-y-auto pr-1">
-                {groups.map(group => {
-                  const qte   = group.items.reduce((s, i) => s + i.quantite, 0)
-                  const prixU = getPrixUnitaire(group.product, qte)
-                  return (
-                    <div key={group.product.id} className="space-y-0.5">
-                      <div className="flex justify-between items-start gap-2 text-xs">
-                        <span className="text-gray-700 dark:text-gray-300 font-medium flex-1 line-clamp-1">{group.product.nom}</span>
-                        <span className="text-gray-800 dark:text-gray-200 font-bold shrink-0 tabular-nums">
-                          {(prixU * qte).toFixed(2)} DA
-                        </span>
-                      </div>
-                      {group.items.map(item => (
-                        <div key={item.id} className="flex justify-between text-[11px] text-gray-400 pl-2">
-                          <span className="flex items-center gap-1 flex-wrap">
-                            {item.variant?.couleur && (
-                              <span className="w-2.5 h-2.5 rounded-full border border-gray-300 inline-block shrink-0"
-                                style={{ backgroundColor: item.variant.couleur }} />
-                            )}
-                            {item.variant?.nom}
-                            {item.variantOption && ` / ${item.variantOption.valeur}`}
-                            {' '}×{item.quantite}
-                          </span>
-                          <span className="tabular-nums shrink-0">
-                            {(prixU * item.quantite).toFixed(2)} DA
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-gray-800 pt-4 space-y-2.5">
-                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <span>Sous-total</span>
-                  <span className="tabular-nums">{sousTotal.toFixed(2)} DA</span>
-                </div>
-                {totalEconomies > 0 && (
-                  <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                    <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" /> Réductions</span>
-                    <span className="tabular-nums font-semibold">−{totalEconomies.toFixed(2)} DA</span>
-                  </div>
-                )}
-                <p className="text-xs text-gray-400">+ Livraison calculée à l&apos;étape suivante</p>
-                <div className="flex justify-between font-bold text-lg pt-1 border-t border-gray-100 dark:border-gray-800">
-                  <span className="text-gray-800 dark:text-gray-100">Total articles</span>
-                  <span className="text-blue-600 dark:text-blue-400 tabular-nums">{sousTotal.toFixed(2)} DA</span>
-                </div>
-              </div>
-            </div>
-
-            {totalEconomies > 0 && (
-              <div className="bg-green-50 dark:bg-green-950/50 border border-green-100 dark:border-green-900 rounded-xl px-4 py-3 flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center shrink-0">
-                  <TrendingDown className="w-4 h-4 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-green-700 dark:text-green-400">Vous économisez !</p>
-                  <p className="text-sm font-semibold text-green-800 dark:text-green-300">{totalEconomies.toFixed(2)} DA</p>
-                </div>
-              </div>
-            )}
-
-            <Link href="/commandes/nouveau"
-              className="flex items-center justify-center gap-2 w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-4 rounded-xl transition text-base shadow-lg shadow-black/10">
-              <ShoppingBag className="w-5 h-5" /> Passer la commande
-            </Link>
-          </div>
-
-        </div>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <ShoppingCart className="w-6 h-6" />
+          Mon Panier
+          <span className="text-base font-normal text-gray-400 ml-1">
+            ({groups.length} produit{groups.length > 1 ? 's' : ''} · {totalArticles} art.)
+          </span>
+        </h1>
+        <button onClick={viderPanier} disabled={deleting}
+          className="text-xs text-gray-400 hover:text-red-500 transition flex items-center gap-1 disabled:opacity-50">
+          <Trash2 className="w-3.5 h-3.5" />
+          {deleting ? 'Vidage…' : 'Vider le panier'}
+        </button>
       </div>
 
-      {/* ══ STICKY BOTTOM BAR — mobile uniquement ══ */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 px-4 py-3 safe-area-pb">
-        <div className="flex items-center gap-3 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Total + économies */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="font-bold text-lg text-gray-900 dark:text-white tabular-nums leading-tight">
-                {sousTotal.toFixed(2)} DA
-              </span>
-              {totalEconomies > 0 && (
-                <span className="text-xs text-green-600 dark:text-green-400 font-semibold whitespace-nowrap">
-                  éco. {totalEconomies.toFixed(0)} DA
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-gray-400 leading-tight">
-              {totalArticles} article{totalArticles > 1 ? 's' : ''} · livraison à préciser
-            </p>
-          </div>
-
-          {/* CTA */}
-          <Link href="/commandes/nouveau"
-            className="flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black font-semibold px-5 py-3.5 rounded-xl transition active:scale-95 shadow-lg shadow-black/20 shrink-0 text-sm">
-            <ShoppingBag className="w-4 h-4" />
-            Commander
+        {/* ── Cartes produits ── */}
+        <div className="lg:col-span-2 space-y-3">
+          {groups.map(group => (
+            <ProductCard
+              key={group.product.id}
+              group={group}
+              onUpdate={updateQuantite}
+              onDelete={supprimerItem}
+              onAddNew={ajouterItem}
+              onDeleteGroup={supprimerGroupe}
+            />
+          ))}
+          <Link href="/produits"
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition mt-1">
+            <ArrowLeft className="w-4 h-4" /> Continuer les achats
           </Link>
         </div>
+
+        {/* ── Résumé ── */}
+        <div className="lg:sticky lg:top-20 h-fit space-y-3">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
+            <h2 className="font-bold text-gray-800 dark:text-gray-100 mb-4">Résumé</h2>
+
+            <div className="space-y-2.5 mb-4 max-h-52 overflow-y-auto pr-1">
+              {groups.map(group => {
+                const qte   = group.items.reduce((s, i) => s + i.quantite, 0)
+                const prixU = getPrixUnitaire(group.product, qte)
+                return (
+                  <div key={group.product.id} className="space-y-0.5">
+                    <div className="flex justify-between items-start gap-2 text-xs">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium flex-1 line-clamp-1">{group.product.nom}</span>
+                      <span className="text-gray-800 dark:text-gray-200 font-bold shrink-0 tabular-nums">
+                        {(prixU * qte).toFixed(2)} DA
+                      </span>
+                    </div>
+                    {group.items.map(item => (
+                      <div key={item.id} className="flex justify-between text-[11px] text-gray-400 pl-2">
+                        <span className="flex items-center gap-1 flex-wrap">
+                          {item.variant?.couleur && (
+                            <span className="w-2.5 h-2.5 rounded-full border border-gray-300 inline-block shrink-0"
+                              style={{ backgroundColor: item.variant.couleur }} />
+                          )}
+                          {item.variant?.nom}
+                          {item.variantOption && ` / ${item.variantOption.valeur}`}
+                          {' '}×{item.quantite}
+                        </span>
+                        {/* ✅ Prix dans le résumé aussi basé sur la qte totale du groupe */}
+                        <span className="tabular-nums shrink-0">
+                          {(prixU * item.quantite).toFixed(2)} DA
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-4 space-y-2.5">
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                <span>Sous-total</span>
+                <span className="tabular-nums">{sousTotal.toFixed(2)} DA</span>
+              </div>
+              {totalEconomies > 0 && (
+                <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                  <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" /> Réductions</span>
+                  <span className="tabular-nums font-semibold">−{totalEconomies.toFixed(2)} DA</span>
+                </div>
+              )}
+              <p className="text-xs text-gray-400">+ Livraison calculée à l&apos;étape suivante</p>
+              <div className="flex justify-between font-bold text-lg pt-1 border-t border-gray-100 dark:border-gray-800">
+                <span className="text-gray-800 dark:text-gray-100">Total articles</span>
+                <span className="text-blue-600 dark:text-blue-400 tabular-nums">{sousTotal.toFixed(2)} DA</span>
+              </div>
+            </div>
+          </div>
+
+          {totalEconomies > 0 && (
+            <div className="bg-green-50 dark:bg-green-950/50 border border-green-100 dark:border-green-900 rounded-xl px-4 py-3 flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center shrink-0">
+                <TrendingDown className="w-4 h-4 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-green-700 dark:text-green-400">Vous économisez !</p>
+                <p className="text-sm font-semibold text-green-800 dark:text-green-300">{totalEconomies.toFixed(2)} DA</p>
+              </div>
+            </div>
+          )}
+
+          <Link href="/commandes/nouveau"
+            className="flex items-center justify-center gap-2 w-full bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black font-semibold py-4 rounded-xl transition text-base shadow-lg shadow-black/10">
+            <ShoppingBag className="w-5 h-5" /> Passer la commande
+          </Link>
+        </div>
+
       </div>
-    </>
+    </div>
   )
 }
