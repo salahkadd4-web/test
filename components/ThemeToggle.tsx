@@ -33,28 +33,47 @@ const options: { key: 'light' | 'dark' | 'system'; label: string }[] = [
   { key: 'system', label: 'Système' },
 ]
 
-const BTN   = 48   // taille du bouton en px (w-12 h-12)
-const EDGE  = 12   // marge min par rapport aux bords
-const DRAG_THRESHOLD = 6 // px avant de considérer un glissement
+const BTN            = 48   // diamètre du bouton en px
+const EDGE           = 12   // marge min par rapport aux bords
+const NAV_BOTTOM     = 80   // hauteur approx de la bottom nav + safe area
+const DRAG_THRESHOLD = 6    // px avant de considérer un glissement
+const SNAP_DURATION  = 280  // ms de l'animation snap
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const [open,     setOpen]     = useState(false)
   const [dragging, setDragging] = useState(false)
+  const [snapping, setSnapping] = useState(false)
 
-  /* Position du bouton mobile — null jusqu'à l'hydratation */
+  /* Position — null jusqu'à l'hydratation */
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
 
   const wrapRef = useRef<HTMLDivElement>(null)
 
-  /* État interne du drag (ref → pas de re-render pendant le glissement) */
   const drag = useRef<{
     startTouchX: number; startTouchY: number
     startPosX:   number; startPosY:   number
     moved:       boolean
   } | null>(null)
 
-  /* ── Initialisation position ── */
+  /* ── Clamp dans l'écran ── */
+  const clamp = useCallback((x: number, y: number) => ({
+    x: Math.max(EDGE, Math.min(window.innerWidth  - BTN - EDGE, x)),
+    y: Math.max(EDGE, Math.min(window.innerHeight - BTN - EDGE, y)),
+  }), [])
+
+  /* ── Snap vers le bord le plus proche (gauche ou droite) ── */
+  const snapToEdge = useCallback((x: number, y: number) => {
+    const midX = window.innerWidth / 2
+    const snappedX = x + BTN / 2 < midX ? EDGE : window.innerWidth - BTN - EDGE
+    const snappedY = Math.max(EDGE, Math.min(window.innerHeight - BTN - NAV_BOTTOM, y))
+    setSnapping(true)
+    setPos({ x: snappedX, y: snappedY })
+    localStorage.setItem('theme-btn-pos', JSON.stringify({ x: snappedX, y: snappedY }))
+    setTimeout(() => setSnapping(false), SNAP_DURATION)
+  }, [])
+
+  /* ── Initialisation position — bottom-left par défaut ── */
   useEffect(() => {
     const saved = localStorage.getItem('theme-btn-pos')
     if (saved) {
@@ -65,15 +84,9 @@ export default function ThemeToggle() {
         setPos({ x, y }); return
       } catch { /* ignored */ }
     }
-    /* Position par défaut : côté gauche, hauteur ~40% — loin des sélections */
-    setPos({ x: EDGE, y: Math.round(window.innerHeight * 0.38) })
+    /* Défaut : coin bas-gauche, au-dessus de la bottom nav */
+    setPos({ x: EDGE, y: window.innerHeight - BTN - NAV_BOTTOM })
   }, [])
-
-  /* ── Clamp dans l'écran ── */
-  const clamp = useCallback((x: number, y: number) => ({
-    x: Math.max(EDGE, Math.min(window.innerWidth  - BTN - EDGE, x)),
-    y: Math.max(EDGE, Math.min(window.innerHeight - BTN - EDGE, y)),
-  }), [])
 
   /* ── Touch handlers ── */
   const onTouchStart = (e: React.TouchEvent) => {
@@ -85,12 +98,13 @@ export default function ThemeToggle() {
       moved: false,
     }
     setDragging(false)
+    setSnapping(false)
   }
 
-  /* touchmove doit être { passive: false } pour pouvoir appeler preventDefault */
+  /* passive: false pour bloquer le scroll pendant le drag */
   const onTouchMoveNative = useCallback((e: TouchEvent) => {
     if (!drag.current) return
-    e.preventDefault()                                // bloque le scroll de la page
+    e.preventDefault()
     const t = e.touches[0]
     const dx = t.clientX - drag.current.startTouchX
     const dy = t.clientY - drag.current.startTouchY
@@ -98,7 +112,7 @@ export default function ThemeToggle() {
         (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
       drag.current.moved = true
       setDragging(true)
-      setOpen(false)                                  // ferme le menu si ouvert
+      setOpen(false)
     }
     if (drag.current.moved) {
       setPos(clamp(drag.current.startPosX + dx, drag.current.startPosY + dy))
@@ -108,12 +122,12 @@ export default function ThemeToggle() {
   const onTouchEnd = () => {
     if (!drag.current) return
     if (!drag.current.moved) {
-      /* Tap simple → ouvrir/fermer le menu */
+      /* Tap → toggle menu */
       setOpen(o => !o)
     } else {
-      /* Fin du glissement → sauvegarder */
+      /* Fin du glissement → snap au bord le plus proche */
       setPos(prev => {
-        if (prev) localStorage.setItem('theme-btn-pos', JSON.stringify(prev))
+        if (prev) snapToEdge(prev.x, prev.y)
         return prev
       })
     }
@@ -139,9 +153,9 @@ export default function ThemeToggle() {
     return () => document.removeEventListener('touchstart', close)
   }, [open])
 
-  /* Direction du popup selon la position dans l'écran */
-  const menuAbove = pos ? pos.y > window.innerHeight * 0.5 : true
-  const menuLeft  = pos ? pos.x > window.innerWidth  * 0.5 : false
+  /* Direction du popup selon position dans l'écran */
+  const menuAbove = pos ? pos.y > window.innerHeight * 0.55 : true
+  const menuLeft  = pos ? pos.x < window.innerWidth  * 0.5  : true
 
   /* ══════════════════════════════════════════
      RENDU
@@ -176,16 +190,21 @@ export default function ThemeToggle() {
         </button>
       </div>
 
-      {/* ── Mobile — bouton glissable ── */}
+      {/* ── Mobile — bulle glissable ── */}
       {pos && (
         <div
           ref={wrapRef}
           className="md:hidden fixed z-50"
           style={{
-            left:        pos.x,
-            top:         pos.y,
-            touchAction: 'none',
-            userSelect:  'none',
+            left:       pos.x,
+            top:        pos.y,
+            width:      BTN,
+            height:     BTN,
+            touchAction:'none',
+            userSelect: 'none',
+            transition: snapping
+              ? `left ${SNAP_DURATION}ms cubic-bezier(0.34,1.56,0.64,1), top ${SNAP_DURATION}ms cubic-bezier(0.34,1.56,0.64,1)`
+              : 'none',
           }}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
@@ -194,14 +213,14 @@ export default function ThemeToggle() {
           {/* ── Popup des options (tap) ── */}
           {open && (
             <div className={`absolute flex flex-col gap-2
-              ${menuAbove ? 'bottom-14'  : 'top-14'}
-              ${menuLeft  ? 'right-0'   : 'left-0'}
+              ${menuAbove ? 'bottom-14' : 'top-14'}
+              ${menuLeft  ? 'left-0'   : 'right-0'}
             `}>
               {options.map(opt => (
                 <button
                   key={opt.key}
                   onTouchEnd={e => { e.stopPropagation(); setTheme(opt.key); setOpen(false) }}
-                  className={`w-11 h-11 rounded-full flex items-center justify-center shadow-xl border-2 transition-all
+                  className={`w-11 h-11 rounded-full flex items-center justify-center shadow-xl border-2 transition-all active:scale-95
                     ${theme === opt.key
                       ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white scale-110'
                       : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
@@ -214,22 +233,25 @@ export default function ThemeToggle() {
             </div>
           )}
 
-          {/* ── Bouton principal ── */}
+          {/* ── Bouton principal — semi-transparent au repos ── */}
           <button
             className={`w-12 h-12 rounded-full flex flex-col items-center justify-center gap-0.5
               bg-gray-900 dark:bg-white text-white dark:text-gray-900
-              shadow-xl border-2 border-gray-700 dark:border-gray-200
+              shadow-lg border-2 border-gray-700 dark:border-gray-200
               transition-all duration-200
-              ${dragging ? 'scale-110 shadow-2xl opacity-75' : 'opacity-90 active:scale-95'}
+              ${dragging
+                ? 'scale-115 shadow-2xl opacity-90 border-blue-500'
+                : open
+                  ? 'opacity-95 scale-105'
+                  : 'opacity-40 scale-100'         /* discret au repos */
+              }
             `}
             title="Thème — glissez pour déplacer"
           >
-            {/* Icône thème actif */}
             {icons[theme as 'light' | 'dark' | 'system'] ?? icons.system}
-
-            {/* Indicateur de glissement (3 points) */}
+            {/* Points de drag hint */}
             <div className="flex gap-0.5 mt-0.5">
-              {[0,1,2].map(i => (
+              {[0, 1, 2].map(i => (
                 <span key={i} className="w-1 h-1 rounded-full bg-current opacity-50" />
               ))}
             </div>
