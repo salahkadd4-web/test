@@ -45,7 +45,7 @@ export default async function AdminRetoursPage() {
 
           {/* Lien direct connexion si pas de session Flowmerce */}
           <a
-            href={`${FLOWMERCE_URL}`}
+            href={`${FLOWMERCE_URL}/auth/login`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium px-6 py-2.5 rounded-xl transition text-sm"

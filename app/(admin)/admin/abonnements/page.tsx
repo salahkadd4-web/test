@@ -24,9 +24,9 @@ const NIVEAU_LABELS: Record<string, { label: string; color: string }> = {
 }
 
 const STATUT_LABELS: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  GRATUIT:  { label: 'Gratuit',  color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',   icon: CheckCircle2 },
-  ACTIF:    { label: 'Actif',    color: 'bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300',       icon: CheckCircle2 },
-  EXPIRE:   { label: 'Expiré',   color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',           icon: XCircle },
+  GRATUIT:  { label: 'Gratuit',  color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',     icon: CheckCircle2 },
+  ACTIF:    { label: 'Actif',    color: 'bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300',         icon: CheckCircle2 },
+  EXPIRE:   { label: 'Expiré',   color: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',             icon: XCircle },
   SUSPENDU: { label: 'Suspendu', color: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300', icon: AlertTriangle },
 }
 
@@ -37,7 +37,7 @@ export default function AdminAbonnementsPage() {
 
   const fetch_ = useCallback(async () => {
     setLoading(true)
-    const res = await fetch(`/api/admin/abonnements${filterStatut ? `?statut=${filterStatut}` : ''}`)
+    const res  = await fetch(`/api/admin/abonnements${filterStatut ? `?statut=${filterStatut}` : ''}`)
     const data = await res.json()
     setRows(data)
     setLoading(false)
@@ -51,21 +51,23 @@ export default function AdminAbonnementsPage() {
   const gratuits        = rows.filter(r => r.statut === 'GRATUIT')
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
+
+      {/* En-tête */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Abonnements</h1>
-        <button onClick={fetch_} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+        <button onClick={fetch_} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition">
           <RefreshCw size={14} /> Actualiser
         </button>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { label: 'Actifs',          value: actifs.length,          color: 'text-teal-600',   icon: CheckCircle2 },
-          { label: 'Gratuits',        value: gratuits.length,        color: 'text-green-600',  icon: Clock },
-          { label: 'Expirés',         value: expires.length,         color: 'text-red-600',    icon: XCircle },
-          { label: 'Expirent ≤ 7j',   value: expirentBientot.length, color: 'text-orange-600', icon: AlertTriangle },
+          { label: 'Actifs',        value: actifs.length,          color: 'text-teal-600',   icon: CheckCircle2 },
+          { label: 'Gratuits',      value: gratuits.length,        color: 'text-green-600',  icon: Clock },
+          { label: 'Expirés',       value: expires.length,         color: 'text-red-600',    icon: XCircle },
+          { label: 'Expirent ≤ 7j', value: expirentBientot.length, color: 'text-orange-600', icon: AlertTriangle },
         ].map(k => (
           <div key={k.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 flex items-center gap-3">
             <k.icon className={`${k.color} shrink-0`} size={22} />
@@ -118,63 +120,67 @@ export default function AdminAbonnementsPage() {
         ) : rows.length === 0 ? (
           <div className="p-10 text-center text-gray-400">Aucun abonnement trouvé</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs uppercase">
-              <tr>
-                <th className="text-left px-4 py-3">Boutique / Vendeur</th>
-                <th className="text-left px-4 py-3">Statut</th>
-                <th className="text-left px-4 py-3">Niveau</th>
-                <th className="text-left px-4 py-3">Expiration</th>
-                <th className="text-left px-4 py-3">Jours restants</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {rows.map(r => {
-                const statut = STATUT_LABELS[r.statut]
-                const Icon   = statut?.icon ?? CheckCircle2
-                const urgent = r.joursRestants <= 7 && r.statut !== 'EXPIRE'
-                return (
-                  <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900 dark:text-white">{r.vendeur.nomBoutique ?? '—'}</p>
-                      <p className="text-gray-400 text-xs">{r.vendeur.user.prenom} {r.vendeur.user.nom}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statut?.color}`}>
-                        <Icon size={11} /> {statut?.label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {NIVEAU_LABELS[r.niveau] ? (
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${NIVEAU_LABELS[r.niveau].color}`}>
-                          {NIVEAU_LABELS[r.niveau].label}
+          /* ── Scrollbar horizontal sur mobile (identique à admin/clients) ── */
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
+              <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs uppercase">
+                <tr>
+                  <th className="text-left px-4 py-3">Boutique / Vendeur</th>
+                  <th className="text-left px-4 py-3">Statut</th>
+                  <th className="text-left px-4 py-3">Niveau</th>
+                  <th className="text-left px-4 py-3">Expiration</th>
+                  <th className="text-left px-4 py-3">Jours restants</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {rows.map(r => {
+                  const statut = STATUT_LABELS[r.statut]
+                  const Icon   = statut?.icon ?? CheckCircle2
+                  const urgent = r.joursRestants <= 7 && r.statut !== 'EXPIRE'
+                  return (
+                    <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-gray-900 dark:text-white">{r.vendeur.nomBoutique ?? '—'}</p>
+                        <p className="text-gray-400 text-xs">{r.vendeur.user.prenom} {r.vendeur.user.nom}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statut?.color}`}>
+                          <Icon size={11} /> {statut?.label}
                         </span>
-                      ) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
-                      {new Date(r.dateFin).toLocaleDateString('fr-DZ')}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`font-semibold ${urgent ? 'text-orange-500' : r.statut === 'EXPIRE' ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
-                        {r.statut === 'EXPIRE' ? 'Expiré' : `${r.joursRestants}j`}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/admin/vendeurs?id=${r.vendeurId}`}
-                        className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline"
-                      >
-                        <CreditCard size={13} /> Gérer
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-4 py-3">
+                        {NIVEAU_LABELS[r.niveau] ? (
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${NIVEAU_LABELS[r.niveau].color}`}>
+                            {NIVEAU_LABELS[r.niveau].label}
+                          </span>
+                        ) : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                        {new Date(r.dateFin).toLocaleDateString('fr-DZ')}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`font-semibold ${urgent ? 'text-orange-500' : r.statut === 'EXPIRE' ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
+                          {r.statut === 'EXPIRE' ? 'Expiré' : `${r.joursRestants}j`}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Link
+                          href={`/admin/vendeurs?id=${r.vendeurId}`}
+                          className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline whitespace-nowrap"
+                        >
+                          <CreditCard size={13} /> Gérer
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
     </div>
   )
 }
