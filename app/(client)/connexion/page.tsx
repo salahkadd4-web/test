@@ -68,6 +68,28 @@ function ConnexionContent() {
     initGoogle()
   }, [])
 
+  // ── Redirection automatique si déjà connecté (app mobile) ────────────────
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { Capacitor } = await import('@capacitor/core')
+        if (!Capacitor.isNativePlatform()) return
+
+        const res     = await fetch('/api/auth/session')
+        const session = await res.json()
+        if (!session?.user) return
+
+        if (session.user.role === 'ADMIN')        router.replace('/admin')
+        else if (session.user.role === 'VENDEUR') router.replace('/vendeur')
+        else                                       router.replace('/')
+      } catch {
+        // session non disponible, on reste sur /connexion
+      }
+    }
+    checkSession()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
     setError('')
