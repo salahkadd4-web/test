@@ -6,6 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
+// ─── Web client ID (type 3) — correct pour @capgo/capacitor-social-login ───
+const GOOGLE_WEB_CLIENT_ID = '502936788244-mn58pnn6u9v5ekp3o14ord4778gp7ki3.apps.googleusercontent.com'
+
 /** Lien "Parcourir en tant qu'invité" — affiché uniquement dans l'app Capacitor */
 function GuestLink() {
   const [isNative, setIsNative] = useState(false)
@@ -46,6 +49,25 @@ function ConnexionContent() {
   const [error,         setError]         = useState('')
   const [form,          setForm]          = useState({ identifiant: '', motDePasse: '' })
 
+  // ── Initialiser SocialLogin UNE SEULE FOIS au montage ────────────────────
+  useEffect(() => {
+    const initGoogle = async () => {
+      try {
+        const { Capacitor } = await import('@capacitor/core')
+        if (!Capacitor.isNativePlatform()) return
+
+        // @ts-ignore
+        const { SocialLogin } = await import('@capgo/capacitor-social-login')
+        await SocialLogin.initialize({
+          google: { webClientId: GOOGLE_WEB_CLIENT_ID },
+        })
+      } catch (e) {
+        console.error('SocialLogin init error:', e)
+      }
+    }
+    initGoogle()
+  }, [])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
     setError('')
@@ -63,7 +85,6 @@ function ConnexionContent() {
       })
 
       if (result?.error) {
-        // ── Compte Google ──────────────────────────────────────────────────
         if (result.error.includes('GOOGLE_ACCOUNT')) {
           setError('Ce compte utilise la connexion Google. Connectez-vous avec le bouton Google.')
           return
@@ -73,13 +94,12 @@ function ConnexionContent() {
       }
 
       if (result?.ok) {
-        // Lire le rôle depuis la session pour rediriger correctement
         const res     = await fetch('/api/auth/session')
         const session = await res.json()
 
-        if (session?.user?.role === 'ADMIN')   router.push('/admin')
-        else if (session?.user?.role === 'VENDEUR') router.push('/vendeur')   // ← NOUVEAU
-        else router.push('/')
+        if (session?.user?.role === 'ADMIN')        router.push('/admin')
+        else if (session?.user?.role === 'VENDEUR') router.push('/vendeur')
+        else                                         router.push('/')
 
         router.refresh()
       }
@@ -98,19 +118,12 @@ function ConnexionContent() {
 
       if (Capacitor.isNativePlatform()) {
         // @ts-ignore
-        const SocialLoginModule = await import('@capgo/capacitor-social-login').catch(() => null)
-        if (!SocialLoginModule) { setError('Plugin Google non disponible.'); return }
-        const { SocialLogin } = SocialLoginModule
+        const { SocialLogin } = await import('@capgo/capacitor-social-login')
 
-        await SocialLogin.initialize({
-          google: {
-            webClientId: '502936788244-dqait91nm2t0stlg0moj4lua7mpfohfn.apps.googleusercontent.com',
-          },
-        })
-
+        // ✅ initialize() déjà appelé au montage — on passe directement au login
         const result = await SocialLogin.login({
           provider: 'google',
-          options: { scopes: ['email', 'profile'] },
+          options:  { scopes: ['email', 'profile'] },
         })
 
         const googleResult = result.result
@@ -137,6 +150,7 @@ function ConnexionContent() {
         else setError('Erreur de session. Veuillez réessayer.')
 
       } else {
+        // ── Version web : NextAuth standard ──
         await signIn('google', { callbackUrl: '/' })
       }
     } catch (err: any) {
@@ -158,6 +172,7 @@ function ConnexionContent() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col lg:flex-row transition-colors duration-300">
 
+      {/* ── Panneau gauche (desktop uniquement) ── */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black dark:bg-gray-900 items-center justify-center p-12 border-r border-gray-800">
         <div className="absolute z-10 [mask-image:radial-gradient(ellipse_at_center,transparent_-50%,black_10%)]">
           <Image src="/logo_noir.png" alt="" width={750} height={750}
@@ -171,6 +186,7 @@ function ConnexionContent() {
         </div>
       </div>
 
+      {/* ── Formulaire ── */}
       <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto">
         <div className="w-full max-w-sm py-8">
 
@@ -197,6 +213,7 @@ function ConnexionContent() {
             </div>
           )}
 
+          {/* ── Bouton Google ── */}
           <button onClick={handleGoogle} disabled={loadingGoogle || loading}
             className="w-full flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-[0.15em] py-3.5 transition-colors duration-300 disabled:opacity-50 mb-6">
             {loadingGoogle ? <span className="text-gray-400">...</span> : <GoogleIcon />}
@@ -209,6 +226,7 @@ function ConnexionContent() {
             <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
           </div>
 
+          {/* ── Formulaire email/mdp ── */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-2">
@@ -248,7 +266,7 @@ function ConnexionContent() {
             </Link>
           </p>
 
-          {/* Lien invité — visible uniquement sur l'app mobile Capacitor */}
+          {/* ── Lien invité (mobile Capacitor uniquement) ── */}
           <GuestLink />
         </div>
 
